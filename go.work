@@ -1,0 +1,10 @@
+go 1.19
+
+use (
+	./
+)
+replace (
+    github.com/farseer-go/fs => ../fs
+    github.com/farseer-go/collections => ../collections
+    github.com/farseer-go/mapper => ../mapper
+)
