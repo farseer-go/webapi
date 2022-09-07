@@ -20,6 +20,7 @@ func Run(params ...string) {
 	}
 
 	param = http.ClearHttpPrefix(param)
+	web.BConfig.CopyRequestBody = true
 	web.BeeApp.Run(param)
 }
 
