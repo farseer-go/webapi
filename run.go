@@ -1,16 +1,26 @@
 package webapi
 
-import "github.com/beego/beego/v2/server/web"
+import (
+	"github.com/beego/beego/v2/server/web"
+	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/utils/http"
+)
 
-// Run webapi.Run() default run on HttpPort
+// Run webapi.Run() default run on config:FS.
 // webapi.Run("localhost")
 // webapi.Run(":8089")
 // webapi.Run("127.0.0.1:8089")
 func Run(params ...string) {
+	param := ""
 	if len(params) > 0 && params[0] != "" {
-		web.BeeApp.Run(params[0])
+		param = params[0]
 	}
-	web.BeeApp.Run("")
+	if param == "" {
+		param = configure.GetString("WebApi.Url")
+	}
+
+	param = http.ClearHttpPrefix(param)
+	web.BeeApp.Run(param)
 }
 
 // AutoRouter see HttpServer.AutoRouter

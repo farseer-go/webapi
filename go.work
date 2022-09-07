@@ -7,4 +7,5 @@ replace (
     github.com/farseer-go/fs => ../fs
     github.com/farseer-go/collections => ../collections
     github.com/farseer-go/mapper => ../mapper
+    github.com/farseer-go/utils => ../utils
 )
