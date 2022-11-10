@@ -21,10 +21,6 @@ func Run(params ...string) {
 
 	param = http.ClearHttpPrefix(param)
 	web.BConfig.CopyRequestBody = true
+	web.BConfig.WebConfig.AutoRender = false
 	web.BeeApp.Run(param)
-}
-
-// AutoRouter see HttpServer.AutoRouter
-func AutoRouter(c web.ControllerInterface) *web.HttpServer {
-	return web.BeeApp.AutoRouter(c)
 }
