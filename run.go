@@ -4,14 +4,31 @@ import (
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/filter/cors"
 	"github.com/farseer-go/fs/configure"
-	"github.com/farseer-go/utils/http"
+	"github.com/farseer-go/fs/flog"
+	"github.com/farseer-go/webapi/controller"
+	"github.com/farseer-go/webapi/minimal"
+	"net/http"
 )
 
-// Run webapi.Run() default run on config:FS.
+func Run() {
+	controller.Run()
+	minimal.Run()
+	flog.Info(http.ListenAndServe(":8888", nil))
+}
+
+func RegisterController(c controller.IController) {
+	controller.Register(c)
+}
+
+func RegisterAction(route string, actionFunc any, params ...string) {
+	minimal.Register(route, actionFunc, params...)
+}
+
+// Run2 webapi.Run() default run on config:FS.
 // webapi.Run("localhost")
 // webapi.Run(":8089")
 // webapi.Run("127.0.0.1:8089")
-func Run(params ...string) {
+func Run2(params ...string) {
 	param := ""
 	if len(params) > 0 && params[0] != "" {
 		param = params[0]
@@ -37,8 +54,13 @@ func Run(params ...string) {
 		}))
 	}
 
-	param = http.ClearHttpPrefix(param)
+	//param = http.ClearHttpPrefix(param)
 	web.BConfig.CopyRequestBody = true
 	web.BConfig.WebConfig.AutoRender = false
 	web.BeeApp.Run(param)
+}
+
+// SetApiPrefix 设置api前缀
+func SetApiPrefix(prefix string) {
+	config.apiPrefix = prefix
 }
