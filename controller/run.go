@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/exception"
 	"net/http"
 	"reflect"
 	"strings"
@@ -29,17 +30,19 @@ func Run() {
 			// 入参
 			params := baseController.httpContext.GetRequestParam(route.requestParamType, collections.NewList[string]())
 
-			// 调用action
-			returnVals := controllerVal.MethodByName(route.actionName).Call(params)
-
-			// 初始化返回报文
-			baseController.httpContext.InitResponse(returnVals)
-
-			// 输出返回值
-			_, _ = w.Write(baseController.httpContext.HttpResponse.BodyBytes)
-
-			// 响应码
-			w.WriteHeader(200)
+			exception.Try(func() {
+				// 调用action
+				returnVals := controllerVal.MethodByName(route.actionName).Call(params)
+				// 初始化返回报文
+				baseController.httpContext.InitResponse(returnVals)
+				// 输出返回值
+				_, _ = w.Write(baseController.httpContext.HttpResponse.BodyBytes)
+				// 响应码
+				w.WriteHeader(200)
+			}).CatchException(func(exp any) {
+				// 响应码
+				w.WriteHeader(500)
+			})
 		})
 	}
 }

@@ -1,6 +1,7 @@
 package minimal
 
 import (
+	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/webapi/context"
 	"net/http"
 	"reflect"
@@ -24,17 +25,19 @@ func Run() {
 			// 入参
 			params := httpContext.GetRequestParam(route.requestParamType, route.paramNames)
 
-			// 调用action
-			returnVals := reflect.ValueOf(route.action).Call(params)
-
-			// 初始化返回报文
-			httpContext.InitResponse(returnVals)
-
-			// 输出返回值
-			_, _ = w.Write(httpContext.HttpResponse.BodyBytes)
-
-			// 响应码
-			w.WriteHeader(200)
+			exception.Try(func() {
+				// 调用action
+				returnVals := reflect.ValueOf(route.action).Call(params)
+				// 初始化返回报文
+				httpContext.InitResponse(returnVals)
+				// 输出返回值
+				_, _ = w.Write(httpContext.HttpResponse.BodyBytes)
+				// 响应码
+				w.WriteHeader(200)
+			}).CatchException(func(exp any) {
+				// 响应码
+				w.WriteHeader(500)
+			})
 		})
 	}
 }
