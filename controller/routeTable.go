@@ -16,4 +16,5 @@ type routeTable struct {
 	actionName       string                         // action名称
 	requestParamType collections.List[reflect.Type] // 入参
 	responseBodyType collections.List[reflect.Type] // 出参
+	method           string
 }

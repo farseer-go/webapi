@@ -14,4 +14,5 @@ type routeTable struct {
 	requestParamType collections.List[reflect.Type] // 入参
 	responseBodyType collections.List[reflect.Type] // 出参
 	paramNames       collections.List[string]       // 多字段，方法入参名称
+	method           string
 }

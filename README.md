@@ -1,11 +1,14 @@
 # webapi
 ## 整体
+* 支持wwwroot静态目录
+* 支持area区域设置
 * 支持中间件
 * 支持端口配置
 * 支持CORS
 * 支持filter
 * 支持api日志
 * 支持api性能统计
+* 支持http2.0
 
 ## WebApi功能
 * 自动注册Controller下的所有Action（完成）
@@ -19,6 +22,7 @@
 * 支持form模式（完成）
 * 支持query模式（完成）
 * 支持返回值赋值ApiResponse
+* 500、404处理
 
 
 ## MiniApi功能
@@ -27,9 +31,9 @@
 * 支持结构返回值（转成json）（完成）
 * 支持基础类型返回值（转成string）（完成）
 * 支持多个入参（完成）
-* 支持Get、Post、Put、Delete
+* 支持Get、Post、Put、Delete（完成）
 * 支持json模式（完成）
 * 支持form模式（完成）
 * 支持query模式（完成）
 * 支持返回值赋值ApiResponse
-
+* 500、404处理

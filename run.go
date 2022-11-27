@@ -20,8 +20,8 @@ func RegisterController(c controller.IController) {
 	controller.Register(c)
 }
 
-func RegisterAction(route string, actionFunc any, params ...string) {
-	minimal.Register(route, actionFunc, params...)
+func RegisterAction(method string, route string, actionFunc any, params ...string) {
+	minimal.Register(method, route, actionFunc, params...)
 }
 
 // Run2 webapi.Run() default run on config:FS.

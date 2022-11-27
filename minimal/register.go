@@ -10,7 +10,7 @@ import (
 )
 
 // Register 注册单个Api
-func Register(route string, actionFunc any, paramNames ...string) {
+func Register(method string, route string, actionFunc any, paramNames ...string) {
 	if !strings.HasPrefix(route, "/") {
 		route = "/" + route
 	}
@@ -28,6 +28,7 @@ func Register(route string, actionFunc any, paramNames ...string) {
 	lstRouteTable.Add(routeTable{
 		routeUrl:         route,
 		action:           actionFunc,
+		method:           method,
 		requestParamType: collections.NewList(param...),
 		responseBodyType: collections.NewList(types.GetOutParam(actionType)...),
 		paramNames:       collections.NewList(paramNames...),

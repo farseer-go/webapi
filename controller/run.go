@@ -4,6 +4,7 @@ import (
 	"github.com/farseer-go/collections"
 	"net/http"
 	"reflect"
+	"strings"
 )
 
 func Run() {
@@ -11,6 +12,13 @@ func Run() {
 	for i := 0; i < lstRouteTable.Count(); i++ {
 		route := lstRouteTable.Index(i)
 		http.HandleFunc(route.routeUrl, func(w http.ResponseWriter, r *http.Request) {
+			// 检查method
+			if strings.ToUpper(route.method) != r.Method {
+				// 响应码
+				w.WriteHeader(405)
+				return
+			}
+
 			// 实例化控制器
 			controllerVal := reflect.New(route.controller)
 			baseController := getBaseController(controllerVal)
@@ -28,7 +36,7 @@ func Run() {
 			baseController.httpContext.InitResponse(returnVals)
 
 			// 输出返回值
-			w.Write(baseController.httpContext.HttpResponse.BodyBytes)
+			_, _ = w.Write(baseController.httpContext.HttpResponse.BodyBytes)
 
 			// 响应码
 			w.WriteHeader(200)
