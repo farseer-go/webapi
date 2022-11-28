@@ -2,6 +2,7 @@ package middleware
 
 import "github.com/farseer-go/webapi/context"
 
+// HTTP报文响应中间件（默认加载）
 type Http struct {
 	IMiddleware
 }

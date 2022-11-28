@@ -5,6 +5,7 @@ import (
 	"github.com/farseer-go/webapi/context"
 )
 
+// 异常中间件（默认加载）
 type Exception struct {
 	IMiddleware
 }
