@@ -7,6 +7,7 @@ import (
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/webapi/controller"
+	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
 	"net/http"
 	"os"
@@ -14,12 +15,11 @@ import (
 )
 
 func Run() {
-	// 路由注册
-	controller.Run()
-	minimal.Run()
+	// 初始化中间件
+	middleware.Init()
 
-	// 默认wwwroot为静态目录
-	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./wwwroot"))))
+	// 处理路由
+	handleRoute()
 
 	addr := ":8888"
 	if strings.HasPrefix(addr, ":") {
@@ -28,6 +28,11 @@ func Run() {
 	flog.Info(http.ListenAndServe(addr, nil))
 }
 
+func RegisterMiddleware(m middleware.IMiddleware) {
+	middleware.MiddlewareList.Add(m)
+}
+
+// Area 设置区域
 func Area(area string, f func()) {
 	if !strings.HasPrefix(area, "/") {
 		area = "/" + area
@@ -35,15 +40,16 @@ func Area(area string, f func()) {
 	if !strings.HasSuffix(area, "/") {
 		area += "/"
 	}
-	config.area = area
+	defaultApi.area = area
+	// 执行注册
 	f()
 	// 执行完后，恢复区域为"/"
-	config.area = "/"
+	defaultApi.area = "/"
 }
 
 // RegisterController 自动注册控制器下的所有Action方法
 func RegisterController(c controller.IController) {
-	controller.Register(config.area, c)
+	controller.Register(defaultApi.area, c)
 }
 
 // RegisterAction 注册单个Api
@@ -54,7 +60,7 @@ func RegisterAction(method string, route string, actionFunc any, params ...strin
 		flog.Errorf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("route"))
 		os.Exit(1)
 	}
-	minimal.Register(config.area, method, route, actionFunc, params...)
+	minimal.Register(defaultApi.area, method, route, actionFunc, params...)
 }
 
 // RegisterPOST 注册单个Api
@@ -77,6 +83,21 @@ func RegisterDELETE(route string, actionFunc any, params ...string) {
 	RegisterAction("DELETE", route, actionFunc, params...)
 }
 
+func UseCors() {
+	RegisterMiddleware(&middleware.Cors{})
+}
+
+func UseStaticFiles() {
+	// 默认wwwroot为静态目录
+	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./wwwroot"))))
+}
+
+func UseWebApi() {
+	RegisterMiddleware(&middleware.Routing{})
+	RegisterMiddleware(&middleware.Session{})
+	RegisterMiddleware(&middleware.UrlRewriting{})
+}
+
 // Run2 webapi.Run() default run on config:FS.
 // webapi.Run("localhost")
 // webapi.Run(":8089")
@@ -91,29 +112,22 @@ func Run2(params ...string) {
 	}
 
 	// 启用CORS
-	if config.enableCORS {
-		web.InsertFilter("*", web.BeforeRouter, cors.Allow(&cors.Options{
-			// 可选参数"GET", "POST", "PUT", "DELETE", "OPTIONS" (*为所有)
-			// 其中Options跨域复杂请求预检
-			AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			// 指的是允许的Header的种类
-			AllowHeaders: []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
-			// 公开的HTTP标头列表
-			ExposeHeaders: []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
-			// 如果设置，则允许共享身份验证凭据，例如cookie
-			AllowCredentials: true,
-			// 指定可访问域名AllowOrigins
-			AllowOrigins: []string{"*"},
-		}))
-	}
+	web.InsertFilter("*", web.BeforeRouter, cors.Allow(&cors.Options{
+		// 可选参数"GET", "POST", "PUT", "DELETE", "OPTIONS" (*为所有)
+		// 其中Options跨域复杂请求预检
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		// 指的是允许的Header的种类
+		AllowHeaders: []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
+		// 公开的HTTP标头列表
+		ExposeHeaders: []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
+		// 如果设置，则允许共享身份验证凭据，例如cookie
+		AllowCredentials: true,
+		// 指定可访问域名AllowOrigins
+		AllowOrigins: []string{"*"},
+	}))
 
 	//param = http.ClearHttpPrefix(param)
 	web.BConfig.CopyRequestBody = true
 	web.BConfig.WebConfig.AutoRender = false
 	web.BeeApp.Run(param)
-}
-
-// SetApiPrefix 设置api前缀
-func SetApiPrefix(prefix string) {
-	config.apiPrefix = prefix
 }

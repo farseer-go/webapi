@@ -11,6 +11,5 @@ type BaseController struct {
 }
 
 func (c *BaseController) init(r *http.Request) {
-	c.httpContext = context.NewHttpContext(r)
 	flog.Debug("完成初始化")
 }

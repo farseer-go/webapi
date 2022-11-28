@@ -5,6 +5,7 @@ import (
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/types"
+	"github.com/farseer-go/webapi/context"
 	"os"
 	"reflect"
 )
@@ -21,12 +22,12 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 	}
 
 	// 添加到路由表
-	lstRouteTable.Add(routeTable{
-		routeUrl:         area + route,
-		action:           actionFunc,
-		method:           method,
-		requestParamType: collections.NewList(param...),
-		responseBodyType: collections.NewList(types.GetOutParam(actionType)...),
-		paramNames:       collections.NewList(paramNames...),
+	context.LstRouteTable.Add(context.HttpRoute{
+		RouteUrl:         area + route,
+		Action:           actionFunc,
+		Method:           method,
+		RequestParamType: collections.NewList(param...),
+		ResponseBodyType: collections.NewList(types.GetOutParam(actionType)...),
+		ParamNames:       collections.NewList(paramNames...),
 	})
 }

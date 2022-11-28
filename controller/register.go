@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/types"
+	"github.com/farseer-go/webapi/context"
 	"reflect"
 	"strings"
 )
@@ -27,14 +28,14 @@ func Register(area string, c IController) {
 		lstParamType.RemoveAt(0)
 
 		// 添加到路由表
-		lstRouteTable.Add(routeTable{
-			routeUrl:         area + controllerName + "/" + actionName,
-			controller:       cRealType,
-			controllerName:   controllerName,
-			action:           methodType,
-			actionName:       actionName,
-			requestParamType: lstParamType,
-			responseBodyType: collections.NewList(types.GetOutParam(methodType)...),
+		context.LstRouteTable.Add(context.HttpRoute{
+			RouteUrl:         area + controllerName + "/" + actionName,
+			Controller:       cRealType,
+			ControllerName:   controllerName,
+			Action:           methodType,
+			ActionName:       actionName,
+			RequestParamType: lstParamType,
+			ResponseBodyType: collections.NewList(types.GetOutParam(methodType)...),
 		})
 	}
 }

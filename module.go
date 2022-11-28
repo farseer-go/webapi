@@ -1,8 +1,11 @@
 package webapi
 
 import (
+	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/modules"
+	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/controller"
+	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
 )
 
@@ -14,8 +17,12 @@ func (module Module) DependsModule() []modules.FarseerModule {
 }
 
 func (module Module) PreInitialize() {
+	context.LstRouteTable = collections.NewList[context.HttpRoute]()
+
 	controller.Init()
 	minimal.Init()
+
+	middleware.MiddlewareList = collections.NewList[middleware.IMiddleware](&middleware.Http{}, &middleware.Exception{})
 }
 
 func (module Module) Initialize() {
