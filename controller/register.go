@@ -8,7 +8,7 @@ import (
 )
 
 // Register 自动注册控制器下的所有Action方法
-func Register(c IController) {
+func Register(area string, c IController) {
 	cVal := reflect.ValueOf(c)
 	cType := cVal.Type()
 	cRealType := reflect.Indirect(cVal).Type()
@@ -28,7 +28,7 @@ func Register(c IController) {
 
 		// 添加到路由表
 		lstRouteTable.Add(routeTable{
-			routeUrl:         "/" + controllerName + "/" + actionName,
+			routeUrl:         area + controllerName + "/" + actionName,
 			controller:       cRealType,
 			controllerName:   controllerName,
 			action:           methodType,

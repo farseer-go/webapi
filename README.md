@@ -1,7 +1,7 @@
 # webapi
 ## 整体
-* 支持wwwroot静态目录
-* 支持area区域设置
+* 支持wwwroot静态目录（完成）
+* 支持area区域设置（完成）
 * 支持中间件
 * 支持端口配置
 * 支持CORS
@@ -21,8 +21,8 @@
 * 支持json模式（完成）
 * 支持form模式（完成）
 * 支持query模式（完成）
-* 支持返回值赋值ApiResponse
 * 500、404处理（完成）
+* 支持返回值赋值ApiResponse
 
 
 ## MiniApi功能
@@ -35,5 +35,5 @@
 * 支持json模式（完成）
 * 支持form模式（完成）
 * 支持query模式（完成）
-* 支持返回值赋值ApiResponse
 * 500、404处理（完成）
+* 支持返回值赋值ApiResponse

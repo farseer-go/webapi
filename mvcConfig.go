@@ -4,6 +4,9 @@ package webapi
 type mvcConfig struct {
 	apiPrefix  string // api前缀
 	enableCORS bool   // 启用CORS
+	area       string
 }
 
-var config = mvcConfig{}
+var config = mvcConfig{
+	area: "/",
+}

@@ -4,24 +4,77 @@ import (
 	"github.com/beego/beego/v2/server/web"
 	"github.com/beego/beego/v2/server/web/filter/cors"
 	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/minimal"
 	"net/http"
+	"os"
+	"strings"
 )
 
 func Run() {
+	// 路由注册
 	controller.Run()
 	minimal.Run()
-	flog.Info(http.ListenAndServe(":8888", nil))
+
+	// 默认wwwroot为静态目录
+	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./wwwroot"))))
+
+	addr := ":8888"
+	if strings.HasPrefix(addr, ":") {
+		flog.Infof("Web服务已启动：http://localhost%s/", addr)
+	}
+	flog.Info(http.ListenAndServe(addr, nil))
 }
 
+func Area(area string, f func()) {
+	if !strings.HasPrefix(area, "/") {
+		area = "/" + area
+	}
+	if !strings.HasSuffix(area, "/") {
+		area += "/"
+	}
+	config.area = area
+	f()
+	// 执行完后，恢复区域为"/"
+	config.area = "/"
+}
+
+// RegisterController 自动注册控制器下的所有Action方法
 func RegisterController(c controller.IController) {
-	controller.Register(c)
+	controller.Register(config.area, c)
 }
 
+// RegisterAction 注册单个Api
 func RegisterAction(method string, route string, actionFunc any, params ...string) {
-	minimal.Register(method, route, actionFunc, params...)
+	route = strings.Trim(route, " ")
+	route = strings.TrimLeft(route, "/")
+	if route == "" {
+		flog.Errorf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("route"))
+		os.Exit(1)
+	}
+	minimal.Register(config.area, method, route, actionFunc, params...)
+}
+
+// RegisterPOST 注册单个Api
+func RegisterPOST(route string, actionFunc any, params ...string) {
+	RegisterAction("POST", route, actionFunc, params...)
+}
+
+// RegisterGET 注册单个Api
+func RegisterGET(route string, actionFunc any, params ...string) {
+	RegisterAction("GET", route, actionFunc, params...)
+}
+
+// RegisterPUT 注册单个Api
+func RegisterPUT(route string, actionFunc any, params ...string) {
+	RegisterAction("PUT", route, actionFunc, params...)
+}
+
+// RegisterDELETE 注册单个Api
+func RegisterDELETE(route string, actionFunc any, params ...string) {
+	RegisterAction("DELETE", route, actionFunc, params...)
 }
 
 // Run2 webapi.Run() default run on config:FS.
