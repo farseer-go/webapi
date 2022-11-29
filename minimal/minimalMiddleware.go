@@ -12,5 +12,5 @@ func (receiver MinimalMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 入参
 	params := httpContext.GetRequestParam()
 	// 调用action
-	httpContext.HttpResponse.Body = reflect.ValueOf(httpContext.HttpRoute.Action).Call(params)
+	httpContext.Response.Body = reflect.ValueOf(httpContext.Route.Action).Call(params)
 }

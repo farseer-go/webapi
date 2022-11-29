@@ -11,16 +11,16 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 	receiver.IMiddleware.Invoke(httpContext)
 
 	// 输出返回值
-	httpContext.HttpResponse.WriteCode(httpContext.HttpResponse.StatusCode)
+	httpContext.Response.WriteCode(httpContext.Response.StatusCode)
 
 	// 有返回值，但没有转成字节
-	if len(httpContext.HttpResponse.Body) > 0 && len(httpContext.HttpResponse.BodyBytes) == 0 {
+	if len(httpContext.Response.Body) > 0 && len(httpContext.Response.BodyBytes) == 0 {
 		// 初始化返回报文
 		httpContext.BuildResponse()
 	}
 
 	// 写入Response流
-	if len(httpContext.HttpResponse.BodyBytes) > 0 {
-		_, _ = httpContext.HttpResponse.Write(httpContext.HttpResponse.BodyBytes)
+	if len(httpContext.Response.BodyBytes) > 0 {
+		_, _ = httpContext.Response.Write(httpContext.Response.BodyBytes)
 	}
 }

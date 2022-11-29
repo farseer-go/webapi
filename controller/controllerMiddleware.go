@@ -10,7 +10,7 @@ type ControllerMiddleware struct {
 
 func (receiver ControllerMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 实例化控制器
-	controllerVal := reflect.New(httpContext.HttpRoute.Controller)
+	controllerVal := reflect.New(httpContext.Route.Controller)
 	baseController := getBaseController(controllerVal)
 
 	// 初始化
@@ -20,5 +20,5 @@ func (receiver ControllerMiddleware) Invoke(httpContext *context.HttpContext) {
 	params := httpContext.GetRequestParam()
 
 	// 调用action
-	httpContext.HttpResponse.Body = controllerVal.MethodByName(httpContext.HttpRoute.ActionName).Call(params)
+	httpContext.Response.Body = controllerVal.MethodByName(httpContext.Route.ActionName).Call(params)
 }

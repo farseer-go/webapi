@@ -19,29 +19,29 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 
 		var returnVal any
 		// 只有一个返回值
-		if len(httpContext.HttpResponse.Body) == 1 {
-			returnVal = httpContext.HttpResponse.Body[0].Interface()
+		if len(httpContext.Response.Body) == 1 {
+			returnVal = httpContext.Response.Body[0].Interface()
 		} else {
 			// 多个返回值，则转成数组Json
 			lst := collections.NewListAny()
-			for i := 0; i < len(httpContext.HttpResponse.Body); i++ {
-				lst.Add(httpContext.HttpResponse.Body[i].Interface())
+			for i := 0; i < len(httpContext.Response.Body); i++ {
+				lst.Add(httpContext.Response.Body[i].Interface())
 			}
 			returnVal = lst
 		}
 		apiResponse = core.Success[any]("成功", returnVal)
 	}).CatchWebException(func(exp *exception.WebException) {
 		// 响应码
-		httpContext.HttpResponse.StatusCode = exp.StatusCode
+		httpContext.Response.StatusCode = exp.StatusCode
 		httpContext.Exception = exp.Message
-		apiResponse = core.Error[any](exp.Message, httpContext.HttpResponse.StatusCode)
+		apiResponse = core.Error[any](exp.Message, httpContext.Response.StatusCode)
 	}).CatchException(func(exp any) {
 		// 响应码
-		httpContext.HttpResponse.StatusCode = 500
+		httpContext.Response.StatusCode = 500
 		httpContext.Exception = exp
-		apiResponse = core.Error[any](exp.(string), httpContext.HttpResponse.StatusCode)
+		apiResponse = core.Error[any](exp.(string), httpContext.Response.StatusCode)
 	})
 
-	httpContext.HttpResponse.BodyBytes = apiResponse.ToBytes()
-	httpContext.HttpResponse.BodyString = string(httpContext.HttpResponse.BodyBytes)
+	httpContext.Response.BodyBytes = apiResponse.ToBytes()
+	httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
 }

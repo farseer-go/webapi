@@ -11,16 +11,16 @@ import (
 )
 
 type HttpContext struct {
-	HttpRequest      *HttpRequest
-	HttpResponse     *HttpResponse
-	HttpHeader       collections.Dictionary[string, string]
-	HttpURL          *HttpURL
+	Request          *HttpRequest
+	Response         *HttpResponse
+	Header           collections.Dictionary[string, string]
+	Route            *HttpRoute
+	URI              *HttpURL
 	Method           string
 	ContentLength    int64
 	Close            bool
 	TransferEncoding []string
 	ContentType      string
-	HttpRoute        *HttpRoute
 	Exception        any
 }
 
@@ -30,16 +30,16 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 	buf := new(bytes.Buffer)
 	_, _ = buf.ReadFrom(r.Body)
 	var httpContext = HttpContext{
-		HttpRequest: &HttpRequest{
+		Request: &HttpRequest{
 			Body:       r.Body,
 			BodyString: buf.String(),
 			BodyBytes:  buf.Bytes(),
 		},
-		HttpResponse: &HttpResponse{
+		Response: &HttpResponse{
 			w: w,
 		},
-		HttpHeader: collections.NewDictionary[string, string](),
-		HttpURL: &HttpURL{
+		Header: collections.NewDictionary[string, string](),
+		URI: &HttpURL{
 			Path:        r.URL.Path,
 			RemoteAddr:  r.RemoteAddr,
 			Host:        r.Host,
@@ -53,35 +53,35 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 		Close:            r.Close,
 		TransferEncoding: r.TransferEncoding,
 		ContentType:      "",
-		HttpRoute:        &httpRoute,
+		Route:            &httpRoute,
 	}
 
 	switch httpContext.Method {
 	case "GET":
 		_ = r.ParseForm()
-		httpContext.HttpRequest.ParseQuery(r.Form)
+		httpContext.Request.ParseQuery(r.Form)
 	default:
-		httpContext.HttpRequest.ParseForm()
+		httpContext.Request.ParseForm()
 	}
 
 	// httpURL
 	for k, v := range r.URL.Query() {
-		httpContext.HttpURL.Query.Add(k, strings.Join(v, ";"))
+		httpContext.URI.Query.Add(k, strings.Join(v, ";"))
 	}
 
 	if r.TLS == nil {
-		httpContext.HttpURL.Url = "http://" + r.Host + r.RequestURI
+		httpContext.URI.Url = "http://" + r.Host + r.RequestURI
 	} else {
-		httpContext.HttpURL.Url = "https://" + r.Host + r.RequestURI
+		httpContext.URI.Url = "https://" + r.Host + r.RequestURI
 	}
 
 	// header
 	for k, v := range r.Header {
-		httpContext.HttpHeader.Add(k, strings.Join(v, ";"))
+		httpContext.Header.Add(k, strings.Join(v, ";"))
 	}
 
 	// ContentType
-	for _, contentType := range strings.Split(httpContext.HttpHeader.GetValue("Content-Type"), ";") {
+	for _, contentType := range strings.Split(httpContext.Header.GetValue("Content-Type"), ";") {
 		if strings.Contains(contentType, "/") {
 			httpContext.ContentType = contentType
 		}
@@ -92,7 +92,7 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 // GetRequestParam 根据method映射入参
 func (httpContext *HttpContext) GetRequestParam() []reflect.Value {
 	// 没有入参时，忽略request.body
-	if httpContext.HttpRoute.RequestParamType.Count() == 0 {
+	if httpContext.Route.RequestParamType.Count() == 0 {
 		return []reflect.Value{}
 	}
 
@@ -110,35 +110,35 @@ func (httpContext *HttpContext) GetRequestParam() []reflect.Value {
 // application/json
 func (httpContext *HttpContext) contentTypeJson() []reflect.Value {
 	// dto
-	if httpContext.HttpRoute.RequestParamIsModel {
-		firstParamType := httpContext.HttpRoute.RequestParamType.First() // 先取第一个参数
+	if httpContext.Route.RequestParamIsModel {
+		firstParamType := httpContext.Route.RequestParamType.First() // 先取第一个参数
 		val := reflect.New(firstParamType).Interface()
-		_ = json.Unmarshal(httpContext.HttpRequest.BodyBytes, val)
+		_ = json.Unmarshal(httpContext.Request.BodyBytes, val)
 		return []reflect.Value{reflect.ValueOf(val).Elem()}
 	}
 
 	// 多参数
-	mapVal := httpContext.HttpRequest.JsonToMap()
+	mapVal := httpContext.Request.JsonToMap()
 	return httpContext.mapToParams(mapVal)
 }
 
 // application/x-www-form-urlencoded
 func (httpContext *HttpContext) formUrlencoded() []reflect.Value {
 	// 多参数
-	return httpContext.mapToParams(httpContext.HttpRequest.Form)
+	return httpContext.mapToParams(httpContext.Request.Form)
 }
 
 // query
 func (httpContext *HttpContext) query() []reflect.Value {
 	// 多参数
-	return httpContext.mapToParams(httpContext.HttpRequest.Query)
+	return httpContext.mapToParams(httpContext.Request.Query)
 }
 
 // 将map转成入参值
 func (httpContext *HttpContext) mapToParams(mapVal map[string]any) []reflect.Value {
 	// dto模式
-	if httpContext.HttpRoute.RequestParamIsModel {
-		param := httpContext.HttpRoute.RequestParamType.First()
+	if httpContext.Route.RequestParamIsModel {
+		param := httpContext.Route.RequestParamType.First()
 		paramVal := reflect.New(param).Elem()
 		for i := 0; i < param.NumField(); i++ {
 			field := param.Field(i)
@@ -156,11 +156,11 @@ func (httpContext *HttpContext) mapToParams(mapVal map[string]any) []reflect.Val
 	}
 
 	// 多参数
-	lstParams := make([]reflect.Value, httpContext.HttpRoute.RequestParamType.Count())
-	for i := 0; i < httpContext.HttpRoute.RequestParamType.Count(); i++ {
-		defVal := reflect.New(httpContext.HttpRoute.RequestParamType.Index(i)).Elem().Interface()
-		if httpContext.HttpRoute.ParamNames.Count() > i {
-			paramName := strings.ToLower(httpContext.HttpRoute.ParamNames.Index(i))
+	lstParams := make([]reflect.Value, httpContext.Route.RequestParamType.Count())
+	for i := 0; i < httpContext.Route.RequestParamType.Count(); i++ {
+		defVal := reflect.New(httpContext.Route.RequestParamType.Index(i)).Elem().Interface()
+		if httpContext.Route.ParamNames.Count() > i {
+			paramName := strings.ToLower(httpContext.Route.ParamNames.Index(i))
 			paramVal, _ := mapVal[paramName]
 			defVal = parse.Convert(paramVal, defVal)
 		}
@@ -172,29 +172,29 @@ func (httpContext *HttpContext) mapToParams(mapVal map[string]any) []reflect.Val
 // BuildResponse 初始化返回报文
 func (httpContext *HttpContext) BuildResponse() {
 	// 没有返回值，则不响应
-	if len(httpContext.HttpResponse.Body) == 0 {
-		httpContext.HttpResponse.BodyBytes = []byte{}
-		httpContext.HttpResponse.BodyString = ""
+	if len(httpContext.Response.Body) == 0 {
+		httpContext.Response.BodyBytes = []byte{}
+		httpContext.Response.BodyString = ""
 		return
 	}
 
 	// 只有一个返回值
-	if len(httpContext.HttpResponse.Body) == 1 {
-		responseBody := httpContext.HttpResponse.Body[0].Interface()
-		if httpContext.HttpRoute.ResponseBodyIsModel { // dto
-			httpContext.HttpResponse.BodyBytes, _ = json.Marshal(responseBody)
-			httpContext.HttpResponse.BodyString = string(httpContext.HttpResponse.BodyBytes)
+	if len(httpContext.Response.Body) == 1 {
+		responseBody := httpContext.Response.Body[0].Interface()
+		if httpContext.Route.ResponseBodyIsModel { // dto
+			httpContext.Response.BodyBytes, _ = json.Marshal(responseBody)
+			httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
 		} else { // 基本类型直接转string
-			httpContext.HttpResponse.BodyString = parse.Convert(responseBody, "")
-			httpContext.HttpResponse.BodyBytes = []byte(httpContext.HttpResponse.BodyString)
+			httpContext.Response.BodyString = parse.Convert(responseBody, "")
+			httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
 		}
 	}
 
 	// 多个返回值，则转成数组Json
 	lst := collections.NewListAny()
-	for i := 0; i < len(httpContext.HttpResponse.Body); i++ {
-		lst.Add(httpContext.HttpResponse.Body[i].Interface())
+	for i := 0; i < len(httpContext.Response.Body); i++ {
+		lst.Add(httpContext.Response.Body[i].Interface())
 	}
-	httpContext.HttpResponse.BodyBytes, _ = json.Marshal(lst)
-	httpContext.HttpResponse.BodyString = string(httpContext.HttpResponse.BodyBytes)
+	httpContext.Response.BodyBytes, _ = json.Marshal(lst)
+	httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
 }

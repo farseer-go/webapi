@@ -11,9 +11,9 @@ type Routing struct {
 
 func (receiver *Routing) Invoke(httpContext *context.HttpContext) {
 	// 检查method
-	if strings.ToUpper(httpContext.HttpRoute.Method) != httpContext.Method {
+	if strings.ToUpper(httpContext.Route.Method) != httpContext.Method {
 		// 响应码
-		httpContext.HttpResponse.WriteCode(405)
+		httpContext.Response.WriteCode(405)
 		return
 	}
 	receiver.IMiddleware.Invoke(httpContext)
