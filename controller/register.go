@@ -24,18 +24,21 @@ func Register(area string, c IController) {
 		}
 
 		// 控制器都是以方法的形式，因此第0个入参是接收器，应去除
-		lstParamType := collections.NewList(types.GetInParam(methodType)...)
-		lstParamType.RemoveAt(0)
+		lstRequestParamType := collections.NewList(types.GetInParam(methodType)...)
+		lstRequestParamType.RemoveAt(0)
+		lstResponseParamType := collections.NewList(types.GetOutParam(methodType)...)
 
 		// 添加到路由表
 		context.LstRouteTable.Add(context.HttpRoute{
-			RouteUrl:         area + controllerName + "/" + actionName,
-			Controller:       cRealType,
-			ControllerName:   controllerName,
-			Action:           methodType,
-			ActionName:       actionName,
-			RequestParamType: lstParamType,
-			ResponseBodyType: collections.NewList(types.GetOutParam(methodType)...),
+			RouteUrl:            area + controllerName + "/" + actionName,
+			Controller:          cRealType,
+			ControllerName:      controllerName,
+			Action:              methodType,
+			ActionName:          actionName,
+			RequestParamType:    lstRequestParamType,
+			ResponseBodyType:    lstResponseParamType,
+			RequestParamIsModel: types.IsDtoModel(lstRequestParamType.ToArray()),
+			ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
 		})
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/parse"
-	"github.com/farseer-go/fs/types"
 	"net/http"
 	"reflect"
 	"strings"
@@ -106,22 +105,13 @@ func (httpContext *HttpContext) GetRequestParam() []reflect.Value {
 	default: //case "application/x-www-form-urlencoded", "multipart/form-data":
 		return httpContext.formUrlencoded()
 	}
-
-	//lstParams := collections.NewList[reflect.Value]()
-	//for _, paramType := range requestParamType.ToArray() {
-	//	lstParams.Add(reflect.New(paramType).Elem())
-	//}
-	//
-	//return lstParams.ToArray()
 }
 
 // application/json
 func (httpContext *HttpContext) contentTypeJson() []reflect.Value {
 	// dto
-	firstParamType := httpContext.HttpRoute.RequestParamType.First() // 先取第一个参数
-	isCollections := types.IsCollections(firstParamType)
-	isStruct := firstParamType.Kind() == reflect.Struct
-	if httpContext.HttpRoute.RequestParamType.Count() == 1 && !isCollections && isStruct {
+	if httpContext.HttpRoute.RequestParamIsModel {
+		firstParamType := httpContext.HttpRoute.RequestParamType.First() // 先取第一个参数
 		val := reflect.New(firstParamType).Interface()
 		_ = json.Unmarshal(httpContext.HttpRequest.BodyBytes, val)
 		return []reflect.Value{reflect.ValueOf(val).Elem()}
@@ -146,6 +136,26 @@ func (httpContext *HttpContext) query() []reflect.Value {
 
 // 将map转成入参值
 func (httpContext *HttpContext) mapToParams(mapVal map[string]any) []reflect.Value {
+	// dto模式
+	if httpContext.HttpRoute.RequestParamIsModel {
+		param := httpContext.HttpRoute.RequestParamType.First()
+		paramVal := reflect.New(param).Elem()
+		for i := 0; i < param.NumField(); i++ {
+			field := param.Field(i)
+			if !field.IsExported() {
+				continue
+			}
+			key := strings.ToLower(field.Name)
+			kv, exists := mapVal[key]
+			if exists {
+				defVal := paramVal.Field(i).Interface()
+				paramVal.FieldByName(field.Name).Set(reflect.ValueOf(parse.Convert(kv, defVal)))
+			}
+		}
+		return []reflect.Value{paramVal}
+	}
+
+	// 多参数
 	lstParams := make([]reflect.Value, httpContext.HttpRoute.RequestParamType.Count())
 	for i := 0; i < httpContext.HttpRoute.RequestParamType.Count(); i++ {
 		defVal := reflect.New(httpContext.HttpRoute.RequestParamType.Index(i)).Elem().Interface()
@@ -171,11 +181,7 @@ func (httpContext *HttpContext) BuildResponse() {
 	// 只有一个返回值
 	if len(httpContext.HttpResponse.Body) == 1 {
 		responseBody := httpContext.HttpResponse.Body[0].Interface()
-		firstParamType := types.GetRealType(httpContext.HttpResponse.Body[0])
-		isCollections := types.IsCollections(firstParamType)
-		isStruct := firstParamType.Kind() == reflect.Struct
-
-		if !isCollections && isStruct { // dto
+		if httpContext.HttpRoute.ResponseBodyIsModel { // dto
 			httpContext.HttpResponse.BodyBytes, _ = json.Marshal(responseBody)
 			httpContext.HttpResponse.BodyString = string(httpContext.HttpResponse.BodyBytes)
 		} else { // 基本类型直接转string

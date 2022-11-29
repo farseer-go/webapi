@@ -21,13 +21,18 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 		os.Exit(1)
 	}
 
+	lstRequestParamType := collections.NewList(param...)
+	lstResponseParamType := collections.NewList(types.GetOutParam(actionType)...)
+
 	// 添加到路由表
 	context.LstRouteTable.Add(context.HttpRoute{
-		RouteUrl:         area + route,
-		Action:           actionFunc,
-		Method:           method,
-		RequestParamType: collections.NewList(param...),
-		ResponseBodyType: collections.NewList(types.GetOutParam(actionType)...),
-		ParamNames:       collections.NewList(paramNames...),
+		RouteUrl:            area + route,
+		Action:              actionFunc,
+		Method:              method,
+		RequestParamType:    lstRequestParamType,
+		ResponseBodyType:    lstResponseParamType,
+		ParamNames:          collections.NewList(paramNames...),
+		RequestParamIsModel: types.IsDtoModel(lstRequestParamType.ToArray()),
+		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
 	})
 }
