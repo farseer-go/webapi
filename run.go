@@ -1,8 +1,6 @@
 package webapi
 
 import (
-	"github.com/beego/beego/v2/server/web"
-	"github.com/beego/beego/v2/server/web/filter/cors"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
@@ -14,14 +12,25 @@ import (
 	"strings"
 )
 
-func Run() {
+func Run(params ...string) {
 	// 初始化中间件
 	middleware.Init()
 
 	// 处理路由
 	handleRoute()
 
-	addr := ":8888"
+	var addr string
+	if len(params) > 0 && params[0] != "" {
+		addr = params[0]
+	}
+	if addr == "" {
+		addr = configure.GetString("WebApi.Url")
+	}
+
+	if addr == "" {
+		addr = ":8888"
+	}
+
 	if strings.HasPrefix(addr, ":") {
 		flog.Infof("Web服务已启动：http://localhost%s/", addr)
 	}
@@ -88,7 +97,7 @@ func UseCors() {
 	RegisterMiddleware(&middleware.Cors{})
 }
 
-// UseStaticFiles 支持静态目录
+// UseStaticFiles 支持静态目录，在根目录./wwwroot中的文件，直接以静态文件提供服务
 func UseStaticFiles() {
 	// 默认wwwroot为静态目录
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./wwwroot"))))
@@ -103,38 +112,4 @@ func UseWebApi() {
 // UseApiResponse 支持ApiResponse结构
 func UseApiResponse() {
 	RegisterMiddleware(&middleware.ApiResponse{})
-}
-
-// Run2 webapi.Run() default run on config:FS.
-// webapi.Run("localhost")
-// webapi.Run(":8089")
-// webapi.Run("127.0.0.1:8089")
-func Run2(params ...string) {
-	param := ""
-	if len(params) > 0 && params[0] != "" {
-		param = params[0]
-	}
-	if param == "" {
-		param = configure.GetString("WebApi.Url")
-	}
-
-	// 启用CORS
-	web.InsertFilter("*", web.BeforeRouter, cors.Allow(&cors.Options{
-		// 可选参数"GET", "POST", "PUT", "DELETE", "OPTIONS" (*为所有)
-		// 其中Options跨域复杂请求预检
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		// 指的是允许的Header的种类
-		AllowHeaders: []string{"Origin", "Authorization", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
-		// 公开的HTTP标头列表
-		ExposeHeaders: []string{"Content-Length", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers", "Content-Type"},
-		// 如果设置，则允许共享身份验证凭据，例如cookie
-		AllowCredentials: true,
-		// 指定可访问域名AllowOrigins
-		AllowOrigins: []string{"*"},
-	}))
-
-	//param = http.ClearHttpPrefix(param)
-	web.BConfig.CopyRequestBody = true
-	web.BConfig.WebConfig.AutoRender = false
-	web.BeeApp.Run(param)
 }

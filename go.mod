@@ -3,7 +3,6 @@ module github.com/farseer-go/webapi
 go 1.19
 
 require (
-	github.com/beego/beego/v2 v2.0.5
 	github.com/farseer-go/collections v0.1.1
 	github.com/farseer-go/fs v0.0.0-20220906142547-679f1409766e
 	github.com/farseer-go/utils v0.0.0-20220906142640-178ebec4054a
