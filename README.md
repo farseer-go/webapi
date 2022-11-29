@@ -3,6 +3,7 @@
 * 支持wwwroot静态目录（完成）
 * 支持area区域设置（完成）
 * 支持中间件（完成）
+* 支持异常中间件（完成）
 * 支持端口配置
 * 支持CORS
 * 支持filter
@@ -16,13 +17,12 @@
 * 支持单个DTO入参（完成）
 * 支持结构返回值（转成json）（完成）
 * 支持基础类型返回值（转成string）（完成）
-* 支持多个入参
 * 支持Get、Post、Put、Delete
 * 支持json模式（完成）
 * 支持form模式（完成）
 * 支持query模式（完成）
 * 500、404处理（完成）
-* 支持返回值赋值ApiResponse
+* 支持返回值赋值ApiResponse（完成）
 
 
 ## MiniApi功能
@@ -36,4 +36,4 @@
 * 支持form模式（完成）
 * 支持query模式（完成）
 * 500、404处理（完成）
-* 支持返回值赋值ApiResponse
+* 支持返回值赋值ApiResponse（完成）

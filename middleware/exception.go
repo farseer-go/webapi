@@ -5,7 +5,7 @@ import (
 	"github.com/farseer-go/webapi/context"
 )
 
-// 异常中间件（默认加载）
+// Exception 异常中间件（默认加载）
 type Exception struct {
 	IMiddleware
 }
@@ -14,7 +14,9 @@ func (receiver *Exception) Invoke(httpContext *context.HttpContext) {
 	exception.Try(func() {
 		receiver.IMiddleware.Invoke(httpContext)
 		// 响应码
-		httpContext.HttpResponse.StatusCode = 200
+		if httpContext.HttpResponse.StatusCode == 0 {
+			httpContext.HttpResponse.StatusCode = 200
+		}
 	}).CatchWebException(func(exp *exception.WebException) {
 		// 响应码
 		httpContext.HttpResponse.StatusCode = exp.StatusCode

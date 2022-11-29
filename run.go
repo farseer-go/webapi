@@ -83,10 +83,12 @@ func RegisterDELETE(route string, actionFunc any, params ...string) {
 	RegisterAction("DELETE", route, actionFunc, params...)
 }
 
+// UseCors 使用CORS中间件
 func UseCors() {
 	RegisterMiddleware(&middleware.Cors{})
 }
 
+// UseStaticFiles 支持静态目录
 func UseStaticFiles() {
 	// 默认wwwroot为静态目录
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./wwwroot"))))
@@ -96,6 +98,11 @@ func UseWebApi() {
 	RegisterMiddleware(&middleware.Routing{})
 	RegisterMiddleware(&middleware.Session{})
 	RegisterMiddleware(&middleware.UrlRewriting{})
+}
+
+// UseApiResponse 支持ApiResponse结构
+func UseApiResponse() {
+	RegisterMiddleware(&middleware.ApiResponse{})
 }
 
 // Run2 webapi.Run() default run on config:FS.

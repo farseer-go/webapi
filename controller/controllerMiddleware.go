@@ -20,8 +20,5 @@ func (receiver ControllerMiddleware) Invoke(httpContext *context.HttpContext) {
 	params := httpContext.GetRequestParam()
 
 	// 调用action
-	returnVals := controllerVal.MethodByName(httpContext.HttpRoute.ActionName).Call(params)
-
-	// 初始化返回报文
-	httpContext.InitResponse(returnVals)
+	httpContext.HttpResponse.Body = controllerVal.MethodByName(httpContext.HttpRoute.ActionName).Call(params)
 }

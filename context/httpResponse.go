@@ -1,8 +1,12 @@
 package context
 
-import "net/http"
+import (
+	"net/http"
+	"reflect"
+)
 
 type HttpResponse struct {
+	Body       []reflect.Value
 	BodyString string
 	BodyBytes  []byte
 	w          http.ResponseWriter

@@ -123,7 +123,7 @@ func (httpContext *HttpContext) contentTypeJson() []reflect.Value {
 	isStruct := firstParamType.Kind() == reflect.Struct
 	if httpContext.HttpRoute.RequestParamType.Count() == 1 && !isCollections && isStruct {
 		val := reflect.New(firstParamType).Interface()
-		json.Unmarshal(httpContext.HttpRequest.BodyBytes, val)
+		_ = json.Unmarshal(httpContext.HttpRequest.BodyBytes, val)
 		return []reflect.Value{reflect.ValueOf(val).Elem()}
 	}
 
@@ -159,20 +159,21 @@ func (httpContext *HttpContext) mapToParams(mapVal map[string]any) []reflect.Val
 	return lstParams
 }
 
-// InitResponse 初始化返回报文
-func (httpContext *HttpContext) InitResponse(returnVals []reflect.Value) {
+// BuildResponse 初始化返回报文
+func (httpContext *HttpContext) BuildResponse() {
 	// 没有返回值，则不响应
-	if len(returnVals) == 0 {
+	if len(httpContext.HttpResponse.Body) == 0 {
 		httpContext.HttpResponse.BodyBytes = []byte{}
 		httpContext.HttpResponse.BodyString = ""
 		return
 	}
-	firstParamType := types.GetRealType(returnVals[0])
-	isCollections := types.IsCollections(firstParamType)
-	isStruct := firstParamType.Kind() == reflect.Struct
 
-	if len(returnVals) == 1 {
-		responseBody := returnVals[0].Interface()
+	// 只有一个返回值
+	if len(httpContext.HttpResponse.Body) == 1 {
+		responseBody := httpContext.HttpResponse.Body[0].Interface()
+		firstParamType := types.GetRealType(httpContext.HttpResponse.Body[0])
+		isCollections := types.IsCollections(firstParamType)
+		isStruct := firstParamType.Kind() == reflect.Struct
 
 		if !isCollections && isStruct { // dto
 			httpContext.HttpResponse.BodyBytes, _ = json.Marshal(responseBody)
@@ -183,9 +184,11 @@ func (httpContext *HttpContext) InitResponse(returnVals []reflect.Value) {
 		}
 	}
 
-	if len(returnVals) > 1 {
-		responseBody := returnVals[0].Interface()
-		httpContext.HttpResponse.BodyBytes, _ = json.Marshal(responseBody)
-		httpContext.HttpResponse.BodyString = string(httpContext.HttpResponse.BodyBytes)
+	// 多个返回值，则转成数组Json
+	lst := collections.NewListAny()
+	for i := 0; i < len(httpContext.HttpResponse.Body); i++ {
+		lst.Add(httpContext.HttpResponse.Body[i].Interface())
 	}
+	httpContext.HttpResponse.BodyBytes, _ = json.Marshal(lst)
+	httpContext.HttpResponse.BodyString = string(httpContext.HttpResponse.BodyBytes)
 }
