@@ -22,7 +22,7 @@ func (module Module) PreInitialize() {
 	controller.Init()
 	minimal.Init()
 
-	middleware.MiddlewareList = collections.NewList[middleware.IMiddleware](&middleware.Http{}, &middleware.Exception{})
+	middleware.Init()
 }
 
 func (module Module) Initialize() {

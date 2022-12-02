@@ -14,7 +14,7 @@ func (receiver ControllerMiddleware) Invoke(httpContext *context.HttpContext) {
 	baseController := getBaseController(controllerVal)
 
 	// 初始化
-	baseController.httpContext = *httpContext
+	baseController.HttpContext = *httpContext
 
 	// 入参
 	params := httpContext.GetRequestParam()

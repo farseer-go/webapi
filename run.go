@@ -14,7 +14,7 @@ import (
 
 func Run(params ...string) {
 	// 初始化中间件
-	middleware.Init()
+	middleware.InitMiddleware()
 
 	// 处理路由
 	handleRoute()
@@ -104,7 +104,6 @@ func UseStaticFiles() {
 }
 
 func UseWebApi() {
-	RegisterMiddleware(&middleware.Routing{})
 	RegisterMiddleware(&middleware.Session{})
 	RegisterMiddleware(&middleware.UrlRewriting{})
 }

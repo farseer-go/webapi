@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-type Routing struct {
+type routing struct {
 	IMiddleware
 }
 
-func (receiver *Routing) Invoke(httpContext *context.HttpContext) {
+func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 	// 检查method
 	if strings.ToUpper(httpContext.Route.Method) != httpContext.Method {
 		// 响应码

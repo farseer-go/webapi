@@ -2,12 +2,12 @@ package middleware
 
 import "github.com/farseer-go/webapi/context"
 
-// Http HTTP报文响应中间件（默认加载）
-type Http struct {
+// http HTTP报文响应中间件（默认加载）
+type http struct {
 	IMiddleware
 }
 
-func (receiver *Http) Invoke(httpContext *context.HttpContext) {
+func (receiver *http) Invoke(httpContext *context.HttpContext) {
 	receiver.IMiddleware.Invoke(httpContext)
 
 	// 输出返回值

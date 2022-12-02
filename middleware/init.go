@@ -1,9 +1,16 @@
 package middleware
 
-import "reflect"
+import (
+	"github.com/farseer-go/collections"
+	"reflect"
+)
 
-// 初始化管道
 func Init() {
+	MiddlewareList = collections.NewList[IMiddleware](&http{}, &exceptionMiddleware{}, &routing{})
+}
+
+// InitMiddleware 初始化管道
+func InitMiddleware() {
 	for middlewareIndex := 0; middlewareIndex < MiddlewareList.Count(); middlewareIndex++ {
 		// 最后一个中间件不需要再设置
 		if middlewareIndex+1 == MiddlewareList.Count() {
@@ -16,7 +23,7 @@ func Init() {
 	}
 }
 
-// 设置下一个管道
+// SetNextMiddleware 设置下一个管道
 func SetNextMiddleware(curMiddleware, nextMiddleware IMiddleware) {
 	curMiddlewareValue := reflect.ValueOf(curMiddleware)
 	// 找到next字段进行赋值下一个中间件管道

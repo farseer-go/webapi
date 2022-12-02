@@ -5,12 +5,12 @@ import (
 	"github.com/farseer-go/webapi/context"
 )
 
-// Exception 异常中间件（默认加载）
-type Exception struct {
+// exception 异常中间件（默认加载）
+type exceptionMiddleware struct {
 	IMiddleware
 }
 
-func (receiver *Exception) Invoke(httpContext *context.HttpContext) {
+func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {
 	exception.Try(func() {
 		receiver.IMiddleware.Invoke(httpContext)
 		// 响应码
