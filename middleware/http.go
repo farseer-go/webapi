@@ -16,7 +16,7 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 	// 有返回值，但没有转成字节
 	if len(httpContext.Response.Body) > 0 && len(httpContext.Response.BodyBytes) == 0 {
 		// 初始化返回报文
-		httpContext.BuildResponse()
+		httpContext.Response.BuildResponse(httpContext.Route)
 	}
 
 	// 写入Response流

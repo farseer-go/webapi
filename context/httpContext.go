@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/farseer-go/collections"
-	"github.com/farseer-go/fs/parse"
 	"net/http"
 	"reflect"
 	"strings"
@@ -119,82 +118,17 @@ func (httpContext *HttpContext) contentTypeJson() []reflect.Value {
 
 	// 多参数
 	mapVal := httpContext.Request.JsonToMap()
-	return httpContext.mapToParams(mapVal)
+	return httpContext.Route.mapToParams(mapVal)
 }
 
 // application/x-www-form-urlencoded
 func (httpContext *HttpContext) formUrlencoded() []reflect.Value {
 	// 多参数
-	return httpContext.mapToParams(httpContext.Request.Form)
+	return httpContext.Route.mapToParams(httpContext.Request.Form)
 }
 
 // query
 func (httpContext *HttpContext) query() []reflect.Value {
 	// 多参数
-	return httpContext.mapToParams(httpContext.Request.Query)
-}
-
-// 将map转成入参值
-func (httpContext *HttpContext) mapToParams(mapVal map[string]any) []reflect.Value {
-	// dto模式
-	if httpContext.Route.RequestParamIsModel {
-		param := httpContext.Route.RequestParamType.First()
-		paramVal := reflect.New(param).Elem()
-		for i := 0; i < param.NumField(); i++ {
-			field := param.Field(i)
-			if !field.IsExported() {
-				continue
-			}
-			key := strings.ToLower(field.Name)
-			kv, exists := mapVal[key]
-			if exists {
-				defVal := paramVal.Field(i).Interface()
-				paramVal.FieldByName(field.Name).Set(reflect.ValueOf(parse.Convert(kv, defVal)))
-			}
-		}
-		return []reflect.Value{paramVal}
-	}
-
-	// 多参数
-	lstParams := make([]reflect.Value, httpContext.Route.RequestParamType.Count())
-	for i := 0; i < httpContext.Route.RequestParamType.Count(); i++ {
-		defVal := reflect.New(httpContext.Route.RequestParamType.Index(i)).Elem().Interface()
-		if httpContext.Route.ParamNames.Count() > i {
-			paramName := strings.ToLower(httpContext.Route.ParamNames.Index(i))
-			paramVal, _ := mapVal[paramName]
-			defVal = parse.Convert(paramVal, defVal)
-		}
-		lstParams[i] = reflect.ValueOf(defVal)
-	}
-	return lstParams
-}
-
-// BuildResponse 初始化返回报文
-func (httpContext *HttpContext) BuildResponse() {
-	// 没有返回值，则不响应
-	if len(httpContext.Response.Body) == 0 {
-		httpContext.Response.BodyBytes = []byte{}
-		httpContext.Response.BodyString = ""
-		return
-	}
-
-	// 只有一个返回值
-	if len(httpContext.Response.Body) == 1 {
-		responseBody := httpContext.Response.Body[0].Interface()
-		if httpContext.Route.ResponseBodyIsModel { // dto
-			httpContext.Response.BodyBytes, _ = json.Marshal(responseBody)
-			httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
-		} else { // 基本类型直接转string
-			httpContext.Response.BodyString = parse.Convert(responseBody, "")
-			httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
-		}
-	}
-
-	// 多个返回值，则转成数组Json
-	lst := collections.NewListAny()
-	for i := 0; i < len(httpContext.Response.Body); i++ {
-		lst.Add(httpContext.Response.Body[i].Interface())
-	}
-	httpContext.Response.BodyBytes, _ = json.Marshal(lst)
-	httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
+	return httpContext.Route.mapToParams(httpContext.Request.Query)
 }

@@ -2,7 +2,9 @@ package context
 
 import (
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/parse"
 	"reflect"
+	"strings"
 )
 
 var LstRouteTable collections.List[HttpRoute]
@@ -20,4 +22,39 @@ type HttpRoute struct {
 	ParamNames          collections.List[string]
 	RequestParamIsModel bool // 是否为DTO结构
 	ResponseBodyIsModel bool // 是否为DTO结构
+}
+
+// 将map转成入参值
+func (receiver *HttpRoute) mapToParams(mapVal map[string]any) []reflect.Value {
+	// dto模式
+	if receiver.RequestParamIsModel {
+		param := receiver.RequestParamType.First()
+		paramVal := reflect.New(param).Elem()
+		for i := 0; i < param.NumField(); i++ {
+			field := param.Field(i)
+			if !field.IsExported() {
+				continue
+			}
+			key := strings.ToLower(field.Name)
+			kv, exists := mapVal[key]
+			if exists {
+				defVal := paramVal.Field(i).Interface()
+				paramVal.FieldByName(field.Name).Set(reflect.ValueOf(parse.Convert(kv, defVal)))
+			}
+		}
+		return []reflect.Value{paramVal}
+	}
+
+	// 多参数
+	lstParams := make([]reflect.Value, receiver.RequestParamType.Count())
+	for i := 0; i < receiver.RequestParamType.Count(); i++ {
+		defVal := reflect.New(receiver.RequestParamType.Index(i)).Elem().Interface()
+		if receiver.ParamNames.Count() > i {
+			paramName := strings.ToLower(receiver.ParamNames.Index(i))
+			paramVal, _ := mapVal[paramName]
+			defVal = parse.Convert(paramVal, defVal)
+		}
+		lstParams[i] = reflect.ValueOf(defVal)
+	}
+	return lstParams
 }
