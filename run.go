@@ -4,6 +4,7 @@ import (
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
+	"github.com/farseer-go/fs/modules"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
@@ -13,6 +14,9 @@ import (
 )
 
 func Run(params ...string) {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+
 	// 初始化中间件
 	middleware.InitMiddleware()
 
@@ -38,6 +42,9 @@ func Run(params ...string) {
 }
 
 func RegisterMiddleware(m middleware.IMiddleware) {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+
 	middleware.MiddlewareList.Add(m)
 }
 
@@ -58,11 +65,17 @@ func Area(area string, f func()) {
 
 // RegisterController 自动注册控制器下的所有Action方法
 func RegisterController(c controller.IController) {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+
 	controller.Register(defaultApi.area, c)
 }
 
 // RegisterAction 注册单个Api
 func RegisterAction(method string, route string, actionFunc any, params ...string) {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+
 	route = strings.Trim(route, " ")
 	route = strings.TrimLeft(route, "/")
 	if route == "" {
@@ -99,6 +112,9 @@ func UseCors() {
 
 // UseStaticFiles 支持静态目录，在根目录./wwwroot中的文件，直接以静态文件提供服务
 func UseStaticFiles() {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+
 	// 默认wwwroot为静态目录
 	http.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./wwwroot"))))
 }
