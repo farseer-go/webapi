@@ -25,16 +25,11 @@ func (receiver *http) Invoke(httpContext *context.HttpContext) {
 		}
 	}
 
+	// 输出返回值
+	httpContext.Response.WriteCode(httpContext.Response.StatusCode)
+
 	// 写入Response流
 	if len(httpContext.Response.BodyBytes) > 0 {
 		_, _ = httpContext.Response.Write(httpContext.Response.BodyBytes)
 	}
-
-	// 响应码
-	if httpContext.Response.StatusCode == 0 {
-		httpContext.Response.StatusCode = 200
-	}
-
-	// 输出返回值
-	httpContext.Response.WriteCode(httpContext.Response.StatusCode)
 }

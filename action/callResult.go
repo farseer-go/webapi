@@ -20,6 +20,7 @@ func (receiver CallResult) ExecuteResult(httpContext *context.HttpContext) {
 	if len(httpContext.Response.Body) == 0 {
 		httpContext.Response.BodyBytes = []byte{}
 		httpContext.Response.BodyString = ""
+		httpContext.Response.StatusCode = 200
 		return
 	}
 
@@ -33,6 +34,7 @@ func (receiver CallResult) ExecuteResult(httpContext *context.HttpContext) {
 			httpContext.Response.BodyString = parse.Convert(responseBody, "")
 			httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
 		}
+		httpContext.Response.StatusCode = 200
 		return
 	}
 
@@ -43,4 +45,5 @@ func (receiver CallResult) ExecuteResult(httpContext *context.HttpContext) {
 	}
 	httpContext.Response.BodyBytes, _ = json.Marshal(lst)
 	httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
+	httpContext.Response.StatusCode = 200
 }

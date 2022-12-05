@@ -28,6 +28,7 @@ func (receiver ViewResult) ExecuteResult(httpContext *context.HttpContext) {
 
 	httpContext.Response.BodyString = file.ReadString(receiver.ViewName)
 	httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
+	httpContext.Response.StatusCode = 200
 }
 
 // View 视图

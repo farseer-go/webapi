@@ -13,7 +13,7 @@ func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 	// 检查method
 	if strings.ToUpper(httpContext.Route.Method) != httpContext.Method {
 		// 响应码
-		httpContext.Response.WriteCode(405)
+		httpContext.Response.StatusCode = 405
 		return
 	}
 	receiver.IMiddleware.Invoke(httpContext)

@@ -1,6 +1,9 @@
 package action
 
-import "github.com/farseer-go/webapi/context"
+import (
+	"github.com/farseer-go/webapi/context"
+	"net/http"
+)
 
 // RedirectToRouteResult 重定向功能
 type RedirectToRouteResult struct {
@@ -8,7 +11,8 @@ type RedirectToRouteResult struct {
 }
 
 func (receiver RedirectToRouteResult) ExecuteResult(httpContext *context.HttpContext) {
-	httpContext.Response.Redirect(receiver.url)
+	httpContext.Response.AddHeader("Location", receiver.url)
+	httpContext.Response.StatusCode = http.StatusFound
 }
 
 // Redirect 重定向

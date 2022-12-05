@@ -13,6 +13,7 @@ type FileContentResult struct {
 func (receiver FileContentResult) ExecuteResult(httpContext *context.HttpContext) {
 	httpContext.Response.BodyString = file.ReadString(receiver.filePath)
 	httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
+	httpContext.Response.StatusCode = 200
 }
 
 // FileContent 文件

@@ -38,8 +38,3 @@ func (receiver HttpResponse) SetHeader(key, value string) {
 func (receiver HttpResponse) DelHeader(key string) {
 	receiver.w.Header().Del(key)
 }
-
-func (receiver *HttpResponse) Redirect(url string) {
-	receiver.w.Header().Add("Location", url)
-	receiver.StatusCode = http.StatusFound
-}
