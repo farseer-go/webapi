@@ -12,6 +12,11 @@ type ApiResponse struct {
 }
 
 func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
+	// ActionResult类型，不做ApiResponse解析
+	if httpContext.IsActionResult() {
+		receiver.IMiddleware.Invoke(httpContext)
+		return
+	}
 
 	var apiResponse core.ApiResponse[any]
 	exception.Try(func() {

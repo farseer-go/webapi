@@ -132,3 +132,8 @@ func (httpContext *HttpContext) query() []reflect.Value {
 	// 多参数
 	return httpContext.Route.mapToParams(httpContext.Request.Query)
 }
+
+// IsActionResult 是否为ActionResult类型
+func (httpContext *HttpContext) IsActionResult() bool {
+	return httpContext.Route.ResponseBodyType.Count() == 1 && httpContext.Route.ResponseBodyType.First().String() == "action.IResult"
+}

@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/farseer-go/fs/exception"
+	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/webapi/context"
 )
 
@@ -13,10 +14,6 @@ type exceptionMiddleware struct {
 func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {
 	exception.Try(func() {
 		receiver.IMiddleware.Invoke(httpContext)
-		// 响应码
-		if httpContext.Response.StatusCode == 0 {
-			httpContext.Response.StatusCode = 200
-		}
 	}).CatchWebException(func(exp *exception.WebException) {
 		// 响应码
 		httpContext.Response.StatusCode = exp.StatusCode
@@ -29,5 +26,6 @@ func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {
 		httpContext.Response.BodyString = exp.(string)
 		httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
 		httpContext.Exception = exp
+		flog.Warningf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, httpContext.Response.BodyString)
 	})
 }
