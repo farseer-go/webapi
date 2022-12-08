@@ -5,10 +5,10 @@ import (
 	"reflect"
 )
 
-type MinimalMiddleware struct {
+type HandleMiddleware struct {
 }
 
-func (receiver MinimalMiddleware) Invoke(httpContext *context.HttpContext) {
+func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 入参
 	params := httpContext.GetRequestParam()
 	// 调用action

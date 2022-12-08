@@ -19,9 +19,9 @@ func handleRoute() {
 
 			// minimalApi
 			if route.ControllerName == "" && route.ActionName == "" {
-				middleware.SetNextMiddleware(last, minimal.MinimalMiddleware{})
+				middleware.SetNextMiddleware(last, minimal.HandleMiddleware{})
 			} else { // controller
-				middleware.SetNextMiddleware(last, controller.ControllerMiddleware{})
+				middleware.SetNextMiddleware(last, controller.HandleMiddleware{})
 			}
 
 			// 解析报文、组装httpContext

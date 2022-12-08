@@ -5,10 +5,10 @@ import (
 	"reflect"
 )
 
-type ControllerMiddleware struct {
+type HandleMiddleware struct {
 }
 
-func (receiver ControllerMiddleware) Invoke(httpContext *context.HttpContext) {
+func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 实例化控制器
 	controllerVal := reflect.New(httpContext.Route.Controller)
 	baseController := getBaseController(controllerVal)
