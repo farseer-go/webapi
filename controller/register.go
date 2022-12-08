@@ -30,7 +30,7 @@ func Register(area string, c IController) {
 
 		// 添加到路由表
 		context.LstRouteTable.Add(context.HttpRoute{
-			RouteUrl:            area + controllerName + "/" + actionName,
+			RouteUrl:            area + strings.ToLower(controllerName) + "/" + strings.ToLower(actionName),
 			Controller:          cRealType,
 			ControllerName:      controllerName,
 			Action:              methodType,
