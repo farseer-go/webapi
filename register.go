@@ -26,36 +26,63 @@ func RegisterController(c controller.IController) {
 	controller.Register(defaultApi.area, c)
 }
 
-// RegisterAction 注册单个Api
-func RegisterAction(method string, route string, actionFunc any, params ...string) {
+// registerAction 注册单个Api
+func registerAction(route Route) {
 	// 需要先依赖模块
 	modules.ThrowIfNotLoad(Module{})
 
-	route = strings.Trim(route, " ")
-	route = strings.TrimLeft(route, "/")
-	if route == "" {
+	route.Url = strings.Trim(route.Url, " ")
+	route.Url = strings.TrimLeft(route.Url, "/")
+	if route.Url == "" {
 		flog.Errorf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("route"))
 		os.Exit(1)
 	}
-	minimal.Register(defaultApi.area, method, route, actionFunc, params...)
+	minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...)
 }
 
 // RegisterPOST 注册单个Api
 func RegisterPOST(route string, actionFunc any, params ...string) {
-	RegisterAction("POST", route, actionFunc, params...)
+	registerAction(Route{
+		Url:    route,
+		Method: "POST",
+		Action: actionFunc,
+		Params: params,
+	})
 }
 
 // RegisterGET 注册单个Api
 func RegisterGET(route string, actionFunc any, params ...string) {
-	RegisterAction("GET", route, actionFunc, params...)
+	registerAction(Route{
+		Url:    route,
+		Method: "GET",
+		Action: actionFunc,
+		Params: params,
+	})
 }
 
 // RegisterPUT 注册单个Api
 func RegisterPUT(route string, actionFunc any, params ...string) {
-	RegisterAction("PUT", route, actionFunc, params...)
+	registerAction(Route{
+		Url:    route,
+		Method: "PUT",
+		Action: actionFunc,
+		Params: params,
+	})
 }
 
 // RegisterDELETE 注册单个Api
 func RegisterDELETE(route string, actionFunc any, params ...string) {
-	RegisterAction("DELETE", route, actionFunc, params...)
+	registerAction(Route{
+		Url:    route,
+		Method: "DELETE",
+		Action: actionFunc,
+		Params: params,
+	})
+}
+
+// RegisterRoutes 批量注册路由
+func RegisterRoutes(routes []Route) {
+	for i := 0; i < len(routes); i++ {
+		registerAction(routes[i])
+	}
 }
