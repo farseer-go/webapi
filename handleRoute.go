@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// 将路由表注册到http.HandleFunc
 func handleRoute() {
 	// 遍历路由注册表
 	for i := 0; i < context.LstRouteTable.Count(); i++ {

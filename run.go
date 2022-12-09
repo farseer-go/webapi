@@ -16,9 +16,10 @@ func Run(params ...string) {
 	// 初始化中间件
 	middleware.InitMiddleware()
 
-	// 处理路由
+	// 将路由表注册到http.HandleFunc
 	handleRoute()
 
+	// 设置监听地址
 	var addr string
 	if len(params) > 0 && params[0] != "" {
 		addr = params[0]
@@ -30,6 +31,8 @@ func Run(params ...string) {
 	if addr == "" {
 		addr = ":8888"
 	}
+
+	addr = strings.TrimSuffix(addr, "/")
 
 	if strings.HasPrefix(addr, ":") {
 		flog.Infof("Web服务已启动：http://localhost%s/", addr)
