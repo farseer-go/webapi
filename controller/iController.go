@@ -9,6 +9,6 @@ import (
 var lstControllerMethodName collections.List[string]
 
 type IController interface {
-	// init 初始化
-	init(r *http.Request)
+	init(r *http.Request)         // init 初始化
+	getAction() map[string]Action // 获取Action设置
 }

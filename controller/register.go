@@ -14,7 +14,9 @@ func Register(area string, c IController) {
 	cType := cVal.Type()
 	cRealType := reflect.Indirect(cVal).Type()
 	controllerName := strings.TrimSuffix(cRealType.Name(), "Controller")
+	actions := c.getAction()
 
+	// 遍历controller下的action函数
 	for i := 0; i < cType.NumMethod(); i++ {
 		methodType := cType.Method(i).Type
 		actionName := cType.Method(i).Name
@@ -28,6 +30,22 @@ func Register(area string, c IController) {
 		lstRequestParamType.RemoveAt(0)
 		lstResponseParamType := collections.NewList(types.GetOutParam(methodType)...)
 
+		// 设置Action默认参数
+		if _, exists := actions[actionName]; !exists {
+			actions[actionName] = Action{Method: "POST"}
+		}
+
+		// 多参数解析
+		var paramNames []string
+		if actions[actionName].Params != "" {
+			paramNames = strings.Split(actions[actionName].Params, ",")
+		}
+
+		if actions[actionName].Method == "" {
+			action := actions[actionName]
+			action.Method = "POST"
+		}
+
 		// 添加到路由表
 		context.LstRouteTable.Add(context.HttpRoute{
 			RouteUrl:            area + strings.ToLower(controllerName) + "/" + strings.ToLower(actionName),
@@ -39,6 +57,8 @@ func Register(area string, c IController) {
 			ResponseBodyType:    lstResponseParamType,
 			RequestParamIsModel: types.IsDtoModel(lstRequestParamType.ToArray()),
 			ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
+			Method:              strings.ToUpper(actions[actionName].Method),
+			ParamNames:          collections.NewList(paramNames...),
 		})
 	}
 }
