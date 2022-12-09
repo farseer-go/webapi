@@ -49,4 +49,5 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 
 	httpContext.Response.BodyBytes = apiResponse.ToBytes()
 	httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
+	httpContext.Response.StatusCode = 200
 }
