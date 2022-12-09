@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/parse"
+	"github.com/farseer-go/fs/types"
 	"github.com/farseer-go/webapi/context"
 )
 
@@ -27,12 +28,13 @@ func (receiver CallResult) ExecuteResult(httpContext *context.HttpContext) {
 	// 只有一个返回值
 	if len(httpContext.Response.Body) == 1 {
 		responseBody := httpContext.Response.Body[0].Interface()
-		if httpContext.Route.ResponseBodyIsModel { // dto
-			httpContext.Response.BodyBytes, _ = json.Marshal(responseBody)
-			httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
-		} else { // 基本类型直接转string
+		// 基本类型直接转string
+		if types.IsGoBasicType(httpContext.Route.ResponseBodyType.First()) {
 			httpContext.Response.BodyString = parse.Convert(responseBody, "")
 			httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
+		} else { // dto
+			httpContext.Response.BodyBytes, _ = json.Marshal(responseBody)
+			httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
 		}
 		httpContext.Response.StatusCode = 200
 		return
