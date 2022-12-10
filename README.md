@@ -31,15 +31,25 @@ func main() {
     webapi.Run()
 }
 
-func Hello1(req request.PageSizeRequest) string {
+// 使用结构（DTO）来接收入参
+// 返回string
+func Hello1(req pageSizeRequest) string {
     return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 }
 
-func Hello3(pageSize int, pageIndex int) request.PageSizeRequest {
-    return request.PageSizeRequest{
-            PageSize:  pageSize,
-            PageIndex: pageIndex,
-        }
+// 使用基础参数来接收入参
+// 返回pageSizeRequest结构（会自动转成json)
+func Hello3(pageSize int, pageIndex int) pageSizeRequest {
+    return pageSizeRequest{
+        PageSize:  pageSize,
+        PageIndex: pageIndex,
+    }
+}
+
+// 也可以定义一个结构，用于接收参数
+type pageSizeRequest struct {
+    PageSize  int
+    PageIndex int
 }
 ```
 
