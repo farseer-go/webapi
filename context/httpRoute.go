@@ -20,8 +20,9 @@ type HttpRoute struct {
 	ResponseBodyType    collections.List[reflect.Type] // 出参
 	Method              string
 	ParamNames          collections.List[string]
-	RequestParamIsModel bool // 是否为DTO结构
-	ResponseBodyIsModel bool // 是否为DTO结构
+	RequestParamIsModel bool   // 是否为DTO结构
+	ResponseBodyIsModel bool   // 是否为DTO结构
+	AutoBindHeaderName  string // 自动绑定header的字段名称
 }
 
 // 将map转成入参值

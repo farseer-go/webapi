@@ -41,28 +41,27 @@ func (receiver HandleMiddleware) initController(httpContext *context.HttpContext
 
 // 绑定header
 func (receiver HandleMiddleware) bindHeader(httpContext *context.HttpContext, controllerVal reflect.Value) {
-	controllerElem := controllerVal.Elem()
-	controllerType := controllerElem.Type()
-	for i := 0; i < controllerElem.NumField(); i++ {
-		// 找到需要绑定头部的标记
-		if controllerType.Field(i).Tag.Get("webapi") == "header" {
-			controllerHeaderVal := controllerElem.Field(i)
-			controllerHeaderType := controllerHeaderVal.Type()
-			// 遍历需要将header绑定的结构体
-			for headerIndex := 0; headerIndex < controllerHeaderVal.NumField(); headerIndex++ {
-				headerFieldVal := controllerHeaderVal.Field(headerIndex)
-				headerFieldType := headerFieldVal.Type()
-				headerName := controllerHeaderType.Field(headerIndex).Tag.Get("webapi")
-				if headerName == "" {
-					headerName = controllerHeaderType.Field(headerIndex).Name
-				}
-				headerVal := httpContext.Header.GetValue(headerName)
-				if headerVal == "" {
-					continue
-				}
-				headerValue := parse.ConvertValue(headerVal, headerFieldType)
-				headerFieldVal.Set(headerValue)
-			}
+	// 没有设置绑定字段，则不需要绑定
+	if httpContext.Route.AutoBindHeaderName == "" {
+		return
+	}
+
+	controllerHeaderVal := controllerVal.Elem().FieldByName(httpContext.Route.AutoBindHeaderName)
+	controllerHeaderType := controllerHeaderVal.Type()
+
+	// 遍历需要将header绑定的结构体
+	for headerIndex := 0; headerIndex < controllerHeaderVal.NumField(); headerIndex++ {
+		headerFieldVal := controllerHeaderVal.Field(headerIndex)
+		headerFieldType := headerFieldVal.Type()
+		headerName := controllerHeaderType.Field(headerIndex).Tag.Get("webapi")
+		if headerName == "" {
+			headerName = controllerHeaderType.Field(headerIndex).Name
 		}
+		headerVal := httpContext.Header.GetValue(headerName)
+		if headerVal == "" {
+			continue
+		}
+		headerValue := parse.ConvertValue(headerVal, headerFieldType)
+		headerFieldVal.Set(headerValue)
 	}
 }

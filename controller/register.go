@@ -16,6 +16,16 @@ func Register(area string, c IController) {
 	controllerName := strings.TrimSuffix(cRealType.Name(), "Controller")
 	actions := c.getAction()
 
+	// 查找是否需要自动绑定header
+	var autoBindHeaderName string
+	for i := 0; i < cRealType.NumField(); i++ {
+		// 找到需要绑定头部的标记
+		controllerFieldType := cRealType.Field(i)
+		if controllerFieldType.Tag.Get("webapi") == "header" {
+			autoBindHeaderName = controllerFieldType.Name
+		}
+	}
+
 	// 遍历controller下的action函数
 	for i := 0; i < cType.NumMethod(); i++ {
 		methodType := cType.Method(i).Type
@@ -59,6 +69,7 @@ func Register(area string, c IController) {
 			ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
 			Method:              strings.ToUpper(actions[actionName].Method),
 			ParamNames:          collections.NewList(paramNames...),
+			AutoBindHeaderName:  autoBindHeaderName,
 		})
 	}
 }
