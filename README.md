@@ -3,6 +3,10 @@
 
 > 模块：`webapi.Module`
 
+- [文档（国内）](https://farseer-go.gitee.io/)
+- [文档（国外）](https://farseer-go.github.io/doc/)
+- [开源（Github）](https://github.com/farseer-go/fs)
+
 ![](https://img.shields.io/github/stars/farseer-go?style=social)
 ![](https://img.shields.io/github/license/farseer-go/webapi)
 ![](https://img.shields.io/github/go-mod/go-version/farseer-go/webapi)
@@ -64,12 +68,6 @@ type pageSizeRequest struct {
     PageIndex int
 }
 ```
-发起请求：
-![img_3.png](images/img_3.png)
-
-收到请求：
-![img.png](images/img.png)
-
 函数中，`出入参都会自动绑定数据`
 
 > 如果是`application/json`，则会自动被反序列化成model，如果是`x-www-form-urlencoded`，则会将每一项的key/value匹配到model字段中
