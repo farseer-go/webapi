@@ -46,7 +46,8 @@ func findAutoBindHeaderName(controllerType reflect.Type) string {
 func registerAction(area string, actionMethod reflect.Method, actions map[string]Action, controllerName string, controllerType reflect.Type, autoBindHeaderName string, isImplActionFilter bool) {
 	methodType := actionMethod.Type
 	actionName := actionMethod.Name
-	if actionName == "Base" && methodType.NumIn() == 1 {
+	// 如果是ActionFilter过滤器，则跳过
+	if isImplActionFilter && (actionName == "OnActionExecuting" || actionName == "OnActionExecuted") {
 		return
 	}
 	// 如果是来自基类的方法、非导出类型，则跳过
