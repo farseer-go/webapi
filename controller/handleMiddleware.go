@@ -19,12 +19,22 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 自动绑定头部
 	receiver.bindHeader(httpContext, controllerVal)
 
+	// 是否要执行ActionFilter
+	if httpContext.Route.IsImplActionFilter {
+		controllerVal.MethodByName("OnActionExecuting").Call([]reflect.Value{})
+	}
+
 	// 入参
 	params := httpContext.GetRequestParam()
 
 	// 调用action
 	actionMethod := controllerVal.MethodByName(httpContext.Route.ActionName)
 	httpContext.Response.Body = actionMethod.Call(params)
+
+	// 是否要执行ActionFilter
+	if httpContext.Route.IsImplActionFilter {
+		controllerVal.MethodByName("OnActionExecuted").Call([]reflect.Value{})
+	}
 }
 
 // 找到 "controller.BaseController" 字段，并初始化赋值

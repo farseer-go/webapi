@@ -23,6 +23,7 @@ type HttpRoute struct {
 	RequestParamIsModel bool   // 是否为DTO结构
 	ResponseBodyIsModel bool   // 是否为DTO结构
 	AutoBindHeaderName  string // 自动绑定header的字段名称
+	IsImplActionFilter  bool   // 是否实现了IActionFilter
 }
 
 // 将map转成入参值
