@@ -3,6 +3,10 @@
 
 > 模块：`webapi.Module`
 
+- [文档（国内）](https://farseer-go.gitee.io/)
+- [文档（国外）](https://farseer-go.github.io/doc/)
+- [开源（Github）](https://github.com/farseer-go/fs)
+
 ![](https://img.shields.io/github/stars/farseer-go?style=social)
 ![](https://img.shields.io/github/license/farseer-go/webapi)
 ![](https://img.shields.io/github/go-mod/go-version/farseer-go/webapi)
@@ -25,16 +29,16 @@ webapi使用了中间件的管道模型编写，让我们加入非业务逻辑�
 
 ```go
 func main() {
-    fs.Initialize[webapi.Module]("FOPS")
-    webapi.RegisterPOST("/mini/hello1", Hello1)
-    webapi.RegisterPOST("/mini/hello3", Hello3, "pageSize", "pageIndex")
-    webapi.Run()
+	fs.Initialize[webapi.Module]("FOPS")
+	webapi.RegisterPOST("/mini/hello1", Hello1)
+	webapi.RegisterPOST("/mini/hello3", Hello3, "pageSize", "pageIndex")
+	webapi.Run()
 }
 
 // 使用结构（DTO）来接收入参
 // 返回string
 func Hello1(req pageSizeRequest) string {
-    return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
+	return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 }
 
 // 使用基础参数来接收入参
@@ -53,7 +57,7 @@ type pageSizeRequest struct {
 }
 ```
 
-在Hello1、Hello3两个函数中，`出入参都会自动绑定数据`
+函数中，`出入参都会自动绑定数据`
 
 > 如果是`application/json`，则会自动被反序列化成model，如果是`x-www-form-urlencoded`，则会将每一项的key/value匹配到model字段中
 
