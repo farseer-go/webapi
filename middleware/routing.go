@@ -11,7 +11,7 @@ type routing struct {
 
 func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 	// 检查method
-	if strings.ToUpper(httpContext.Route.Method) != httpContext.Method {
+	if httpContext.Method != "OPTIONS" && strings.ToUpper(httpContext.Route.Method) != httpContext.Method {
 		// 响应码
 		httpContext.Response.StatusCode = 405
 		return
