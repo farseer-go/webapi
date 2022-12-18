@@ -1,8 +1,8 @@
 package action
 
 import (
-	"github.com/farseer-go/utils/file"
 	"github.com/farseer-go/webapi/context"
+	"os"
 )
 
 // FileContentResult 返回文件内容
@@ -11,7 +11,8 @@ type FileContentResult struct {
 }
 
 func (receiver FileContentResult) ExecuteResult(httpContext *context.HttpContext) {
-	httpContext.Response.BodyString = file.ReadString(receiver.filePath)
+	file, _ := os.ReadFile(receiver.filePath)
+	httpContext.Response.BodyString = string(file)
 	httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
 	httpContext.Response.StatusCode = 200
 }

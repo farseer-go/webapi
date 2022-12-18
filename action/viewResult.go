@@ -2,8 +2,8 @@ package action
 
 import (
 	"github.com/farseer-go/collections"
-	"github.com/farseer-go/utils/file"
 	"github.com/farseer-go/webapi/context"
+	"os"
 	"strings"
 )
 
@@ -26,7 +26,8 @@ func (receiver ViewResult) ExecuteResult(httpContext *context.HttpContext) {
 		}
 	}
 
-	httpContext.Response.BodyString = file.ReadString(receiver.ViewName)
+	file, _ := os.ReadFile(receiver.ViewName)
+	httpContext.Response.BodyString = string(file)
 	httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
 	httpContext.Response.StatusCode = 200
 }
