@@ -88,8 +88,8 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 	return httpContext
 }
 
-// GetRequestParam 根据method映射入参
-func (httpContext *HttpContext) GetRequestParam() []reflect.Value {
+// BuildActionInValue 根据method映射入参
+func (httpContext *HttpContext) BuildActionInValue() []reflect.Value {
 	// 没有入参时，忽略request.body
 	if httpContext.Route.RequestParamType.Count() == 0 {
 		return []reflect.Value{}

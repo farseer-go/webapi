@@ -25,7 +25,7 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	}
 
 	// 入参
-	params := httpContext.GetRequestParam()
+	params := httpContext.BuildActionInValue()
 
 	// 调用action
 	actionMethod := controllerVal.MethodByName(httpContext.Route.ActionName)
