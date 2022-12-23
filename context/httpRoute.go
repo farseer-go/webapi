@@ -2,6 +2,7 @@ package context
 
 import (
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/parse"
 	"reflect"
 	"strings"
@@ -50,13 +51,27 @@ func (receiver *HttpRoute) mapToParams(mapVal map[string]any) []reflect.Value {
 	// 多参数
 	lstParams := make([]reflect.Value, receiver.RequestParamType.Count())
 	for i := 0; i < receiver.RequestParamType.Count(); i++ {
-		defVal := reflect.New(receiver.RequestParamType.Index(i)).Elem().Interface()
-		if receiver.ParamNames.Count() > i {
-			paramName := strings.ToLower(receiver.ParamNames.Index(i))
-			paramVal, _ := mapVal[paramName]
-			defVal = parse.Convert(paramVal, defVal)
+		fieldType := receiver.RequestParamType.Index(i)
+		var val any
+		// interface类型，则通过注入的方式
+		if fieldType.Kind() == reflect.Interface {
+			val = container.ResolveType(fieldType)
+		} else {
+			val = reflect.New(fieldType).Elem().Interface()
+			if receiver.ParamNames.Count() > i {
+				paramName := strings.ToLower(receiver.ParamNames.Index(i))
+				paramVal, _ := mapVal[paramName]
+				val = parse.Convert(paramVal, val)
+
+				// 当实际只有一个接收参数时，不需要指定参数
+			} else if receiver.ParamNames.Count() == 0 && len(mapVal) == 1 {
+				for _, paramVal := range mapVal {
+					val = parse.Convert(paramVal, val)
+				}
+			}
 		}
-		lstParams[i] = reflect.ValueOf(defVal)
+
+		lstParams[i] = reflect.ValueOf(val)
 	}
 	return lstParams
 }
