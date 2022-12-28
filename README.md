@@ -16,7 +16,7 @@
 ![](https://img.shields.io/github/license/farseer-go/webapi)
 ![](https://img.shields.io/github/go-mod/go-version/farseer-go/webapi)
 ![](https://img.shields.io/github/v/release/farseer-go/webapi)
-![Codecov](https://img.shields.io/codecov/c/github/farseer-go/webapi)
+[![codecov](https://img.shields.io/codecov/c/github/farseer-go/webapi)](https://codecov.io/gh/farseer-go/webapi)
 ![](https://img.shields.io/github/languages/code-size/farseer-go/webapi)
 ![](https://img.shields.io/github/directory-file-count/farseer-go/webapi)
 ![](https://goreportcard.com/badge/github.com/farseer-go/webapi)
