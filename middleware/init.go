@@ -6,11 +6,15 @@ import (
 )
 
 func Init() {
-	MiddlewareList = collections.NewList[IMiddleware](&http{}, &exceptionMiddleware{}, &routing{})
+	MiddlewareList = collections.NewList[IMiddleware]()
 }
 
 // InitMiddleware 初始化管道
 func InitMiddleware() {
+	MiddlewareList.Insert(0, &routing{})
+	MiddlewareList.Insert(0, &exceptionMiddleware{})
+	MiddlewareList.Insert(0, &http{})
+
 	for middlewareIndex := 0; middlewareIndex < MiddlewareList.Count(); middlewareIndex++ {
 		// 最后一个中间件不需要再设置
 		if middlewareIndex+1 == MiddlewareList.Count() {
@@ -34,4 +38,9 @@ func SetNextMiddleware(curMiddleware, nextMiddleware IMiddleware) {
 			break
 		}
 	}
+}
+
+// AddMiddleware 添加中间件
+func AddMiddleware(m IMiddleware) {
+	MiddlewareList.Add(m)
 }

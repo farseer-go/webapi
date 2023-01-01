@@ -9,11 +9,11 @@ import (
 )
 
 // 将路由表注册到http.HandleFunc
-func handleRoute() {
+func handleRoute(mux *http.ServeMux) {
 	// 遍历路由注册表
 	for i := 0; i < context.LstRouteTable.Count(); i++ {
 		route := context.LstRouteTable.Index(i)
-		http.HandleFunc(route.RouteUrl, func(w http.ResponseWriter, r *http.Request) {
+		mux.HandleFunc(route.RouteUrl, func(w http.ResponseWriter, r *http.Request) {
 			// 组装最后一个API中间件
 			lst := middleware.MiddlewareList.ToArray()
 			last := lst[middleware.MiddlewareList.Count()-1]

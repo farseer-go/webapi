@@ -16,8 +16,10 @@ func Run(params ...string) {
 	// 初始化中间件
 	middleware.InitMiddleware()
 
+	mux := http.NewServeMux()
+
 	// 将路由表注册到http.HandleFunc
-	handleRoute()
+	handleRoute(mux)
 
 	// 设置监听地址
 	var addr string
@@ -26,10 +28,9 @@ func Run(params ...string) {
 	}
 	if addr == "" {
 		addr = configure.GetString("WebApi.Url")
-	}
-
-	if addr == "" {
-		addr = ":8888"
+		if addr == "" {
+			addr = ":8888"
+		}
 	}
 
 	addr = strings.TrimSuffix(addr, "/")
@@ -37,7 +38,7 @@ func Run(params ...string) {
 	if strings.HasPrefix(addr, ":") {
 		flog.Infof("Web服务已启动：http://localhost%s/", addr)
 	}
-	flog.Info(http.ListenAndServe(addr, nil))
+	flog.Info(http.ListenAndServe(addr, mux))
 }
 
 // Area 设置区域

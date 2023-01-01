@@ -21,7 +21,6 @@ func (module Module) PreInitialize() {
 
 	controller.Init()
 	minimal.Init()
-
 	middleware.Init()
 }
 

@@ -13,8 +13,7 @@ import (
 func RegisterMiddleware(m middleware.IMiddleware) {
 	// 需要先依赖模块
 	modules.ThrowIfNotLoad(Module{})
-
-	middleware.MiddlewareList.Add(m)
+	middleware.AddMiddleware(m)
 }
 
 // RegisterController 自动注册控制器下的所有Action方法
