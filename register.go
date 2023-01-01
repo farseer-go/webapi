@@ -7,7 +7,6 @@ import (
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
-	"os"
 	"strings"
 )
 
@@ -34,8 +33,7 @@ func registerAction(route Route) {
 	route.Url = strings.Trim(route.Url, " ")
 	route.Url = strings.TrimLeft(route.Url, "/")
 	if route.Url == "" {
-		flog.Errorf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("route"))
-		os.Exit(1)
+		panic(flog.Errorf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("route")))
 	}
 	minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...)
 }
