@@ -1,10 +1,15 @@
 package test
 
 import (
-	"fmt"
+	"bytes"
+	"encoding/json"
 	"github.com/farseer-go/fs"
+	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/controller"
+	"github.com/stretchr/testify/assert"
+	"io"
+	"net/http"
 	"testing"
 	"time"
 )
@@ -26,62 +31,26 @@ func TestRun(t *testing.T) {
 
 		// 注册单个Api
 		webapi.RegisterPOST("/mini/hello1", Hello1)
-		webapi.RegisterPOST("/mini/hello2", Hello2)
-		webapi.RegisterPOST("/mini/hello3", Hello3, "pageSize", "pageIndex")
-		webapi.RegisterPOST("/mini/hello4", Hello4, "pageSize", "pageIndex")
+		webapi.RegisterGET("/mini/hello2", Hello2)
+		webapi.RegisterPUT("/mini/hello3", Hello3, "pageSize", "pageIndex")
+		webapi.RegisterDELETE("/mini/hello4", Hello4, "pageSize", "pageIndex")
 	})
 
 	webapi.UseApiResponse()
-	go webapi.Run()
-	time.Sleep(1 * time.Second)
-}
+	go webapi.Run(":8888")
+	time.Sleep(100 * time.Millisecond)
 
-type pageSizeRequest struct {
-	PageSize  int
-	PageIndex int
-}
+	t.Run("hello1", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		request := bytes.NewReader(marshal)
+		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/mini/hello1", "application/json", request)
+		assert.Equal(t, 200, rsp.StatusCode)
+		defer rsp.Body.Close()
+		rspByte, _ := io.ReadAll(rsp.Body)
 
-func Hello1(req pageSizeRequest) string {
-	return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
-}
-
-func Hello2(req pageSizeRequest) any {
-	return pageSizeRequest{
-		PageSize:  req.PageSize,
-		PageIndex: req.PageIndex,
-	}
-}
-
-func Hello3(pageSize int, pageIndex int) pageSizeRequest {
-	return pageSizeRequest{
-		PageSize:  pageSize,
-		PageIndex: pageIndex,
-	}
-}
-
-func Hello4(pageSize int, pageIndex int) (int, int) {
-	return pageSize, pageIndex
-}
-
-type TestController struct {
-	controller.BaseController
-}
-
-func (r *TestController) Base() {
-
-}
-
-func (r *TestController) Hello1(req pageSizeRequest) string {
-	return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
-}
-
-func (r *TestController) Hello2(pageSize int, pageIndex int) pageSizeRequest {
-	return pageSizeRequest{
-		PageSize:  pageSize,
-		PageIndex: pageIndex,
-	}
-}
-
-func (r *TestController) Hello3() (TValue string) {
-	return r.HttpContext.Header.GetValue("Content-Type")
+		var apiResponse core.ApiResponseString
+		_ = json.Unmarshal(rspByte, &apiResponse)
+		assert.Equal(t, Hello1(sizeRequest), apiResponse.Data)
+	})
 }
