@@ -8,7 +8,6 @@ import (
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/stretchr/testify/assert"
-	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -18,7 +17,6 @@ func TestRun(t *testing.T) {
 	fs.Initialize[webapi.Module]("demo")
 
 	webapi.Area("/api/1.0/", func() {
-
 		// 自动注册控制器下的所有Action方法
 		webapi.RegisterController(&TestController{
 			BaseController: controller.BaseController{
@@ -36,21 +34,36 @@ func TestRun(t *testing.T) {
 		webapi.RegisterDELETE("/mini/hello4", Hello4, "pageSize", "pageIndex")
 	})
 
+	webapi.UseCors()
+	webapi.UseWebApi()
+	webapi.UseStaticFiles()
 	webapi.UseApiResponse()
+	webapi.RegisterRoutes([]webapi.Route{
+		{
+			Url:    "/mini/hello2",
+			Method: "GET",
+			Action: Hello2,
+		},
+	})
 	go webapi.Run(":8888")
 	time.Sleep(100 * time.Millisecond)
 
-	t.Run("hello1", func(t *testing.T) {
+	t.Run("api/1.0/mini/hello1", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
 		marshal, _ := json.Marshal(sizeRequest)
-		request := bytes.NewReader(marshal)
-		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/mini/hello1", "application/json", request)
-		assert.Equal(t, 200, rsp.StatusCode)
-		defer rsp.Body.Close()
-		rspByte, _ := io.ReadAll(rsp.Body)
-
-		var apiResponse core.ApiResponseString
-		_ = json.Unmarshal(rspByte, &apiResponse)
+		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/mini/hello1", "application/json", bytes.NewReader(marshal))
+		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
+		_ = rsp.Body.Close()
 		assert.Equal(t, Hello1(sizeRequest), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("mini/hello2", func(t *testing.T) {
+		rsp, _ := http.Get("http://127.0.0.1:8888/mini/hello2")
+		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
+		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
+		assert.Equal(t, 200, rsp.StatusCode)
 	})
 }
