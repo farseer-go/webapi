@@ -9,6 +9,8 @@ import (
 	"github.com/farseer-go/webapi/controller"
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"net/url"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -47,6 +49,39 @@ func TestRun(t *testing.T) {
 	})
 	go webapi.Run(":8888")
 	time.Sleep(100 * time.Millisecond)
+
+	testController := TestController{}
+	t.Run("api/1.0/test/hello1", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/test/hello1", "application/json", bytes.NewReader(marshal))
+		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, testController.Hello1(sizeRequest), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("api/1.0/test/hello2-application/json", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/test/hello2", "application/json", bytes.NewReader(marshal))
+		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, testController.Hello2(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("api/1.0/test/hello2-application/json", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		val := make(url.Values)
+		val.Add("pageSize", strconv.Itoa(sizeRequest.PageSize))
+		val.Add("pageIndex", strconv.Itoa(sizeRequest.PageIndex))
+		rsp, _ := http.PostForm("http://127.0.0.1:8888/api/1.0/test/hello2", val)
+		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, testController.Hello2(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
 
 	t.Run("api/1.0/mini/hello1", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
