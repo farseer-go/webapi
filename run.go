@@ -21,7 +21,7 @@ func Run(params ...string) {
 
 	// 设置监听地址
 	var addr string
-	if len(params) > 0 && params[0] != "" {
+	if len(params) > 0 {
 		addr = params[0]
 	}
 	if addr == "" {
