@@ -18,7 +18,7 @@ import (
 func TestRun(t *testing.T) {
 	fs.Initialize[webapi.Module]("demo")
 
-	webapi.Area("/api/1.0/", func() {
+	webapi.Area("api/1.0", func() {
 		// 自动注册控制器下的所有Action方法
 		webapi.RegisterController(&TestController{
 			BaseController: controller.BaseController{
@@ -35,19 +35,16 @@ func TestRun(t *testing.T) {
 		webapi.RegisterPUT("/mini/hello3", Hello3, "pageSize", "pageIndex")
 		webapi.RegisterDELETE("/mini/hello4", Hello4, "pageSize", "pageIndex")
 	})
+	webapi.RegisterRoutes([]webapi.Route{{Url: "/mini/hello2", Method: "GET", Action: Hello2}})
 
 	webapi.UseCors()
 	webapi.UseWebApi()
 	webapi.UseStaticFiles()
 	webapi.UseApiResponse()
-	webapi.RegisterRoutes([]webapi.Route{
-		{
-			Url:    "/mini/hello2",
-			Method: "GET",
-			Action: Hello2,
-		},
-	})
-	go webapi.Run(":8888")
+
+	testPanic(t)
+
+	go webapi.Run("")
 	time.Sleep(100 * time.Millisecond)
 
 	testController := TestController{}
@@ -100,5 +97,13 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
 		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
+	})
+}
+
+func testPanic(t *testing.T) bool {
+	return t.Run("TestPanic", func(t *testing.T) {
+		assert.Panics(t, func() {
+			webapi.RegisterPOST("/", func() {})
+		})
 	})
 }
