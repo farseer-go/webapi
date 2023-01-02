@@ -17,7 +17,7 @@ type HttpRequest struct {
 
 func (r *HttpRequest) JsonToMap() map[string]any {
 	mapVal := make(map[string]any)
-	json.Unmarshal(r.BodyBytes, &mapVal)
+	_ = json.Unmarshal(r.BodyBytes, &mapVal)
 	// 将Key转小写
 	for k, v := range mapVal {
 		kLower := strings.ToLower(k)

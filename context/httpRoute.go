@@ -25,10 +25,12 @@ type HttpRoute struct {
 	ResponseBodyIsModel bool   // 是否为DTO结构
 	AutoBindHeaderName  string // 自动绑定header的字段名称
 	IsImplActionFilter  bool   // 是否实现了IActionFilter
+	HttpMiddleware      IMiddleware
+	HandleMiddleware    IMiddleware
 }
 
-// 将map转成入参值
-func (receiver *HttpRoute) mapToParams(mapVal map[string]any) []reflect.Value {
+// MapToParams 将map转成入参值
+func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
 	// dto模式
 	if receiver.RequestParamIsModel {
 		param := receiver.RequestParamType.First()
@@ -60,7 +62,7 @@ func (receiver *HttpRoute) mapToParams(mapVal map[string]any) []reflect.Value {
 			val = reflect.New(fieldType).Elem().Interface()
 			if receiver.ParamNames.Count() > i {
 				paramName := strings.ToLower(receiver.ParamNames.Index(i))
-				paramVal, _ := mapVal[paramName]
+				paramVal := mapVal[paramName]
 				val = parse.Convert(paramVal, val)
 
 				// 当实际只有一个接收参数时，不需要指定参数

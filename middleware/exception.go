@@ -9,7 +9,7 @@ import (
 
 // exception 异常中间件（默认加载）
 type exceptionMiddleware struct {
-	IMiddleware
+	context.IMiddleware
 }
 
 func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {

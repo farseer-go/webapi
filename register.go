@@ -4,13 +4,14 @@ import (
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/modules"
+	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
 	"strings"
 )
 
-func RegisterMiddleware(m middleware.IMiddleware) {
+func RegisterMiddleware(m context.IMiddleware) {
 	// 需要先依赖模块
 	modules.ThrowIfNotLoad(Module{})
 	middleware.AddMiddleware(m)
@@ -32,7 +33,7 @@ func registerAction(route Route) {
 	route.Url = strings.Trim(route.Url, " ")
 	route.Url = strings.TrimLeft(route.Url, "/")
 	if route.Url == "" {
-		panic(flog.Errorf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("route")))
+		panic(flog.Errorf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing")))
 	}
 	minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...)
 }

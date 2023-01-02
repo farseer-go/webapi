@@ -3,7 +3,7 @@ package middleware
 import "github.com/farseer-go/webapi/context"
 
 type UrlRewriting struct {
-	IMiddleware
+	context.IMiddleware
 }
 
 func (receiver *UrlRewriting) Invoke(httpContext *context.HttpContext) {

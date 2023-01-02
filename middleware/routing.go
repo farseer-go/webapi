@@ -6,7 +6,7 @@ import (
 )
 
 type routing struct {
-	IMiddleware
+	context.IMiddleware
 }
 
 func (receiver *routing) Invoke(httpContext *context.HttpContext) {

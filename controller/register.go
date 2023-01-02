@@ -4,6 +4,7 @@ import (
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/types"
 	"github.com/farseer-go/webapi/context"
+	"github.com/farseer-go/webapi/middleware"
 	"reflect"
 	"strings"
 )
@@ -91,5 +92,7 @@ func registerAction(area string, actionMethod reflect.Method, actions map[string
 		ParamNames:          collections.NewList(paramNames...),
 		AutoBindHeaderName:  autoBindHeaderName,
 		IsImplActionFilter:  isImplActionFilter,
+		HttpMiddleware:      &middleware.Http{},
+		HandleMiddleware:    &HandleMiddleware{},
 	})
 }

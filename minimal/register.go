@@ -6,7 +6,7 @@ import (
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/types"
 	"github.com/farseer-go/webapi/context"
-	"os"
+	"github.com/farseer-go/webapi/middleware"
 	"reflect"
 )
 
@@ -17,8 +17,7 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 
 	// 如果设置了方法的入参（多参数），则需要全部设置
 	if len(paramNames) > 0 && len(paramNames) != len(param) {
-		flog.Errorf("注册minimalApi失败：%s函数入参个数设置与%s不匹配", flog.Colors[eumLogLevel.Error](actionType.String()), flog.Colors[eumLogLevel.Error](paramNames))
-		os.Exit(1)
+		panic(flog.Errorf("注册minimalApi失败：%s函数入参个数设置与%s不匹配", flog.Colors[eumLogLevel.Error](actionType.String()), flog.Colors[eumLogLevel.Error](paramNames)))
 	}
 
 	lstRequestParamType := collections.NewList(param...)
@@ -34,5 +33,7 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 		ParamNames:          collections.NewList(paramNames...),
 		RequestParamIsModel: types.IsDtoModel(lstRequestParamType.ToArray()),
 		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
+		HttpMiddleware:      &middleware.Http{},
+		HandleMiddleware:    &HandleMiddleware{},
 	})
 }

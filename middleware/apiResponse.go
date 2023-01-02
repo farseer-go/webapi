@@ -8,7 +8,7 @@ import (
 )
 
 type ApiResponse struct {
-	IMiddleware
+	context.IMiddleware
 }
 
 func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {

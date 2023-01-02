@@ -118,19 +118,19 @@ func (httpContext *HttpContext) contentTypeJson() []reflect.Value {
 
 	// 多参数
 	mapVal := httpContext.Request.JsonToMap()
-	return httpContext.Route.mapToParams(mapVal)
+	return httpContext.Route.MapToParams(mapVal)
 }
 
 // application/x-www-form-urlencoded
 func (httpContext *HttpContext) formUrlencoded() []reflect.Value {
 	// 多参数
-	return httpContext.Route.mapToParams(httpContext.Request.Form)
+	return httpContext.Route.MapToParams(httpContext.Request.Form)
 }
 
 // query
 func (httpContext *HttpContext) query() []reflect.Value {
 	// 多参数
-	return httpContext.Route.mapToParams(httpContext.Request.Query)
+	return httpContext.Route.MapToParams(httpContext.Request.Query)
 }
 
 // IsActionResult 是否为ActionResult类型
