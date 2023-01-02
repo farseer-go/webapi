@@ -1,6 +1,9 @@
 package test
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/farseer-go/fs/exception"
+)
 
 type pageSizeRequest struct {
 	PageSize  int
@@ -24,4 +27,12 @@ func Hello3(pageSize int, pageIndex int) pageSizeRequest {
 
 func Hello4(pageSize int, pageIndex int) (int, int) {
 	return pageSize, pageIndex
+}
+
+func Hello5() {
+	exception.ThrowWebException(501, "s501")
+}
+
+func Hello6() {
+	exception.ThrowException("s500")
 }

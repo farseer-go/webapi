@@ -9,6 +9,7 @@ import (
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/stretchr/testify/assert"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -39,7 +40,11 @@ func TestRun(t *testing.T) {
 		webapi.RegisterDELETE("/mini/hello4", Hello4, "pageSize", "pageIndex")
 	})
 	webapi.RegisterRoutes([]webapi.Route{{Url: "/mini/hello2", Method: "GET", Action: Hello2}})
-
+	webapi.RegisterPOST("/mini/hello5", Hello5)
+	webapi.RegisterPOST("/mini/hello6", Hello6)
+	assert.Panics(t, func() {
+		webapi.RegisterRoutes([]webapi.Route{{Url: "/mini/hello3", Method: "GET", Action: Hello2, Params: []string{"aaa"}}})
+	})
 	webapi.UseCors()
 	webapi.UseWebApi()
 	webapi.UseStaticFiles()
@@ -48,6 +53,10 @@ func TestRun(t *testing.T) {
 	testPanic(t)
 
 	go webapi.Run("")
+	time.Sleep(10 * time.Millisecond)
+	webapi.RegisterPOST("/mini/hello5", Hello5)
+	webapi.RegisterPOST("/mini/hello6", Hello6)
+	go webapi.Run(":8889")
 	time.Sleep(100 * time.Millisecond)
 
 	testController := TestController{}
@@ -154,6 +163,42 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
 		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("mini/hello5", func(t *testing.T) {
+		rsp, _ := http.Post("http://127.0.0.1:8888/mini/hello5", "application/json", nil)
+		apiResponse := core.NewApiResponseByReader[any](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, 501, apiResponse.StatusCode)
+		assert.Equal(t, "s501", apiResponse.StatusMessage)
+		assert.Equal(t, false, apiResponse.Status)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("mini/hello6", func(t *testing.T) {
+		rsp, _ := http.Post("http://127.0.0.1:8888/mini/hello6", "application/json", nil)
+		apiResponse := core.NewApiResponseByReader[any](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, 500, apiResponse.StatusCode)
+		assert.Equal(t, "s500", apiResponse.StatusMessage)
+		assert.Equal(t, false, apiResponse.Status)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("mini/hello5:8889", func(t *testing.T) {
+		rsp, _ := http.Post("http://127.0.0.1:8889/mini/hello5", "application/json", nil)
+		body, _ := io.ReadAll(rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, "s501", string(body))
+		assert.Equal(t, 501, rsp.StatusCode)
+	})
+
+	t.Run("mini/hello6:8889", func(t *testing.T) {
+		rsp, _ := http.Post("http://127.0.0.1:8889/mini/hello6", "application/json", nil)
+		body, _ := io.ReadAll(rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, "s500", string(body))
+		assert.Equal(t, 500, rsp.StatusCode)
 	})
 }
 
