@@ -29,6 +29,9 @@ func InitMiddleware() {
 			SetNextMiddleware(curMiddleware, nextMiddleware)
 		}
 	}
+
+	// 清空之前预加载的用户中间件，实现多开实例
+	MiddlewareList.Clear()
 }
 
 // 组装管道

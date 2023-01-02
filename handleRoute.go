@@ -18,4 +18,7 @@ func handleRoute(mux *http.ServeMux) {
 			route.HttpMiddleware.Invoke(&httpContext)
 		})
 	}
+
+	// 清空之前预加载的路由，实现多开实例
+	context.LstRouteTable.Clear()
 }
