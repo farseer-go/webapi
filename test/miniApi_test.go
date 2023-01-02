@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/farseer-go/fs/exception"
+	"github.com/farseer-go/webapi/action"
 )
 
 type pageSizeRequest struct {
@@ -35,4 +36,23 @@ func Hello5() {
 
 func Hello6() {
 	exception.ThrowException("s500")
+}
+
+func Hello7(actionType int) action.IResult {
+	switch actionType {
+	case 0:
+		return action.Redirect("/api/1.0/mini/hello2")
+	case 1:
+		return action.View("")
+	case 2:
+		return action.View("mini/hello7")
+	case 3:
+		return action.View("mini/hello7.txt")
+	case 4:
+		return action.Content("ccc")
+	case 5:
+		return action.FileContent("./views/mini/hello7.log")
+	}
+
+	return action.Content("eee")
 }
