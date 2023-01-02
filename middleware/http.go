@@ -24,6 +24,10 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 			action.NewCallResult().ExecuteResult(httpContext)
 		}
 	}
+	
+	if httpContext.Response.StatusCode == 0 {
+		httpContext.Response.StatusCode = 200
+	}
 
 	// 输出返回值
 	httpContext.Response.WriteCode(httpContext.Response.StatusCode)

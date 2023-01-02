@@ -56,3 +56,6 @@ func Hello7(actionType int) action.IResult {
 
 	return action.Content("eee")
 }
+
+func Hello8() {
+}
