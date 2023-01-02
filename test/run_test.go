@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/farseer-go/fs"
+	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/controller"
@@ -11,13 +12,14 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 )
 
 func TestRun(t *testing.T) {
 	fs.Initialize[webapi.Module]("demo")
-
+	configure.SetDefault("Log.Component.webapi", true)
 	webapi.Area("api/1.0", func() {
 		// 自动注册控制器下的所有Action方法
 		webapi.RegisterController(&TestController{
@@ -25,6 +27,7 @@ func TestRun(t *testing.T) {
 				Action: map[string]controller.Action{
 					"Hello1": {Method: "POST"},
 					"Hello2": {Method: "POST", Params: "pageSize,pageIndex"},
+					"Hello3": {Method: "GET"},
 				},
 			},
 		})
@@ -68,15 +71,22 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 	})
 
-	t.Run("api/1.0/test/hello2-application/json", func(t *testing.T) {
-		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+	t.Run("api/1.0/test/hello2-form", func(t *testing.T) {
 		val := make(url.Values)
-		val.Add("pageSize", strconv.Itoa(sizeRequest.PageSize))
-		val.Add("pageIndex", strconv.Itoa(sizeRequest.PageIndex))
+		val.Add("pageSize", strconv.Itoa(10))
+		val.Add("pageIndex", strconv.Itoa(2))
 		rsp, _ := http.PostForm("http://127.0.0.1:8888/api/1.0/test/hello2", val)
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, testController.Hello2(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
+		assert.Equal(t, testController.Hello2(10, 2), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("api/1.0/test/hello3", func(t *testing.T) {
+		rsp, _ := http.Get("http://127.0.0.1:8888/api/1.0/test/hello3")
+		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, "", apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 	})
 
@@ -87,6 +97,53 @@ func TestRun(t *testing.T) {
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, Hello1(sizeRequest), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("api/1.0/mini/hello2", func(t *testing.T) {
+		rsp, _ := http.Get("http://127.0.0.1:8888/api/1.0/mini/hello2")
+		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
+		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("api/1.0/mini/hello3-application/json", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		req, _ := http.NewRequest("PUT", "http://127.0.0.1:8888/api/1.0/mini/hello3", bytes.NewReader(marshal))
+		req.Header.Set("Content-Type", "application/json")
+		rsp, _ := http.DefaultClient.Do(req)
+		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, Hello3(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("api/1.0/mini/hello3-form", func(t *testing.T) {
+		val := make(url.Values)
+		val.Add("pageSize", strconv.Itoa(10))
+		val.Add("pageIndex", strconv.Itoa(2))
+
+		req, _ := http.NewRequest("PUT", "http://127.0.0.1:8888/api/1.0/mini/hello3", strings.NewReader(val.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		rsp, _ := http.DefaultClient.Do(req)
+		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, Hello3(10, 2), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("api/1.0/mini/hello4", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		req, _ := http.NewRequest("DELETE", "http://127.0.0.1:8888/api/1.0/mini/hello4", bytes.NewReader(marshal))
+		req.Header.Set("Content-Type", "application/json")
+		rsp, _ := http.DefaultClient.Do(req)
+		apiResponse := core.NewApiResponseByReader[[]int](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, []int{10, 2}, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 	})
 
