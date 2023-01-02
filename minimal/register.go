@@ -11,7 +11,7 @@ import (
 )
 
 // Register 注册单个Api
-func Register(area string, method string, route string, actionFunc any, paramNames ...string) {
+func Register(area string, method string, route string, actionFunc any, paramNames ...string) context.HttpRoute {
 	actionType := reflect.TypeOf(actionFunc)
 	param := types.GetInParam(actionType)
 
@@ -24,7 +24,7 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 	lstResponseParamType := collections.NewList(types.GetOutParam(actionType)...)
 
 	// 添加到路由表
-	context.LstRouteTable.Add(context.HttpRoute{
+	return context.HttpRoute{
 		RouteUrl:            area + route,
 		Action:              actionFunc,
 		Method:              method,
@@ -35,5 +35,5 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
 		HttpMiddleware:      &middleware.Http{},
 		HandleMiddleware:    &HandleMiddleware{},
-	})
+	}
 }

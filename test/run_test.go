@@ -39,11 +39,11 @@ func TestRun(t *testing.T) {
 		webapi.RegisterPUT("/mini/hello3", Hello3, "pageSize", "pageIndex")
 		webapi.RegisterDELETE("/mini/hello4", Hello4, "pageSize", "pageIndex")
 	})
-	webapi.RegisterRoutes([]webapi.Route{{Url: "/mini/hello2", Method: "GET", Action: Hello2}})
+	webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello2", Method: "GET", Action: Hello2})
 	webapi.RegisterPOST("/mini/hello5", Hello5)
 	webapi.RegisterPOST("/mini/hello6", Hello6)
 	assert.Panics(t, func() {
-		webapi.RegisterRoutes([]webapi.Route{{Url: "/mini/hello3", Method: "GET", Action: Hello2, Params: []string{"aaa"}}})
+		webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello3", Method: "GET", Action: Hello2, Params: []string{"aaa"}})
 	})
 	webapi.UseCors()
 	webapi.UseWebApi()
@@ -54,9 +54,10 @@ func TestRun(t *testing.T) {
 
 	go webapi.Run("")
 	time.Sleep(10 * time.Millisecond)
-	webapi.RegisterPOST("/mini/hello5", Hello5)
-	webapi.RegisterPOST("/mini/hello6", Hello6)
-	go webapi.Run(":8889")
+	server := webapi.NewApplicationBuilder()
+	server.RegisterPOST("/mini/hello5", Hello5)
+	server.RegisterPOST("/mini/hello6", Hello6)
+	go server.Run(":8889")
 	time.Sleep(100 * time.Millisecond)
 
 	testController := TestController{}

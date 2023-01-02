@@ -1,57 +1,79 @@
 package webapi
 
 import (
-	"github.com/farseer-go/fs/configure"
-	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/modules"
-	"github.com/farseer-go/webapi/middleware"
-	"net/http"
-	"strings"
+	"github.com/farseer-go/webapi/context"
+	"github.com/farseer-go/webapi/controller"
 )
 
-func Run(params ...string) {
+func RegisterMiddleware(m context.IMiddleware) {
 	// 需要先依赖模块
 	modules.ThrowIfNotLoad(Module{})
+	defaultApi.RegisterMiddleware(m)
+}
 
-	// 初始化中间件
-	middleware.InitMiddleware()
+// RegisterController 自动注册控制器下的所有Action方法
+func RegisterController(c controller.IController) {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+	defaultApi.RegisterController(c)
+}
 
-	mux := http.NewServeMux()
+// RegisterPOST 注册单个Api
+func RegisterPOST(route string, actionFunc any, params ...string) {
+	defaultApi.RegisterPOST(route, actionFunc, params...)
+}
 
-	// 将路由表注册到http.HandleFunc
-	handleRoute(mux)
+// RegisterGET 注册单个Api
+func RegisterGET(route string, actionFunc any, params ...string) {
+	defaultApi.RegisterGET(route, actionFunc, params...)
+}
 
-	// 设置监听地址
-	var addr string
-	if len(params) > 0 {
-		addr = params[0]
-	}
-	if addr == "" {
-		addr = configure.GetString("WebApi.Url")
-		if addr == "" {
-			addr = ":8888"
-		}
-	}
+// RegisterPUT 注册单个Api
+func RegisterPUT(route string, actionFunc any, params ...string) {
+	defaultApi.RegisterPUT(route, actionFunc, params...)
+}
 
-	addr = strings.TrimSuffix(addr, "/")
+// RegisterDELETE 注册单个Api
+func RegisterDELETE(route string, actionFunc any, params ...string) {
+	defaultApi.RegisterDELETE(route, actionFunc, params...)
+}
 
-	if strings.HasPrefix(addr, ":") {
-		flog.Infof("Web服务已启动：http://localhost%s/", addr)
-	}
-	flog.Info(http.ListenAndServe(addr, mux))
+// RegisterRoutes 批量注册路由
+func RegisterRoutes(routes ...Route) {
+	defaultApi.RegisterRoutes(routes...)
 }
 
 // Area 设置区域
 func Area(area string, f func()) {
-	if !strings.HasPrefix(area, "/") {
-		area = "/" + area
-	}
-	if !strings.HasSuffix(area, "/") {
-		area += "/"
-	}
-	defaultApi.area = area
-	// 执行注册
-	f()
-	// 执行完后，恢复区域为"/"
-	defaultApi.area = "/"
+	defaultApi.Area(area, f)
+}
+
+// UseCors 使用CORS中间件
+func UseCors() {
+	defaultApi.UseCors()
+}
+
+// UseStaticFiles 支持静态目录，在根目录./wwwroot中的文件，直接以静态文件提供服务
+func UseStaticFiles() {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+
+	defaultApi.UseStaticFiles()
+}
+
+func UseWebApi() {
+	defaultApi.UseWebApi()
+}
+
+// UseApiResponse 支持ApiResponse结构
+func UseApiResponse() {
+	defaultApi.UseApiResponse()
+}
+
+// Run 运行Web服务
+func Run(params ...string) {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+	defaultApi.Run(params...)
 }

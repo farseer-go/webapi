@@ -8,8 +8,6 @@ import (
 	"strings"
 )
 
-var LstRouteTable collections.List[HttpRoute]
-
 // HttpRoute 路由表
 type HttpRoute struct {
 	RouteUrl            string                         // 路由地址
