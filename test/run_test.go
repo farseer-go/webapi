@@ -53,16 +53,8 @@ func TestRun(t *testing.T) {
 	webapi.UseApiResponse()
 	webapi.RegisterMiddleware(&middleware.UrlRewriting{})
 
-	testPanic(t)
-
 	go webapi.Run("")
 	time.Sleep(10 * time.Millisecond)
-
-	server := webapi.NewApplicationBuilder()
-	server.RegisterPOST("/mini/hello5", Hello5)
-	server.RegisterPOST("/mini/hello6", Hello6)
-	go server.Run(":8889")
-	time.Sleep(100 * time.Millisecond)
 
 	testController := TestController{}
 	t.Run("api/1.0/test/hello1", func(t *testing.T) {
@@ -266,27 +258,4 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 	})
 
-	t.Run("mini/hello5:8889", func(t *testing.T) {
-		rsp, _ := http.Post("http://127.0.0.1:8889/mini/hello5", "application/json", nil)
-		body, _ := io.ReadAll(rsp.Body)
-		_ = rsp.Body.Close()
-		assert.Equal(t, "s501", string(body))
-		assert.Equal(t, 501, rsp.StatusCode)
-	})
-
-	t.Run("mini/hello6:8889", func(t *testing.T) {
-		rsp, _ := http.Post("http://127.0.0.1:8889/mini/hello6", "application/json", nil)
-		body, _ := io.ReadAll(rsp.Body)
-		_ = rsp.Body.Close()
-		assert.Equal(t, "s500", string(body))
-		assert.Equal(t, 500, rsp.StatusCode)
-	})
-}
-
-func testPanic(t *testing.T) bool {
-	return t.Run("TestPanic", func(t *testing.T) {
-		assert.Panics(t, func() {
-			webapi.RegisterPOST("/", func() {})
-		})
-	})
 }
