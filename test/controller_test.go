@@ -7,6 +7,7 @@ import (
 
 type TestController struct {
 	controller.BaseController
+	Header struct{} `webapi:"header"`
 }
 
 func (r *TestController) Base() {
@@ -26,4 +27,12 @@ func (r *TestController) Hello2(pageSize int, pageIndex int) pageSizeRequest {
 
 func (r *TestController) Hello3() (TValue string) {
 	return r.HttpContext.Header.GetValue("Content-Type")
+}
+
+func (r *TestController) OnActionExecuting() {
+	r.HttpContext.Response.AddHeader("Executing", "true")
+}
+
+func (r *TestController) OnActionExecuted() {
+	r.HttpContext.Response.AddHeader("Executed", "true")
 }

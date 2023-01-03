@@ -65,11 +65,15 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello1(sizeRequest), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, "true", rsp.Header.Get("Executing"))
+		assert.Equal(t, "true", rsp.Header.Get("Executed"))
 	})
 
 	t.Run("api/1.0/test/hello1-GET", func(t *testing.T) {
 		rsp, _ := http.Get("http://127.0.0.1:8888/api/1.0/test/hello1")
 		assert.Equal(t, 405, rsp.StatusCode)
+		assert.Equal(t, "", rsp.Header.Get("Executing"))
+		assert.Equal(t, "", rsp.Header.Get("Executed"))
 	})
 
 	t.Run("api/1.0/test/hello2-application/json", func(t *testing.T) {
@@ -80,6 +84,8 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello2(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, "true", rsp.Header.Get("Executing"))
+		assert.Equal(t, "true", rsp.Header.Get("Executed"))
 	})
 
 	t.Run("api/1.0/test/hello2-form", func(t *testing.T) {
@@ -91,6 +97,8 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello2(10, 2), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, "true", rsp.Header.Get("Executing"))
+		assert.Equal(t, "true", rsp.Header.Get("Executed"))
 	})
 
 	t.Run("api/1.0/test/hello3", func(t *testing.T) {
@@ -99,6 +107,8 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, "", apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, "true", rsp.Header.Get("Executing"))
+		assert.Equal(t, "true", rsp.Header.Get("Executed"))
 	})
 
 	t.Run("api/1.0/mini/hello1", func(t *testing.T) {

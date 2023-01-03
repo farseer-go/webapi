@@ -12,7 +12,7 @@ import (
 type HttpContext struct {
 	Request          *HttpRequest
 	Response         *HttpResponse
-	Header           collections.Dictionary[string, string]
+	Header           collections.ReadonlyDictionary[string, string]
 	Route            *HttpRoute
 	URI              *HttpURL
 	Method           string
@@ -37,7 +37,6 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 		Response: &HttpResponse{
 			w: w,
 		},
-		Header: collections.NewDictionary[string, string](),
 		URI: &HttpURL{
 			Path:        r.URL.Path,
 			RemoteAddr:  r.RemoteAddr,
@@ -75,9 +74,11 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 	}
 
 	// header
+	header := collections.NewDictionary[string, string]()
 	for k, v := range r.Header {
-		httpContext.Header.Add(k, strings.Join(v, ";"))
+		header.Add(k, strings.Join(v, ";"))
 	}
+	httpContext.Header = header.ToReadonlyDictionary()
 
 	// ContentType
 	for _, contentType := range strings.Split(httpContext.Header.GetValue("Content-Type"), ";") {

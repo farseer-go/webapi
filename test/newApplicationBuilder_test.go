@@ -18,6 +18,7 @@ func TestNewApplicationBuilder(t *testing.T) {
 	configure.SetDefault("Log.Component.webapi", true)
 
 	server := webapi.NewApplicationBuilder()
+	server.RegisterController(&TestController{})
 	server.RegisterPOST("/mini/hello1", Hello1)
 	server.RegisterDELETE("/mini/hello4", Hello4, "pageSize", "pageIndex")
 	server.RegisterPOST("/mini/hello5", Hello5)
