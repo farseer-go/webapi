@@ -7,8 +7,9 @@ import (
 )
 
 type pageSizeRequest struct {
-	PageSize  int
-	PageIndex int
+	PageSize   int
+	PageIndex  int
+	noExported string //测试不导出字段
 }
 
 func Hello1(req pageSizeRequest) string {
@@ -38,7 +39,12 @@ func Hello6() {
 	exception.ThrowException("s500")
 }
 
-func Hello7(actionType int) action.IResult {
+func Hello7(actionType int, testInject ITestInject) action.IResult {
+
+	if testInject.Call() != "ok" {
+		panic("inject error")
+	}
+	
 	switch actionType {
 	case 0:
 		return action.Redirect("/api/1.0/mini/hello2")

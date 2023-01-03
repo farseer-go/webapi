@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/controller"
@@ -21,6 +22,9 @@ import (
 
 func TestRun(t *testing.T) {
 	fs.Initialize[webapi.Module]("demo")
+	container.Register(func() ITestInject {
+		return TestInject{}
+	})
 	configure.SetDefault("Log.Component.webapi", true)
 	webapi.Area("api/1.0", func() {
 		// 自动注册控制器下的所有Action方法
@@ -64,6 +68,7 @@ func TestRun(t *testing.T) {
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello1(sizeRequest), apiResponse.Data)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))
 		assert.Equal(t, "true", rsp.Header.Get("Executed"))
@@ -88,6 +93,7 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello2(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))
 		assert.Equal(t, "true", rsp.Header.Get("Executed"))
 		assert.Equal(t, "true", rsp.Header.Get("Set-Header1"))
@@ -103,6 +109,7 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello2(10, 2), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))
 		assert.Equal(t, "true", rsp.Header.Get("Executed"))
 		assert.Equal(t, "true", rsp.Header.Get("Set-Header1"))
@@ -114,6 +121,7 @@ func TestRun(t *testing.T) {
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, "", apiResponse.Data)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))
 		assert.Equal(t, "true", rsp.Header.Get("Executed"))
@@ -129,6 +137,7 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, Hello1(sizeRequest), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
 
 	t.Run("api/1.0/mini/hello2", func(t *testing.T) {
@@ -138,6 +147,7 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
 		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
 
 	t.Run("api/1.0/mini/hello3-application/json", func(t *testing.T) {
@@ -150,6 +160,7 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, Hello3(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
 
 	t.Run("api/1.0/mini/hello3-form", func(t *testing.T) {
@@ -164,6 +175,7 @@ func TestRun(t *testing.T) {
 		_ = rsp.Body.Close()
 		assert.Equal(t, Hello3(10, 2), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
 
 	t.Run("api/1.0/mini/hello4", func(t *testing.T) {
@@ -185,6 +197,7 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
 		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
 
 	t.Run("mini/hello5", func(t *testing.T) {
@@ -216,6 +229,7 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
 		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
 
 	t.Run("mini/hello7-1", func(t *testing.T) {

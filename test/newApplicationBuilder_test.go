@@ -96,4 +96,12 @@ func TestNewApplicationBuilder(t *testing.T) {
 		assert.Equal(t, "true", rsp.Header.Get("Access-Control-Allow-Credentials"))
 		assert.Equal(t, 204, rsp.StatusCode)
 	})
+
+	//t.Run("https://mini/hello5:8889", func(t *testing.T) {
+	//	rsp, _ := http.Post("https://127.0.0.1:8889/mini/hello5", "application/json", nil)
+	//	body, _ := io.ReadAll(rsp.Body)
+	//	_ = rsp.Body.Close()
+	//	assert.Equal(t, "s501", string(body))
+	//	assert.Equal(t, 501, rsp.StatusCode)
+	//})
 }
