@@ -28,6 +28,17 @@ func TestNewApplicationBuilder(t *testing.T) {
 	go server.Run(":8889")
 	time.Sleep(100 * time.Millisecond)
 
+	testController := TestController{}
+	t.Run("test/hello1", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		rsp, _ := http.Post("http://127.0.0.1:8889/test/hello1", "application/json", bytes.NewReader(marshal))
+		body, _ := io.ReadAll(rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, testController.Hello1(sizeRequest), string(body))
+	})
+
 	t.Run("mini/hello5:8889", func(t *testing.T) {
 		rsp, _ := http.Post("http://127.0.0.1:8889/mini/hello5", "application/json", nil)
 		body, _ := io.ReadAll(rsp.Body)

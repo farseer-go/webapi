@@ -28,10 +28,10 @@ func TestRun(t *testing.T) {
 	configure.SetDefault("Log.Component.webapi", true)
 	webapi.Area("api/1.0", func() {
 		// 自动注册控制器下的所有Action方法
-		webapi.RegisterController(&TestController{
+		webapi.RegisterController(&TestHeaderController{
 			BaseController: controller.BaseController{
 				Action: map[string]controller.Action{
-					"Hello1": {Method: "POST"},
+					"Hello1": {Method: ""},
 					"Hello2": {Method: "POST", Params: "pageSize,pageIndex"},
 					"Hello3": {Method: "GET"},
 				},
@@ -60,11 +60,11 @@ func TestRun(t *testing.T) {
 	go webapi.Run("")
 	time.Sleep(10 * time.Millisecond)
 
-	testController := TestController{}
+	testController := TestHeaderController{}
 	t.Run("api/1.0/test/hello1", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
 		marshal, _ := json.Marshal(sizeRequest)
-		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/test/hello1", "application/json", bytes.NewReader(marshal))
+		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/testheader/hello1", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello1(sizeRequest), apiResponse.Data)
@@ -77,7 +77,7 @@ func TestRun(t *testing.T) {
 	})
 
 	t.Run("api/1.0/test/hello1-GET", func(t *testing.T) {
-		rsp, _ := http.Get("http://127.0.0.1:8888/api/1.0/test/hello1")
+		rsp, _ := http.Get("http://127.0.0.1:8888/api/1.0/testheader/hello1")
 		assert.Equal(t, 405, rsp.StatusCode)
 		assert.Equal(t, "", rsp.Header.Get("Executing"))
 		assert.Equal(t, "", rsp.Header.Get("Executed"))
@@ -88,7 +88,7 @@ func TestRun(t *testing.T) {
 	t.Run("api/1.0/test/hello2-application/json", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
 		marshal, _ := json.Marshal(sizeRequest)
-		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/test/hello2", "application/json", bytes.NewReader(marshal))
+		rsp, _ := http.Post("http://127.0.0.1:8888/api/1.0/testheader/hello2", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello2(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
@@ -104,7 +104,7 @@ func TestRun(t *testing.T) {
 		val := make(url.Values)
 		val.Add("pageSize", strconv.Itoa(10))
 		val.Add("pageIndex", strconv.Itoa(2))
-		rsp, _ := http.PostForm("http://127.0.0.1:8888/api/1.0/test/hello2", val)
+		rsp, _ := http.PostForm("http://127.0.0.1:8888/api/1.0/testheader/hello2", val)
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, testController.Hello2(10, 2), apiResponse.Data)
@@ -117,7 +117,7 @@ func TestRun(t *testing.T) {
 	})
 
 	t.Run("api/1.0/test/hello3", func(t *testing.T) {
-		rsp, _ := http.Get("http://127.0.0.1:8888/api/1.0/test/hello3")
+		rsp, _ := http.Get("http://127.0.0.1:8888/api/1.0/testheader/hello3")
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, "", apiResponse.Data)
