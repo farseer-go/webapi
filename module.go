@@ -22,6 +22,7 @@ func (module Module) Initialize() {
 }
 
 func (module Module) PostInitialize() {
+	defaultApi = NewApplicationBuilder()
 }
 
 func (module Module) Shutdown() {

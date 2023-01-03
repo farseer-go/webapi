@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-var defaultApi = NewApplicationBuilder()
+var defaultApi *applicationBuilder
 
 type applicationBuilder struct {
 	area           string
