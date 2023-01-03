@@ -93,7 +93,7 @@ func registerAction(area string, actionMethod reflect.Method, actions map[string
 		ResponseBodyType:    lstResponseParamType,
 		RequestParamIsModel: types.IsDtoModel(lstRequestParamType.ToArray()),
 		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
-		Method:              strings.ToUpper(actions[actionName].Method),
+		Method:              collections.NewList(strings.Split(strings.ToUpper(actions[actionName].Method), "|")...),
 		ParamNames:          collections.NewList(paramNames...),
 		AutoBindHeaderName:  autoBindHeaderName,
 		IsImplActionFilter:  isImplActionFilter,

@@ -8,6 +8,7 @@ import (
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
 	"reflect"
+	"strings"
 )
 
 // Register 注册单个Api
@@ -27,7 +28,7 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 	return context.HttpRoute{
 		RouteUrl:            area + route,
 		Action:              actionFunc,
-		Method:              method,
+		Method:              collections.NewList(strings.Split(strings.ToUpper(method), "|")...),
 		RequestParamType:    lstRequestParamType,
 		ResponseBodyType:    lstResponseParamType,
 		ParamNames:          collections.NewList(paramNames...),

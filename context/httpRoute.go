@@ -17,7 +17,7 @@ type HttpRoute struct {
 	ActionName          string                         // action名称
 	RequestParamType    collections.List[reflect.Type] // 入参
 	ResponseBodyType    collections.List[reflect.Type] // 出参
-	Method              string                         // method
+	Method              collections.List[string]       // method
 	ParamNames          collections.List[string]       // 入参变量名称
 	RequestParamIsModel bool                           // 是否为DTO结构
 	ResponseBodyIsModel bool                           // 是否为DTO结构
