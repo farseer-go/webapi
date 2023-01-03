@@ -67,6 +67,8 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))
 		assert.Equal(t, "true", rsp.Header.Get("Executed"))
+		assert.Equal(t, "true", rsp.Header.Get("Set-Header1"))
+		assert.Equal(t, "", rsp.Header.Get("Set-Header2"))
 	})
 
 	t.Run("api/1.0/test/hello1-GET", func(t *testing.T) {
@@ -74,6 +76,8 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, 405, rsp.StatusCode)
 		assert.Equal(t, "", rsp.Header.Get("Executing"))
 		assert.Equal(t, "", rsp.Header.Get("Executed"))
+		assert.Equal(t, "", rsp.Header.Get("Set-Header1"))
+		assert.Equal(t, "", rsp.Header.Get("Set-Header2"))
 	})
 
 	t.Run("api/1.0/test/hello2-application/json", func(t *testing.T) {
@@ -86,6 +90,8 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))
 		assert.Equal(t, "true", rsp.Header.Get("Executed"))
+		assert.Equal(t, "true", rsp.Header.Get("Set-Header1"))
+		assert.Equal(t, "", rsp.Header.Get("Set-Header2"))
 	})
 
 	t.Run("api/1.0/test/hello2-form", func(t *testing.T) {
@@ -99,6 +105,8 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))
 		assert.Equal(t, "true", rsp.Header.Get("Executed"))
+		assert.Equal(t, "true", rsp.Header.Get("Set-Header1"))
+		assert.Equal(t, "", rsp.Header.Get("Set-Header2"))
 	})
 
 	t.Run("api/1.0/test/hello3", func(t *testing.T) {
@@ -109,6 +117,8 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))
 		assert.Equal(t, "true", rsp.Header.Get("Executed"))
+		assert.Equal(t, "true", rsp.Header.Get("Set-Header1"))
+		assert.Equal(t, "", rsp.Header.Get("Set-Header2"))
 	})
 
 	t.Run("api/1.0/mini/hello1", func(t *testing.T) {

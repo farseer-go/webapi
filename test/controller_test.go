@@ -31,8 +31,11 @@ func (r *TestController) Hello3() (TValue string) {
 
 func (r *TestController) OnActionExecuting() {
 	r.HttpContext.Response.AddHeader("Executing", "true")
+	r.HttpContext.Response.SetHeader("Set-Header1", "true")
+	r.HttpContext.Response.SetHeader("Set-Header2", "true")
 }
 
 func (r *TestController) OnActionExecuted() {
 	r.HttpContext.Response.AddHeader("Executed", "true")
+	r.HttpContext.Response.DelHeader("Set-Header2")
 }
