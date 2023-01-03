@@ -20,8 +20,11 @@ var defaultApi = NewApplicationBuilder()
 type applicationBuilder struct {
 	area           string
 	mux            *http.ServeMux
-	LstRouteTable  collections.List[context.HttpRoute]
-	MiddlewareList collections.List[context.IMiddleware]
+	certFile       string                                // https证书
+	keyFile        string                                // https证书 key
+	tls            bool                                  // 是否使用https
+	LstRouteTable  collections.List[context.HttpRoute]   // 注册的路由表
+	MiddlewareList collections.List[context.IMiddleware] // 注册的中间件
 }
 
 func NewApplicationBuilder() *applicationBuilder {
@@ -141,6 +144,13 @@ func (r *applicationBuilder) UseApiResponse() {
 	r.RegisterMiddleware(&middleware.ApiResponse{})
 }
 
+// UseTLS 使用https
+func (r *applicationBuilder) UseTLS(certFile, keyFile string) {
+	r.certFile = certFile
+	r.keyFile = keyFile
+	r.tls = true
+}
+
 // Run 运行Web服务
 func (r *applicationBuilder) Run(params ...string) {
 	// 设置监听地址
@@ -163,7 +173,16 @@ func (r *applicationBuilder) Run(params ...string) {
 	r.handleRoute()
 
 	if strings.HasPrefix(addr, ":") {
-		flog.Infof("Web服务已启动：http://localhost%s/", addr)
+		if r.tls {
+			flog.Infof("Web服务已启动：https://localhost%s/", addr)
+		} else {
+			flog.Infof("Web服务已启动：http://localhost%s/", addr)
+		}
 	}
-	flog.Info(http.ListenAndServe(addr, r.mux))
+
+	if r.tls {
+		flog.Info(http.ListenAndServeTLS(addr, r.certFile, r.keyFile, r.mux))
+	} else {
+		flog.Info(http.ListenAndServe(addr, r.mux))
+	}
 }

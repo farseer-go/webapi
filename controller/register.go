@@ -38,14 +38,16 @@ func Register(area string, c IController) collections.List[context.HttpRoute] {
 
 // 查找自动绑定header的字段
 func findAutoBindHeaderName(controllerType reflect.Type) string {
+	var controllerFieldName string
 	for i := 0; i < controllerType.NumField(); i++ {
 		// 找到需要绑定头部的标记
 		controllerFieldType := controllerType.Field(i)
 		if controllerFieldType.Tag.Get("webapi") == "header" {
-			return controllerFieldType.Name
+			controllerFieldName = controllerFieldType.Name
+			break
 		}
 	}
-	return ""
+	return controllerFieldName
 }
 
 // 注册Action

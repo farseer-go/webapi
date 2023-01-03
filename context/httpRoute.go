@@ -71,7 +71,6 @@ func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
 				}
 			}
 		}
-
 		lstParams[i] = reflect.ValueOf(val)
 	}
 	return lstParams
