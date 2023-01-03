@@ -45,6 +45,7 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 			RequestURI:  r.RequestURI,
 			QueryString: r.URL.RawQuery,
 			Query:       collections.NewDictionary[string, string](),
+			Url:         "https://" + r.Host + r.RequestURI, // 先默认https，后边在处理
 		},
 		Method:           r.Method,
 		ContentLength:    r.ContentLength,
@@ -69,8 +70,6 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 
 	if r.TLS == nil {
 		httpContext.URI.Url = "http://" + r.Host + r.RequestURI
-	} else {
-		httpContext.URI.Url = "https://" + r.Host + r.RequestURI
 	}
 
 	// header

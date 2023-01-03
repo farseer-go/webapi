@@ -28,9 +28,12 @@ func Register(area string, c IController) collections.List[context.HttpRoute] {
 	// 遍历controller下的action函数
 	for i := 0; i < cType.NumMethod(); i++ {
 		actionMethod := cType.Method(i)
-		httpRoute := registerAction(area, actionMethod, actions, controllerName, controllerType, autoBindHeaderName, isImplActionFilter)
-		if httpRoute != nil {
-			lst.Add(*httpRoute)
+		// 如果是来自基类的方法、非导出类型，则跳过
+		if actionMethod.IsExported() && !lstControllerMethodName.Contains(actionMethod.Name) {
+			httpRoute := registerAction(area, actionMethod, actions, controllerName, controllerType, autoBindHeaderName, isImplActionFilter)
+			if httpRoute != nil {
+				lst.Add(*httpRoute)
+			}
 		}
 	}
 	return lst
@@ -58,10 +61,6 @@ func registerAction(area string, actionMethod reflect.Method, actions map[string
 	if isImplActionFilter && (actionName == "OnActionExecuting" || actionName == "OnActionExecuted") {
 		return nil
 	}
-	// 如果是来自基类的方法、非导出类型，则跳过
-	if !actionMethod.IsExported() || lstControllerMethodName.Contains(actionName) {
-		return nil
-	}
 
 	// 控制器都是以方法的形式，因此第0个入参是接收器，应去除
 	lstRequestParamType := collections.NewList(types.GetInParam(methodType)...)
@@ -82,6 +81,7 @@ func registerAction(area string, actionMethod reflect.Method, actions map[string
 	if actions[actionName].Method == "" {
 		action := actions[actionName]
 		action.Method = "POST"
+		actions[actionName] = action
 	}
 
 	// 添加到路由表
