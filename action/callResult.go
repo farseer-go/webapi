@@ -4,32 +4,23 @@ import (
 	"encoding/json"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/parse"
-	"github.com/farseer-go/fs/types"
 	"github.com/farseer-go/webapi/context"
 )
 
-// CallResult 默认调用Action结果
-type CallResult struct {
+// callResult 默认调用Action结果
+type callResult struct {
 }
 
-func NewCallResult() CallResult {
-	return CallResult{}
+func NewCallResult() callResult {
+	return callResult{}
 }
 
-func (receiver CallResult) ExecuteResult(httpContext *context.HttpContext) {
-	// 没有返回值，则不响应
-	if len(httpContext.Response.Body) == 0 {
-		httpContext.Response.BodyBytes = []byte{}
-		httpContext.Response.BodyString = ""
-		httpContext.Response.StatusCode = 200
-		return
-	}
-
+func (receiver callResult) ExecuteResult(httpContext *context.HttpContext) {
 	// 只有一个返回值
 	if len(httpContext.Response.Body) == 1 {
 		responseBody := httpContext.Response.Body[0].Interface()
 		// 基本类型直接转string
-		if types.IsGoBasicType(httpContext.Route.ResponseBodyType.First()) {
+		if httpContext.Route.IsGoBasicType {
 			httpContext.Response.BodyString = parse.Convert(responseBody, "")
 			httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
 		} else { // dto

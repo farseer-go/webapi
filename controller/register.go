@@ -99,5 +99,6 @@ func registerAction(area string, actionMethod reflect.Method, actions map[string
 		IsImplActionFilter:  isImplActionFilter,
 		HttpMiddleware:      &middleware.Http{},
 		HandleMiddleware:    &HandleMiddleware{},
+		IsGoBasicType:       types.IsGoBasicType(lstResponseParamType.First()),
 	}
 }

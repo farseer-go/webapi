@@ -17,14 +17,15 @@ type HttpRoute struct {
 	ActionName          string                         // action名称
 	RequestParamType    collections.List[reflect.Type] // 入参
 	ResponseBodyType    collections.List[reflect.Type] // 出参
-	Method              string
-	ParamNames          collections.List[string]
-	RequestParamIsModel bool   // 是否为DTO结构
-	ResponseBodyIsModel bool   // 是否为DTO结构
-	AutoBindHeaderName  string // 自动绑定header的字段名称
-	IsImplActionFilter  bool   // 是否实现了IActionFilter
-	HttpMiddleware      IMiddleware
-	HandleMiddleware    IMiddleware
+	Method              string                         // method
+	ParamNames          collections.List[string]       // 入参变量名称
+	RequestParamIsModel bool                           // 是否为DTO结构
+	ResponseBodyIsModel bool                           // 是否为DTO结构
+	AutoBindHeaderName  string                         // 自动绑定header的字段名称
+	IsImplActionFilter  bool                           // 是否实现了IActionFilter
+	IsGoBasicType       bool                           // 返回值只有一个时，是否为基础类型
+	HttpMiddleware      IMiddleware                    // 中间件入口
+	HandleMiddleware    IMiddleware                    // handle中间件
 }
 
 // MapToParams 将map转成入参值

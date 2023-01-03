@@ -35,5 +35,6 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
 		HttpMiddleware:      &middleware.Http{},
 		HandleMiddleware:    &HandleMiddleware{},
+		IsGoBasicType:       types.IsGoBasicType(lstResponseParamType.First()),
 	}
 }
