@@ -174,9 +174,9 @@ func (r *applicationBuilder) Run(params ...string) {
 
 	if strings.HasPrefix(addr, ":") {
 		if r.tls {
-			flog.Infof("Web服务已启动：https://localhost%s/", addr)
+			flog.Infof("Web service is started：https://localhost%s/", addr)
 		} else {
-			flog.Infof("Web服务已启动：http://localhost%s/", addr)
+			flog.Infof("Web service is started：http://localhost%s/", addr)
 		}
 	}
 
