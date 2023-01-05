@@ -94,12 +94,12 @@ func (r *applicationBuilder) initMiddleware() {
 // Area 设置区域
 func (r *applicationBuilder) Area(area string, f func()) {
 	if !strings.HasPrefix(area, "/") {
-		r.area = "/" + area
+		area = "/" + area
 	}
-	if !strings.HasSuffix(r.area, "/") {
-		r.area += "/"
+	if !strings.HasSuffix(area, "/") {
+		area += "/"
 	}
-
+	r.area = area
 	// 执行注册
 	f()
 	// 执行完后，恢复区域为"/"
