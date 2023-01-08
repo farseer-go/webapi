@@ -54,7 +54,7 @@ func (r *applicationBuilder) registerAction(route Route) {
 	route.Url = strings.Trim(route.Url, " ")
 	route.Url = strings.TrimLeft(route.Url, "/")
 	if route.Url == "" {
-		panic(flog.Errorf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing")))
+		flog.Panicf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
 	}
 	r.LstRouteTable.Add(minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...))
 }
