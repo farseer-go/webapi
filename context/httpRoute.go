@@ -39,7 +39,10 @@ func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
 			if !field.IsExported() {
 				continue
 			}
-			key := strings.ToLower(field.Name)
+			key := field.Tag.Get("json")
+			if key == "" {
+				key = strings.ToLower(field.Name)
+			}
 			kv, exists := mapVal[key]
 			if exists {
 				defVal := paramVal.Field(i).Interface()

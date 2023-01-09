@@ -32,7 +32,7 @@ func TestRun(t *testing.T) {
 			BaseController: controller.BaseController{
 				Action: map[string]controller.Action{
 					"Hello1": {Method: ""},
-					"Hello2": {Method: "POST", Params: "pageSize,pageIndex"},
+					"Hello2": {Method: "POST", Params: "page_Size,pageIndex"},
 					"Hello3": {Method: "GET"},
 				},
 			},
@@ -41,8 +41,8 @@ func TestRun(t *testing.T) {
 		// 注册单个Api
 		webapi.RegisterPOST("/mini/hello1", Hello1)
 		webapi.RegisterGET("/mini/hello2", Hello2)
-		webapi.RegisterPUT("/mini/hello3", Hello3, "pageSize", "pageIndex")
-		webapi.RegisterDELETE("/mini/hello4", Hello4, "pageSize", "pageIndex")
+		webapi.RegisterPUT("/mini/hello3", Hello3, "page_Size", "pageIndex")
+		webapi.RegisterDELETE("/mini/hello4", Hello4, "page_Size", "pageIndex")
 	})
 	webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello2", Method: "GET", Action: Hello2})
 	webapi.RegisterPOST("/mini/hello5", Hello5)
@@ -102,7 +102,7 @@ func TestRun(t *testing.T) {
 
 	t.Run("api/1.0/test/hello2-form", func(t *testing.T) {
 		val := make(url.Values)
-		val.Add("pageSize", strconv.Itoa(10))
+		val.Add("page_Size", strconv.Itoa(10))
 		val.Add("pageIndex", strconv.Itoa(2))
 		rsp, _ := http.PostForm("http://127.0.0.1:8888/api/1.0/testheader/hello2", val)
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
@@ -165,7 +165,7 @@ func TestRun(t *testing.T) {
 
 	t.Run("api/1.0/mini/hello3-form", func(t *testing.T) {
 		val := make(url.Values)
-		val.Add("pageSize", strconv.Itoa(10))
+		val.Add("page_Size", strconv.Itoa(10))
 		val.Add("pageIndex", strconv.Itoa(2))
 
 		req, _ := http.NewRequest("PUT", "http://127.0.0.1:8888/api/1.0/mini/hello3", strings.NewReader(val.Encode()))
@@ -173,7 +173,8 @@ func TestRun(t *testing.T) {
 		rsp, _ := http.DefaultClient.Do(req)
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, Hello3(10, 2), apiResponse.Data)
+		assert.Equal(t, Hello3(10, 2).PageSize, apiResponse.Data.PageSize)
+		assert.Equal(t, Hello3(10, 2).PageIndex, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 	})

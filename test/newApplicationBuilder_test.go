@@ -20,7 +20,7 @@ func TestNewApplicationBuilder(t *testing.T) {
 	server := webapi.NewApplicationBuilder()
 	server.RegisterController(&TestController{})
 	server.RegisterRoutes(webapi.Route{Url: "/mini/hello1", Method: "POST|GET", Action: Hello1})
-	server.RegisterDELETE("/mini/hello4", Hello4, "pageSize", "pageIndex")
+	server.RegisterDELETE("/mini/hello4", Hello4, "page_Size", "pageIndex")
 	server.RegisterPOST("/mini/hello5", Hello5)
 	server.RegisterPOST("/mini/hello6", Hello6)
 	server.RegisterPOST("/mini/hello8", Hello8)
@@ -29,7 +29,7 @@ func TestNewApplicationBuilder(t *testing.T) {
 	time.Sleep(100 * time.Millisecond)
 
 	testController := TestController{}
-	t.Run("test/hello1", func(t *testing.T) {
+	t.Run("test/hello1:8889-POST", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
 		marshal, _ := json.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8889/test/hello1", "application/json", bytes.NewReader(marshal))
@@ -64,7 +64,7 @@ func TestNewApplicationBuilder(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 	})
 	t.Run("mini/hello1:8889-GET", func(t *testing.T) {
-		rsp, _ := http.Get("http://127.0.0.1:8889/mini/hello1?PageSize=10&PageIndex=2")
+		rsp, _ := http.Get("http://127.0.0.1:8889/mini/hello1?page_size=10&PageIndex=2")
 		body, _ := io.ReadAll(rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, "hello world pageSize=10，pageIndex=2", string(body))
