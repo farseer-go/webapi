@@ -3,6 +3,7 @@ package context
 import (
 	"encoding/json"
 	"io"
+	"net/http"
 	"net/url"
 	"strings"
 )
@@ -13,6 +14,7 @@ type HttpRequest struct {
 	BodyBytes  []byte
 	Form       map[string]any
 	Query      map[string]any
+	*http.Request
 }
 
 func (r *HttpRequest) JsonToMap() map[string]any {

@@ -33,9 +33,10 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 			Body:       r.Body,
 			BodyString: buf.String(),
 			BodyBytes:  buf.Bytes(),
+			Request:    r,
 		},
 		Response: &HttpResponse{
-			w: w,
+			W: w,
 		},
 		URI: &HttpURL{
 			Path:        r.URL.Path,
