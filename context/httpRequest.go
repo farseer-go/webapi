@@ -14,7 +14,7 @@ type HttpRequest struct {
 	BodyBytes  []byte
 	Form       map[string]any
 	Query      map[string]any
-	*http.Request
+	R          *http.Request
 }
 
 func (r *HttpRequest) JsonToMap() map[string]any {
