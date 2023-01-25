@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/exception"
@@ -45,12 +46,9 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 		// 响应码
 		httpContext.Response.StatusCode = 500
 		httpContext.Exception = exp
-		apiResponse = core.Error[any](exp.(string), httpContext.Response.StatusCode)
+		apiResponse = core.Error[any](fmt.Sprint(exp), httpContext.Response.StatusCode)
 	})
 
 	httpContext.Route.IsGoBasicType = false
 	httpContext.Response.Body = []reflect.Value{reflect.ValueOf(apiResponse)}
-	//httpContext.Response.BodyBytes = apiResponse.ToBytes()
-	//httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
-	//httpContext.Response.StatusCode = 200
 }
