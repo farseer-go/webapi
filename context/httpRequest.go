@@ -17,6 +17,7 @@ type HttpRequest struct {
 	R          *http.Request
 }
 
+// JsonToMap 将json转成map类型
 func (r *HttpRequest) JsonToMap() map[string]any {
 	mapVal := make(map[string]any)
 	_ = json.Unmarshal(r.BodyBytes, &mapVal)

@@ -40,7 +40,6 @@ func Hello6() {
 }
 
 func Hello7(actionType int, testInject ITestInject) action.IResult {
-
 	if testInject.Call() != "ok" {
 		panic("inject error")
 	}
@@ -64,4 +63,11 @@ func Hello7(actionType int, testInject ITestInject) action.IResult {
 }
 
 func Hello8() {
+}
+
+func Hello9(req pageSizeRequest, testInject ITestInject) string {
+	if testInject.Call() != "ok" {
+		panic("inject error")
+	}
+	return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 }

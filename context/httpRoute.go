@@ -32,6 +32,7 @@ type HttpRoute struct {
 func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
 	// dto模式
 	if receiver.RequestParamIsModel {
+		// 第一个参数，将json反序列化到dto
 		param := receiver.RequestParamType.First()
 		paramVal := reflect.New(param).Elem()
 		for i := 0; i < param.NumField(); i++ {
@@ -49,7 +50,14 @@ func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
 				paramVal.FieldByName(field.Name).Set(reflect.ValueOf(parse.Convert(kv, defVal)))
 			}
 		}
-		return []reflect.Value{paramVal}
+		returnVal := []reflect.Value{paramVal}
+
+		// 第2个参数起，为interface类型，需要做注入操作
+		for i := 1; i < receiver.RequestParamType.Count(); i++ {
+			val := container.ResolveType(receiver.RequestParamType.Index(i))
+			returnVal = append(returnVal, reflect.ValueOf(val))
+		}
+		return returnVal
 	}
 
 	// 多参数

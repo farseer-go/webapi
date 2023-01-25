@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/container"
 	"net/http"
 	"reflect"
 	"strings"
@@ -111,10 +112,18 @@ func (httpContext *HttpContext) BuildActionInValue() []reflect.Value {
 func (httpContext *HttpContext) contentTypeJson() []reflect.Value {
 	// dto
 	if httpContext.Route.RequestParamIsModel {
+		// 第一个参数，将json反序列化到dto
 		firstParamType := httpContext.Route.RequestParamType.First() // 先取第一个参数
 		val := reflect.New(firstParamType).Interface()
 		_ = json.Unmarshal(httpContext.Request.BodyBytes, val)
-		return []reflect.Value{reflect.ValueOf(val).Elem()}
+		returnVal := []reflect.Value{reflect.ValueOf(val).Elem()}
+
+		// 第2个参数起，为interface类型，需要做注入操作
+		for i := 1; i < httpContext.Route.RequestParamType.Count(); i++ {
+			val = container.ResolveType(httpContext.Route.RequestParamType.Index(i))
+			returnVal = append(returnVal, reflect.ValueOf(val))
+		}
+		return returnVal
 	}
 
 	// 多参数

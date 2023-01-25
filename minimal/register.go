@@ -32,7 +32,7 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 		RequestParamType:    lstRequestParamType,
 		ResponseBodyType:    lstResponseParamType,
 		ParamNames:          collections.NewList(paramNames...),
-		RequestParamIsModel: types.IsDtoModel(lstRequestParamType.ToArray()),
+		RequestParamIsModel: types.IsDtoModelIgnoreInterface(lstRequestParamType.ToArray()),
 		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
 		HttpMiddleware:      &middleware.Http{},
 		HandleMiddleware:    &HandleMiddleware{},

@@ -25,6 +25,7 @@ func TestRun(t *testing.T) {
 	container.Register(func() ITestInject {
 		return TestInject{}
 	})
+
 	configure.SetDefault("Log.Component.webapi", true)
 	webapi.Area("api/1.0", func() {
 		// 自动注册控制器下的所有Action方法
@@ -48,6 +49,7 @@ func TestRun(t *testing.T) {
 	webapi.RegisterPOST("/mini/hello5", Hello5)
 	webapi.RegisterPOST("/mini/hello6", Hello6)
 	webapi.RegisterPOST("/mini/hello7", Hello7)
+	webapi.RegisterPOST("/mini/hello9", Hello9)
 	assert.Panics(t, func() {
 		webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello3", Method: "GET", Action: Hello2, Params: []string{"aaa"}})
 	})
@@ -293,4 +295,14 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 	})
 
+	t.Run("mini/hello9", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		rsp, _ := http.Post("http://127.0.0.1:8888/mini/hello9", "application/json", bytes.NewReader(marshal))
+		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, Hello1(sizeRequest), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
+	})
 }

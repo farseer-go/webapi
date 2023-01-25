@@ -14,10 +14,6 @@ type TestHeaderController struct {
 	Header header `webapi:"header"`
 }
 
-//func (r *TestHeaderController) Base() {
-//
-//}
-
 func (r *TestHeaderController) Hello1(req pageSizeRequest) string {
 	return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 }
