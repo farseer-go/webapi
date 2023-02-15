@@ -12,6 +12,7 @@ import (
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
 	"net/http"
+	"net/http/pprof"
 	"strings"
 )
 
@@ -132,6 +133,15 @@ func (r *applicationBuilder) UseCors() {
 func (r *applicationBuilder) UseStaticFiles() {
 	// 默认wwwroot为静态目录
 	r.mux.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("./wwwroot"))))
+}
+
+// UsePprof 是否同时开启pprof
+func (r *applicationBuilder) UsePprof() {
+	r.mux.HandleFunc("/debug/pprof/", pprof.Index)
+	r.mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	r.mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	r.mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	r.mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 }
 
 func (r *applicationBuilder) UseWebApi() {

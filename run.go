@@ -62,6 +62,11 @@ func UseStaticFiles() {
 	defaultApi.UseStaticFiles()
 }
 
+// UsePprof 是否同时开启pprof
+func UsePprof() {
+	defaultApi.UsePprof()
+}
+
 func UseWebApi() {
 	defaultApi.UseWebApi()
 }
