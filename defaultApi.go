@@ -6,7 +6,6 @@ import (
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/modules"
-	"github.com/farseer-go/fs/stopwatch"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
@@ -113,13 +112,11 @@ func (r *applicationBuilder) handleRoute() {
 	for i := 0; i < r.LstRouteTable.Count(); i++ {
 		route := r.LstRouteTable.Index(i)
 		r.mux.HandleFunc(route.RouteUrl, func(w http.ResponseWriter, r *http.Request) {
-			sw := stopwatch.StartNew()
 			// 解析报文、组装httpContext
 			httpContext := context.NewHttpContext(route, w, r)
 
 			// 执行第一个中间件
 			route.HttpMiddleware.Invoke(&httpContext)
-			flog.ComponentInfof("webapi", "%s，%s", route.RouteUrl, sw.GetMicrosecondsText())
 		})
 	}
 }
