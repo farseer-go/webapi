@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/parse"
+	"github.com/farseer-go/fs/stopwatch"
 	"github.com/farseer-go/webapi/context"
 	"reflect"
 )
@@ -19,22 +21,20 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 自动绑定头部
 	receiver.bindHeader(httpContext, controllerVal)
 
+	// 入参
+	params := httpContext.BuildActionInValue()
+	actionMethod := controllerVal.MethodByName(httpContext.Route.ActionName)
+
+	sw := stopwatch.StartNew()
 	// 是否要执行ActionFilter
 	if httpContext.Route.IsImplActionFilter {
 		controllerVal.MethodByName("OnActionExecuting").Call([]reflect.Value{})
-	}
-
-	// 入参
-	params := httpContext.BuildActionInValue()
-
-	// 调用action
-	actionMethod := controllerVal.MethodByName(httpContext.Route.ActionName)
-	httpContext.Response.Body = actionMethod.Call(params)
-
-	// 是否要执行ActionFilter
-	if httpContext.Route.IsImplActionFilter {
+		httpContext.Response.Body = actionMethod.Call(params) // 调用action
 		controllerVal.MethodByName("OnActionExecuted").Call([]reflect.Value{})
+	} else {
+		httpContext.Response.Body = actionMethod.Call(params) // 调用action
 	}
+	flog.ComponentInfof("webapi", "%s Use：%s", httpContext.URI.Url, sw.GetMillisecondsText())
 }
 
 // 找到 "controller.BaseController" 字段，并初始化赋值
