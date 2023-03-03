@@ -10,7 +10,8 @@ import (
 func TestHttps(t *testing.T) {
 	fs.Initialize[webapi.Module]("demo")
 	configure.SetDefault("Log.Component.webapi", true)
-	
+
+	webapi.UsePprof()
 	webapi.UseTLS("", "")
 	go webapi.Run(":80443")
 }
