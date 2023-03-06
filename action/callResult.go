@@ -26,6 +26,7 @@ func (receiver callResult) ExecuteResult(httpContext *context.HttpContext) {
 		} else { // dto
 			httpContext.Response.BodyBytes, _ = json.Marshal(responseBody)
 			httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
+			httpContext.Response.SetHeader("Content-Type", "application/json")
 		}
 		httpContext.Response.StatusCode = 200
 		return
@@ -39,4 +40,5 @@ func (receiver callResult) ExecuteResult(httpContext *context.HttpContext) {
 	httpContext.Response.BodyBytes, _ = json.Marshal(lst)
 	httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
 	httpContext.Response.StatusCode = 200
+	httpContext.Response.SetHeader("Content-Type", "application/json")
 }
