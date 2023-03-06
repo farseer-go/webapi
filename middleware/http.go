@@ -17,14 +17,14 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 	if len(httpContext.Response.BodyBytes) == 0 && len(httpContext.Response.Body) > 0 {
 		// IActionResult
 		if httpContext.IsActionResult() {
-			ins := httpContext.Response.Body[0].Interface().(action.IResult)
-			ins.ExecuteResult(httpContext)
+			actionResult := httpContext.Response.Body[0].Interface().(action.IResult)
+			actionResult.ExecuteResult(httpContext)
 		} else {
 			// 则转成callResult
 			action.NewCallResult().ExecuteResult(httpContext)
 		}
 	}
-	
+
 	if httpContext.Response.StatusCode == 0 {
 		httpContext.Response.StatusCode = 200
 	}
