@@ -71,7 +71,7 @@ func UseWebApi() {
 	defaultApi.UseWebApi()
 }
 
-// UseApiResponse 支持ApiResponse结构
+// UseApiResponse 让所有的返回值，包含在core.ApiResponse中
 func UseApiResponse() {
 	defaultApi.UseApiResponse()
 }
