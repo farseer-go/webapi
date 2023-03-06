@@ -20,7 +20,6 @@ func (receiver HttpResponse) WriteCode(statusCode int) {
 
 // Write 将响应内容写入http流
 func (receiver HttpResponse) Write(content []byte) (int, error) {
-	//receiver.w.Header().
 	return receiver.W.Write(content)
 }
 
