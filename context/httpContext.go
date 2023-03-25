@@ -8,12 +8,15 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"time"
 )
 
 type HttpContext struct {
 	Request          *HttpRequest
 	Response         *HttpResponse
 	Header           collections.ReadonlyDictionary[string, string]
+	Cookie           Cookie
+	Session          Session
 	Route            *HttpRoute
 	URI              *HttpURL
 	Method           string
@@ -80,6 +83,24 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 		header.Add(k, strings.Join(v, ";"))
 	}
 	httpContext.Header = header.ToReadonlyDictionary()
+
+	cookies := r.Cookies()
+	httpContext.Cookie, _ = InitCookie()
+	for _, v := range cookies {
+		httpContext.Cookie.Set(v.Name, v.Value)
+	}
+	if httpContext.Cookie.Get("sid") == "" {
+		sid := getSId()
+		sidCookie := http.Cookie{
+			MaxAge:  0,
+			Name:    "sid",
+			Value:   sid,
+			Path:    "/",
+			Expires: time.Now().Add(time.Duration(0)),
+		}
+		http.SetCookie(w, &sidCookie)
+		httpContext.Session, _ = SessionM.storage.InitSession(sid, DEFEALT_TIME)
+	}
 
 	// ContentType
 	for _, contentType := range strings.Split(httpContext.Header.GetValue("Content-Type"), ";") {
