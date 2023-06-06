@@ -97,50 +97,50 @@ type CookieMemory struct {
 type SessionFromMemory struct {
 	sid              string //唯一标识
 	lock             sync.Mutex
-	lastAccessedTime time.Time                   //最后一次访问时间
-	maxAge           int64                       //超时时间
-	data             map[interface{}]interface{} //主数据
+	lastAccessedTime time.Time   //最后一次访问时间
+	maxAge           int64       //超时时间
+	data             map[any]any //主数据
 }
 
 type CookieFromMemory struct {
 	lock sync.Mutex
-	data map[interface{}]interface{} //主数据
+	data map[any]any //主数据
 }
 
 type Session interface {
-	Set(key, value interface{})
-	Get(key interface{}) interface{}
-	Remove(key interface{}) error
+	Set(key, value any)
+	Get(key any) any
+	Remove(key any) error
 	GetId() string
 }
 
 type Cookie interface {
-	Set(key, value interface{})
-	Get(key interface{}) interface{}
-	Remove(key interface{}) error
+	Set(key, value any)
+	Get(key any) any
+	Remove(key any) error
 }
 
 func newSessionFromMemory() *SessionFromMemory {
 	return &SessionFromMemory{
-		data:   make(map[interface{}]interface{}),
+		data:   make(map[any]any),
 		maxAge: DEFEALT_TIME,
 	}
 }
 
-func (si *SessionFromMemory) Set(key, value interface{}) {
+func (si *SessionFromMemory) Set(key, value any) {
 	si.lock.Lock()
 	defer si.lock.Unlock()
 	si.data[key] = value
 }
 
-func (si *SessionFromMemory) Get(key interface{}) interface{} {
+func (si *SessionFromMemory) Get(key any) any {
 	if value := si.data[key]; value != nil {
 		return value
 	}
 	return nil
 }
 
-func (si *SessionFromMemory) Remove(key interface{}) error {
+func (si *SessionFromMemory) Remove(key any) error {
 	if value := si.data[key]; value != nil {
 		delete(si.data, key)
 	}
@@ -149,24 +149,24 @@ func (si *SessionFromMemory) Remove(key interface{}) error {
 
 func newCookieFromMemory() *CookieFromMemory {
 	return &CookieFromMemory{
-		data: make(map[interface{}]interface{}),
+		data: make(map[any]any),
 	}
 }
 
-func (si *CookieFromMemory) Set(key, value interface{}) {
+func (si *CookieFromMemory) Set(key, value any) {
 	si.lock.Lock()
 	defer si.lock.Unlock()
 	si.data[key] = value
 }
 
-func (si *CookieFromMemory) Get(key interface{}) interface{} {
+func (si *CookieFromMemory) Get(key any) any {
 	if value := si.data[key]; value != nil {
 		return value
 	}
 	return nil
 }
 
-func (si *CookieFromMemory) Remove(key interface{}) error {
+func (si *CookieFromMemory) Remove(key any) error {
 	if value := si.data[key]; value != nil {
 		delete(si.data, key)
 	}
