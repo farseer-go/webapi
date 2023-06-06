@@ -1,6 +1,7 @@
 package context
 
 import (
+	"encoding/json"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/parse"
@@ -28,8 +29,26 @@ type HttpRoute struct {
 	HandleMiddleware    IMiddleware                    // handle中间件
 }
 
-// MapToParams 将map转成入参值
-func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
+func (receiver *HttpRoute) JsonToParams(request *HttpRequest) []reflect.Value {
+	// dto
+	if receiver.RequestParamIsModel {
+		// 第一个参数，将json反序列化到dto
+		firstParamType := receiver.RequestParamType.First() // 先取第一个参数
+		val := reflect.New(firstParamType).Interface()
+		_ = json.Unmarshal(request.BodyBytes, val)
+		returnVal := []reflect.Value{reflect.ValueOf(val).Elem()}
+
+		// 第2个参数起，为interface类型，需要做注入操作
+		return receiver.parseInterfaceParam(returnVal)
+	}
+
+	// 多参数
+	mapVal := request.JsonToMap()
+	return receiver.FormToParams(mapVal)
+}
+
+// FormToParams 将map转成入参值
+func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 	// dto模式
 	if receiver.RequestParamIsModel {
 		// 第一个参数，将json反序列化到dto
@@ -40,24 +59,22 @@ func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
 			if !field.IsExported() {
 				continue
 			}
+			// 支持json标签
 			key := field.Tag.Get("json")
 			if key == "" {
 				key = strings.ToLower(field.Name)
 			}
 			kv, exists := mapVal[key]
 			if exists {
-				defVal := paramVal.Field(i).Interface()
-				paramVal.FieldByName(field.Name).Set(reflect.ValueOf(parse.Convert(kv, defVal)))
+				fieldVal := parse.ConvertValue(kv, paramVal.Field(i).Type())
+				// dto中的字段赋值
+				paramVal.FieldByName(field.Name).Set(fieldVal)
 			}
 		}
 		returnVal := []reflect.Value{paramVal}
 
 		// 第2个参数起，为interface类型，需要做注入操作
-		for i := 1; i < receiver.RequestParamType.Count(); i++ {
-			val := container.ResolveType(receiver.RequestParamType.Index(i))
-			returnVal = append(returnVal, reflect.ValueOf(val))
-		}
-		return returnVal
+		return receiver.parseInterfaceParam(returnVal)
 	}
 
 	// 多参数
@@ -67,7 +84,12 @@ func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
 		var val any
 		// interface类型，则通过注入的方式
 		if fieldType.Kind() == reflect.Interface {
-			val = container.ResolveType(fieldType)
+			// 如果是接口类型，则这里的名称为IocName
+			paramName := ""
+			if i < receiver.ParamNames.Count() {
+				paramName = receiver.ParamNames.Index(i)
+			}
+			val = container.ResolveType(fieldType, paramName)
 		} else {
 			val = reflect.New(fieldType).Elem().Interface()
 			if receiver.ParamNames.Count() > i {
@@ -85,4 +107,18 @@ func (receiver *HttpRoute) MapToParams(mapVal map[string]any) []reflect.Value {
 		lstParams[i] = reflect.ValueOf(val)
 	}
 	return lstParams
+}
+
+// 第2个参数起，为interface类型，需要做注入操作
+func (receiver *HttpRoute) parseInterfaceParam(returnVal []reflect.Value) []reflect.Value {
+	for i := 1; i < receiver.RequestParamType.Count(); i++ {
+		// 如果是接口类型，则这里的名称为IocName
+		paramName := ""
+		if i < receiver.ParamNames.Count() {
+			paramName = receiver.ParamNames.Index(i)
+		}
+		val := container.ResolveType(receiver.RequestParamType.Index(i), paramName)
+		returnVal = append(returnVal, reflect.ValueOf(val))
+	}
+	return returnVal
 }
