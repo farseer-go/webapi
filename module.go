@@ -16,8 +16,5 @@ func (module Module) DependsModule() []modules.FarseerModule {
 func (module Module) PreInitialize() {
 	controller.Init()
 	minimal.Init()
-}
-
-func (module Module) PostInitialize() {
 	defaultApi = NewApplicationBuilder()
 }
