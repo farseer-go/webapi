@@ -8,20 +8,20 @@ import (
 	"time"
 )
 
-const DEFEALT_TIME = 1800
+const DefaultTime = 1800
 
-func NewSessionMange() *SessionManager {
-	SessionManager := &SessionManager{
+var DefaultSession = newSessionMange()
+
+func newSessionMange() *SessionManager {
+	sessionManager := &SessionManager{
 		cookieName: "lz_cookie",
 		storage:    newFromMemory(),
-		maxAge:     1800,
+		maxAge:     DefaultTime,
 	}
 
-	go SessionManager.GC()
-	return SessionManager
+	go sessionManager.GC()
+	return sessionManager
 }
-
-var SessionM *SessionManager = NewSessionMange()
 
 type SessionManager struct {
 	cookieName string
@@ -30,15 +30,35 @@ type SessionManager struct {
 	lock       sync.Mutex
 }
 
+func (m *SessionManager) GC() {
+	tick := time.NewTicker(60 * time.Second)
+	for range tick.C {
+		m.lock.Lock()
+		m.storage.GCSession()
+		m.lock.Unlock()
+	}
+}
+
 type Provider interface {
-	//初始化一个session，id根据需要生成后传入
+	// InitSession 初始化一个session，id根据需要生成后传入
 	InitSession(sid string, maxAge int64) (Session, error)
-	//根据sid，获得当前session
+	// SetSession 根据sid，获得当前session
 	SetSession(session Session) error
-	//销毁session
+	// DestroySession 销毁session
 	DestroySession(sid string) error
-	//回收
+	// GCSession 回收
 	GCSession()
+}
+
+func newFromMemory() *FromMemory {
+	return &FromMemory{
+		sessions: make(map[string]Session, 0),
+	}
+}
+
+type FromMemory struct {
+	lock     sync.Mutex
+	sessions map[string]Session
 }
 
 func (fm *FromMemory) DestroySession(sid string) error {
@@ -67,31 +87,17 @@ func (fm *FromMemory) GCSession() {
 	}
 }
 
-func (m *SessionManager) GC() {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-
-	m.storage.GCSession()
-	age2 := int(60 * time.Second)
-	time.AfterFunc(time.Duration(age2), func() {
-		m.GC()
-	})
-}
-
-func newFromMemory() *FromMemory {
-	return &FromMemory{
-		sessions: make(map[string]Session, 0),
+func (fm *FromMemory) InitSession(sid string, maxAge int64) (Session, error) {
+	fm.lock.Lock()
+	defer fm.lock.Unlock()
+	newSession := newSessionFromMemory()
+	newSession.sid = sid
+	if maxAge != 0 {
+		newSession.maxAge = maxAge
 	}
-}
-
-type FromMemory struct {
-	lock     sync.Mutex
-	sessions map[string]Session
-}
-
-type CookieMemory struct {
-	lock   sync.Mutex
-	cookie Cookie
+	newSession.lastAccessedTime = time.Now()
+	fm.sessions[sid] = newSession
+	return newSession, nil
 }
 
 type SessionFromMemory struct {
@@ -102,11 +108,6 @@ type SessionFromMemory struct {
 	data             map[any]any //主数据
 }
 
-type CookieFromMemory struct {
-	lock sync.Mutex
-	data map[any]any //主数据
-}
-
 type Session interface {
 	Set(key, value any)
 	Get(key any) any
@@ -114,16 +115,10 @@ type Session interface {
 	GetId() string
 }
 
-type Cookie interface {
-	Set(key, value any)
-	Get(key any) any
-	Remove(key any) error
-}
-
 func newSessionFromMemory() *SessionFromMemory {
 	return &SessionFromMemory{
 		data:   make(map[any]any),
-		maxAge: DEFEALT_TIME,
+		maxAge: DefaultTime,
 	}
 }
 
@@ -147,53 +142,8 @@ func (si *SessionFromMemory) Remove(key any) error {
 	return nil
 }
 
-func newCookieFromMemory() *CookieFromMemory {
-	return &CookieFromMemory{
-		data: make(map[any]any),
-	}
-}
-
-func (si *CookieFromMemory) Set(key, value any) {
-	si.lock.Lock()
-	defer si.lock.Unlock()
-	si.data[key] = value
-}
-
-func (si *CookieFromMemory) Get(key any) any {
-	if value := si.data[key]; value != nil {
-		return value
-	}
-	return nil
-}
-
-func (si *CookieFromMemory) Remove(key any) error {
-	if value := si.data[key]; value != nil {
-		delete(si.data, key)
-	}
-	return nil
-}
-
 func (si *SessionFromMemory) GetId() string {
 	return si.sid
-}
-
-func (fm *FromMemory) InitSession(sid string, maxAge int64) (Session, error) {
-	fm.lock.Lock()
-	defer fm.lock.Unlock()
-	newSession := newSessionFromMemory()
-	newSession.sid = sid
-	if maxAge != 0 {
-		newSession.maxAge = maxAge
-	}
-	newSession.lastAccessedTime = time.Now()
-	fm.sessions[sid] = newSession
-	return newSession, nil
-}
-
-func InitCookie() (Cookie, error) {
-	var cookie Cookie
-	cookie = newCookieFromMemory()
-	return cookie, nil
 }
 
 func getSId() string {
