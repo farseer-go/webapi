@@ -5,6 +5,14 @@ import (
 	"time"
 )
 
+// 初始化Cookies
+func initCookies(w http.ResponseWriter, r *http.Request) *HttpCookies {
+	return &HttpCookies{
+		w: w,
+		r: r,
+	}
+}
+
 type HttpCookies struct {
 	w http.ResponseWriter
 	r *http.Request

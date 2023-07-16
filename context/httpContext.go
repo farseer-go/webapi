@@ -13,7 +13,7 @@ type HttpContext struct {
 	Response         *HttpResponse
 	Header           collections.ReadonlyDictionary[string, string]
 	Cookie           *HttpCookies
-	Session          Session
+	Session          *HttpSession
 	Route            *HttpRoute
 	URI              *HttpURL
 	Method           string
@@ -55,10 +55,8 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 		TransferEncoding: r.TransferEncoding,
 		ContentType:      "",
 		Route:            &httpRoute,
-		Cookie: &HttpCookies{
-			w: w,
-			r: r,
-		},
+		Cookie:           initCookies(w, r),
+		Session:          initSession(w, r),
 	}
 
 	switch httpContext.Method {
@@ -84,7 +82,7 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 		header.Add(k, strings.Join(v, ";"))
 	}
 	httpContext.Header = header.ToReadonlyDictionary()
-	httpContext.Session, _ = DefaultSession.storage.InitSession("sid", DefaultTime)
+	httpContext.Session = initSession(nil, nil)
 
 	// ContentType
 	for _, contentType := range strings.Split(httpContext.Header.GetValue("Content-Type"), ";") {

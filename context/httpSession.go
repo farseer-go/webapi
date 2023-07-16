@@ -1,155 +1,83 @@
 package context
 
 import (
-	"crypto/rand"
-	"encoding/base64"
-	"io"
-	"sync"
+	"github.com/farseer-go/cache"
+	"github.com/farseer-go/cacheMemory"
+	"github.com/farseer-go/fs/container"
+	"github.com/farseer-go/fs/snowflake"
+	"net/http"
+	"strconv"
 	"time"
 )
 
-const DefaultTime = 1800
+// session名称
+const sessionId = "SessionId"
 
-var DefaultSession = newSessionMange()
+// 自动过期时间，单位：秒
+const sessionTimeout = 1200
 
-func newSessionMange() *SessionManager {
-	sessionManager := &SessionManager{
-		cookieName: "lz_cookie",
-		storage:    newFromMemory(),
-		maxAge:     DefaultTime,
+// 存储session每一项值
+type nameValue struct {
+	Name  string
+	Value any
+}
+
+type HttpSession struct {
+	id    string
+	store cache.ICacheManage[nameValue]
+}
+
+// 初始化httpSession
+func initSession(w http.ResponseWriter, r *http.Request) *HttpSession {
+	c, _ := r.Cookie(sessionId)
+	httpSession := &HttpSession{
+		id: c.Value,
 	}
 
-	go sessionManager.GC()
-	return sessionManager
-}
-
-type SessionManager struct {
-	cookieName string
-	storage    Provider
-	maxAge     int64
-	lock       sync.Mutex
-}
-
-func (m *SessionManager) GC() {
-	tick := time.NewTicker(60 * time.Second)
-	for range tick.C {
-		m.lock.Lock()
-		m.storage.GCSession()
-		m.lock.Unlock()
+	// 第一次请求
+	if httpSession.id == "" {
+		httpSession.id = strconv.FormatInt(snowflake.GenerateId(), 10)
+		// 写入Cookies
+		http.SetCookie(w, &http.Cookie{
+			Name:     sessionId,
+			Value:    httpSession.id,
+			Path:     "/",
+			HttpOnly: true,
+		})
 	}
-}
 
-type Provider interface {
-	// InitSession 初始化一个session，id根据需要生成后传入
-	InitSession(sid string, maxAge int64) (Session, error)
-	// SetSession 根据sid，获得当前session
-	SetSession(session Session) error
-	// DestroySession 销毁session
-	DestroySession(sid string) error
-	// GCSession 回收
-	GCSession()
-}
-
-func newFromMemory() *FromMemory {
-	return &FromMemory{
-		sessions: make(map[string]Session, 0),
+	// 设置存储方式
+	cacheId := "SessionId_" + httpSession.id
+	if !container.IsRegister[cache.ICacheManage[nameValue]](cacheId) {
+		httpSession.store = cacheMemory.SetProfiles[nameValue](cacheId, "Name", func(op *cache.Op) {
+			op.SlidingExpiration(sessionTimeout * time.Second)
+		})
+	} else {
+		httpSession.store = container.Resolve[cache.ICacheManage[nameValue]](cacheId)
 	}
+	return httpSession
 }
 
-type FromMemory struct {
-	lock     sync.Mutex
-	sessions map[string]Session
+// Get 获取Session
+func (r *HttpSession) Get(name string) any {
+	item, _ := r.store.GetItem(name)
+	return item.Value
 }
 
-func (fm *FromMemory) DestroySession(sid string) error {
-	if _, ok := fm.sessions[sid]; ok {
-		delete(fm.sessions, sid)
-		return nil
-	}
-	return nil
+// SetValue 设置Session
+func (r *HttpSession) SetValue(name string, val any) {
+	r.store.SaveItem(nameValue{
+		Name:  name,
+		Value: val,
+	})
 }
 
-func (fm *FromMemory) SetSession(session Session) error {
-	fm.sessions[session.GetId()] = session
-	return nil
+// Remove 删除Session
+func (r *HttpSession) Remove(name string) {
+	r.store.Remove(name)
 }
 
-func (fm *FromMemory) GCSession() {
-	sessions := fm.sessions
-	if len(sessions) < 1 {
-		return
-	}
-	for k, v := range sessions {
-		t := (v.(*SessionFromMemory).lastAccessedTime.Unix()) + (v.(*SessionFromMemory).maxAge)
-		if t < time.Now().Unix() {
-		}
-		delete(fm.sessions, k)
-	}
-}
-
-func (fm *FromMemory) InitSession(sid string, maxAge int64) (Session, error) {
-	fm.lock.Lock()
-	defer fm.lock.Unlock()
-	newSession := newSessionFromMemory()
-	newSession.sid = sid
-	if maxAge != 0 {
-		newSession.maxAge = maxAge
-	}
-	newSession.lastAccessedTime = time.Now()
-	fm.sessions[sid] = newSession
-	return newSession, nil
-}
-
-type SessionFromMemory struct {
-	sid              string //唯一标识
-	lock             sync.Mutex
-	lastAccessedTime time.Time   //最后一次访问时间
-	maxAge           int64       //超时时间
-	data             map[any]any //主数据
-}
-
-type Session interface {
-	Set(key, value any)
-	Get(key any) any
-	Remove(key any) error
-	GetId() string
-}
-
-func newSessionFromMemory() *SessionFromMemory {
-	return &SessionFromMemory{
-		data:   make(map[any]any),
-		maxAge: DefaultTime,
-	}
-}
-
-func (si *SessionFromMemory) Set(key, value any) {
-	si.lock.Lock()
-	defer si.lock.Unlock()
-	si.data[key] = value
-}
-
-func (si *SessionFromMemory) Get(key any) any {
-	if value := si.data[key]; value != nil {
-		return value
-	}
-	return nil
-}
-
-func (si *SessionFromMemory) Remove(key any) error {
-	if value := si.data[key]; value != nil {
-		delete(si.data, key)
-	}
-	return nil
-}
-
-func (si *SessionFromMemory) GetId() string {
-	return si.sid
-}
-
-func getSId() string {
-	b := make([]byte, 32)
-	if _, err := io.ReadFull(rand.Reader, b); err != nil {
-		return ""
-	}
-	return base64.URLEncoding.EncodeToString(b)
+// Clear 清空Session
+func (r *HttpSession) Clear() {
+	r.store.Clear()
 }
