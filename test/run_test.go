@@ -50,6 +50,7 @@ func TestRun(t *testing.T) {
 	webapi.RegisterPOST("/mini/hello6", Hello6)
 	webapi.RegisterPOST("/mini/hello7", Hello7)
 	webapi.RegisterPOST("/mini/hello9", Hello9)
+	webapi.RegisterPOST("/mini/hello10", Hello10)
 	assert.Panics(t, func() {
 		webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello3", Method: "GET", Action: Hello2, Params: []string{"aaa"}})
 	})
@@ -304,5 +305,12 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, Hello1(sizeRequest), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
+	})
+
+	t.Run("mini/hello10", func(t *testing.T) {
+		rsp, _ := http.Post("http://127.0.0.1:8888/mini/hello10", "application/json", nil)
+		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, "application/json", apiResponse.Data)
 	})
 }

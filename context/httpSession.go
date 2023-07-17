@@ -32,9 +32,11 @@ type HttpSession struct {
 
 // 初始化httpSession
 func initSession(w http.ResponseWriter, r *http.Request) *HttpSession {
+	httpSession := &HttpSession{}
+
 	c, _ := r.Cookie(sessionId)
-	httpSession := &HttpSession{
-		id: c.Value,
+	if c != nil {
+		httpSession.id = c.Value
 	}
 
 	// 第一次请求
@@ -75,8 +77,8 @@ func initSession(w http.ResponseWriter, r *http.Request) *HttpSession {
 	return httpSession
 }
 
-// Get 获取Session
-func (r *HttpSession) Get(name string) any {
+// GetValue 获取Session
+func (r *HttpSession) GetValue(name string) any {
 	item, _ := r.store.GetItem(name)
 	return item.Value
 }

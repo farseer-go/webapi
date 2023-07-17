@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/webapi/action"
+	"github.com/farseer-go/webapi/context"
 )
 
 type pageSizeRequest struct {
@@ -70,4 +71,8 @@ func Hello9(req pageSizeRequest, testInject ITestInject) string {
 		panic("inject error")
 	}
 	return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
+}
+
+func Hello10() string {
+	return context.GetHttpContext().ContentType
 }

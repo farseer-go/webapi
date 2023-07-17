@@ -24,6 +24,15 @@ func (r *HttpCookies) Get(name string) *http.Cookie {
 	return cookie
 }
 
+// GetValue 获取Cookie
+func (r *HttpCookies) GetValue(name string) string {
+	cookie, _ := r.r.Cookie(name)
+	if cookie == nil {
+		return ""
+	}
+	return cookie.Value
+}
+
 // SetValue 设置Cookie
 func (r *HttpCookies) SetValue(name string, val string) {
 	http.SetCookie(r.w, &http.Cookie{
