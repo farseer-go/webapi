@@ -3,10 +3,13 @@ package context
 import (
 	"github.com/farseer-go/cache"
 	"github.com/farseer-go/cacheMemory"
+	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/snowflake"
+	"github.com/farseer-go/redis"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -49,9 +52,23 @@ func initSession(w http.ResponseWriter, r *http.Request) *HttpSession {
 	// 设置存储方式
 	cacheId := "SessionId_" + httpSession.id
 	if !container.IsRegister[cache.ICacheManage[nameValue]](cacheId) {
-		httpSession.store = cacheMemory.SetProfiles[nameValue](cacheId, "Name", func(op *cache.Op) {
-			op.SlidingExpiration(sessionTimeout * time.Second)
-		})
+		// 设置定义的超时时间
+		customSessionTimeout := sessionTimeout
+		age := configure.GetInt("Webapi.Session.Age")
+		if age > 0 {
+			customSessionTimeout = age
+		}
+		// 根据配置，设置存储方式
+		switch strings.ToLower(configure.GetString("Webapi.Session.Store")) {
+		case "redis":
+			httpSession.store = redis.SetProfiles[nameValue](cacheId, "Name", configure.GetString("Webapi.Session.StoreConfigName"), func(op *cache.Op) {
+				op.SlidingExpiration(time.Duration(customSessionTimeout) * time.Second)
+			})
+		default:
+			httpSession.store = cacheMemory.SetProfiles[nameValue](cacheId, "Name", func(op *cache.Op) {
+				op.SlidingExpiration(time.Duration(customSessionTimeout) * time.Second)
+			})
+		}
 	} else {
 		httpSession.store = container.Resolve[cache.ICacheManage[nameValue]](cacheId)
 	}
