@@ -67,6 +67,11 @@ func UsePprof() {
 	defaultApi.UsePprof()
 }
 
+// UseSession 开启Session
+func UseSession() {
+	defaultApi.UseSession()
+}
+
 func UseWebApi() {
 	defaultApi.UseWebApi()
 }

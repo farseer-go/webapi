@@ -140,8 +140,12 @@ func (r *applicationBuilder) UsePprof() {
 	r.mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 }
 
-func (r *applicationBuilder) UseWebApi() {
+// UseSession 开启Session
+func (r *applicationBuilder) UseSession() {
 	r.RegisterMiddleware(&middleware.Session{})
+}
+
+func (r *applicationBuilder) UseWebApi() {
 	r.RegisterMiddleware(&middleware.UrlRewriting{})
 }
 

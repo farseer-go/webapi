@@ -30,8 +30,8 @@ type HttpSession struct {
 	store cache.ICacheManage[nameValue]
 }
 
-// 初始化httpSession
-func initSession(w http.ResponseWriter, r *http.Request) *HttpSession {
+// InitSession 初始化httpSession
+func InitSession(w http.ResponseWriter, r *http.Request) *HttpSession {
 	httpSession := &HttpSession{}
 
 	c, _ := r.Cookie(sessionId)

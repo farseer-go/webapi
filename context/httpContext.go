@@ -59,7 +59,6 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 		ContentType:      "",
 		Route:            &httpRoute,
 		Cookie:           initCookies(w, r),
-		Session:          initSession(w, r),
 	}
 
 	switch httpContext.Method {

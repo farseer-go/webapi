@@ -7,5 +7,6 @@ type Session struct {
 }
 
 func (receiver *Session) Invoke(httpContext *context.HttpContext) {
+	httpContext.Session = context.InitSession(httpContext.Response.W, httpContext.Request.R)
 	receiver.IMiddleware.Invoke(httpContext)
 }
