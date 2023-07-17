@@ -46,19 +46,6 @@ func (r *applicationBuilder) RegisterController(c controller.IController) {
 	r.LstRouteTable.AddRange(lst.AsEnumerable())
 }
 
-// registerAction 注册单个Api
-func (r *applicationBuilder) registerAction(route Route) {
-	// 需要先依赖模块
-	modules.ThrowIfNotLoad(Module{})
-
-	route.Url = strings.Trim(route.Url, " ")
-	route.Url = strings.TrimLeft(route.Url, "/")
-	if route.Url == "" {
-		flog.Panicf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
-	}
-	r.LstRouteTable.Add(minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...))
-}
-
 // RegisterPOST 注册单个Api
 func (r *applicationBuilder) RegisterPOST(route string, actionFunc any, params ...string) {
 	r.registerAction(Route{Url: route, Method: "POST", Action: actionFunc, Params: params})
@@ -84,6 +71,19 @@ func (r *applicationBuilder) RegisterRoutes(routes ...Route) {
 	for i := 0; i < len(routes); i++ {
 		r.registerAction(routes[i])
 	}
+}
+
+// registerAction 注册单个Api
+func (r *applicationBuilder) registerAction(route Route) {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+
+	route.Url = strings.Trim(route.Url, " ")
+	route.Url = strings.TrimLeft(route.Url, "/")
+	if route.Url == "" {
+		flog.Panicf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
+	}
+	r.LstRouteTable.Add(minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...))
 }
 
 // 初始化中间件
@@ -114,9 +114,8 @@ func (r *applicationBuilder) handleRoute() {
 		r.mux.HandleFunc(route.RouteUrl, func(w http.ResponseWriter, r *http.Request) {
 			// 解析报文、组装httpContext
 			httpContext := context.NewHttpContext(route, w, r)
-
 			// 执行第一个中间件
-			route.HttpMiddleware.Invoke(&httpContext)
+			route.HttpMiddleware.Invoke(httpContext)
 		})
 	}
 }
