@@ -3,10 +3,13 @@ package context
 import (
 	"bytes"
 	"github.com/farseer-go/collections"
+	"github.com/timandy/routine"
 	"net/http"
 	"reflect"
 	"strings"
 )
+
+var routineHttpContext = routine.NewInheritableThreadLocal[*HttpContext]()
 
 type HttpContext struct {
 	Request          *HttpRequest
@@ -25,7 +28,7 @@ type HttpContext struct {
 }
 
 // NewHttpContext 初始化上下文
-func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request) HttpContext {
+func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request) *HttpContext {
 	// Body
 	buf := new(bytes.Buffer)
 	_, _ = buf.ReadFrom(r.Body)
@@ -82,7 +85,6 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 		header.Add(k, strings.Join(v, ";"))
 	}
 	httpContext.Header = header.ToReadonlyDictionary()
-	httpContext.Session = initSession(nil, nil)
 
 	// ContentType
 	for _, contentType := range strings.Split(httpContext.Header.GetValue("Content-Type"), ";") {
@@ -90,7 +92,14 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 			httpContext.ContentType = contentType
 		}
 	}
-	return httpContext
+
+	routineHttpContext.Set(&httpContext)
+	return &httpContext
+}
+
+// GetHttpContext 在minimalApi模式下也可以获取到上下文
+func GetHttpContext() *HttpContext {
+	return routineHttpContext.Get()
 }
 
 // BuildActionInValue 根据method映射入参
