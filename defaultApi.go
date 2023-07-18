@@ -143,6 +143,7 @@ func (r *applicationBuilder) UsePprof() {
 // UseSession 开启Session
 func (r *applicationBuilder) UseSession() {
 	r.RegisterMiddleware(&middleware.Session{})
+	go context.ClearSession()
 }
 
 func (r *applicationBuilder) UseWebApi() {

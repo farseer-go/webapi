@@ -16,8 +16,11 @@ import (
 // session名称
 const sessionId = "SessionId"
 
-// 自动过期时间，单位：秒
-const sessionTimeout = 1200
+// SessionTimeout 自动过期时间，单位：秒
+var SessionTimeout = 1200
+
+// SessionEnable 开启Session
+var SessionEnable = false
 
 // 存储session每一项值
 type nameValue struct {
@@ -54,22 +57,15 @@ func InitSession(w http.ResponseWriter, r *http.Request) *HttpSession {
 	// 设置存储方式
 	cacheId := "SessionId_" + httpSession.id
 	if !container.IsRegister[cache.ICacheManage[nameValue]](cacheId) {
-		// 设置定义的超时时间
-		customSessionTimeout := sessionTimeout
-		age := configure.GetInt("Webapi.Session.Age")
-		if age > 0 {
-			customSessionTimeout = age
+		ops := func(op *cache.Op) {
+			op.SlidingExpiration(time.Duration(SessionTimeout) * time.Second)
 		}
 		// 根据配置，设置存储方式
 		switch strings.ToLower(configure.GetString("Webapi.Session.Store")) {
 		case "redis":
-			httpSession.store = redis.SetProfiles[nameValue](cacheId, "Name", configure.GetString("Webapi.Session.StoreConfigName"), func(op *cache.Op) {
-				op.SlidingExpiration(time.Duration(customSessionTimeout) * time.Second)
-			})
+			httpSession.store = redis.SetProfiles[nameValue](cacheId, "Name", configure.GetString("Webapi.Session.StoreConfigName"), ops)
 		default:
-			httpSession.store = cacheMemory.SetProfiles[nameValue](cacheId, "Name", func(op *cache.Op) {
-				op.SlidingExpiration(time.Duration(customSessionTimeout) * time.Second)
-			})
+			httpSession.store = cacheMemory.SetProfiles[nameValue](cacheId, "Name", ops)
 		}
 	} else {
 		httpSession.store = container.Resolve[cache.ICacheManage[nameValue]](cacheId)
@@ -99,4 +95,15 @@ func (r *HttpSession) Remove(name string) {
 // Clear 清空Session
 func (r *HttpSession) Clear() {
 	r.store.Clear()
+}
+
+// ClearSession 移除过期的Session对象
+func ClearSession() {
+	if !SessionEnable {
+		SessionEnable = true
+		tick := time.NewTicker(60 * time.Second)
+		for range tick.C {
+			container.RemoveUnused[cache.ICacheManage[nameValue]](time.Duration(SessionTimeout) * time.Second)
+		}
+	}
 }
