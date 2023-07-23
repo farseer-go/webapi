@@ -28,7 +28,7 @@ type HttpContext struct {
 }
 
 // NewHttpContext 初始化上下文
-func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request) *HttpContext {
+func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request) *HttpContext {
 	// Body
 	buf := new(bytes.Buffer)
 	_, _ = buf.ReadFrom(r.Body)
@@ -57,7 +57,7 @@ func NewHttpContext(httpRoute HttpRoute, w http.ResponseWriter, r *http.Request)
 		Close:            r.Close,
 		TransferEncoding: r.TransferEncoding,
 		ContentType:      "",
-		Route:            &httpRoute,
+		Route:            httpRoute,
 		Cookie:           initCookies(w, r),
 	}
 

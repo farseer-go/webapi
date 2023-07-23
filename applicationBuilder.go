@@ -15,35 +15,27 @@ import (
 	"strings"
 )
 
-var defaultApi *applicationBuilder
-
 type applicationBuilder struct {
-	area           string
-	mux            *http.ServeMux
-	certFile       string                                // https证书
-	keyFile        string                                // https证书 key
-	tls            bool                                  // 是否使用https
-	LstRouteTable  collections.List[context.HttpRoute]   // 注册的路由表
+	area     string
+	mux      *serveMux
+	certFile string // https证书
+	keyFile  string // https证书 key
+	tls      bool   // 是否使用https
+	//LstRouteTable  collections.List[context.HttpRoute]   // 注册的路由表
 	MiddlewareList collections.List[context.IMiddleware] // 注册的中间件
 }
 
 func NewApplicationBuilder() *applicationBuilder {
 	return &applicationBuilder{
-		area:           "/",
-		mux:            http.NewServeMux(),
-		LstRouteTable:  collections.NewList[context.HttpRoute](),
+		area: "/",
+		mux:  new(serveMux),
+		//LstRouteTable:  collections.NewList[context.HttpRoute](),
 		MiddlewareList: collections.NewList[context.IMiddleware](),
 	}
 }
 
 func (r *applicationBuilder) RegisterMiddleware(m context.IMiddleware) {
 	r.MiddlewareList.Add(m)
-}
-
-// RegisterController 自动注册控制器下的所有Action方法
-func (r *applicationBuilder) RegisterController(c controller.IController) {
-	lst := controller.Register(defaultApi.area, c)
-	r.LstRouteTable.AddRange(lst.AsEnumerable())
 }
 
 // RegisterPOST 注册单个Api
@@ -73,6 +65,14 @@ func (r *applicationBuilder) RegisterRoutes(routes ...Route) {
 	}
 }
 
+// RegisterController 自动注册控制器下的所有Action方法
+func (r *applicationBuilder) RegisterController(c controller.IController) {
+	lst := controller.Register(defaultApi.area, c)
+	for i := 0; i < lst.Count(); i++ {
+		r.mux.HandleRoute(lst.Index(i))
+	}
+}
+
 // registerAction 注册单个Api
 func (r *applicationBuilder) registerAction(route Route) {
 	// 需要先依赖模块
@@ -83,12 +83,7 @@ func (r *applicationBuilder) registerAction(route Route) {
 	if route.Url == "" {
 		flog.Panicf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
 	}
-	r.LstRouteTable.Add(minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...))
-}
-
-// 初始化中间件
-func (r *applicationBuilder) initMiddleware() {
-	middleware.InitMiddleware(r.LstRouteTable, r.MiddlewareList)
+	r.mux.HandleRoute(minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...))
 }
 
 // Area 设置区域
@@ -104,20 +99,6 @@ func (r *applicationBuilder) Area(area string, f func()) {
 	f()
 	// 执行完后，恢复区域为"/"
 	r.area = "/"
-}
-
-// 将路由表注册到http.HandleFunc
-func (r *applicationBuilder) handleRoute() {
-	// 遍历路由注册表
-	for i := 0; i < r.LstRouteTable.Count(); i++ {
-		route := r.LstRouteTable.Index(i)
-		r.mux.HandleFunc(route.RouteUrl, func(w http.ResponseWriter, r *http.Request) {
-			// 解析报文、组装httpContext
-			httpContext := context.NewHttpContext(route, w, r)
-			// 执行第一个中间件
-			route.HttpMiddleware.Invoke(httpContext)
-		})
-	}
 }
 
 // UseCors 使用CORS中间件
@@ -178,10 +159,7 @@ func (r *applicationBuilder) Run(params ...string) {
 	addr = strings.TrimSuffix(addr, "/")
 
 	// 初始化中间件
-	r.initMiddleware()
-
-	// 将路由表注册到http.HandleFunc
-	r.handleRoute()
+	r.mux.initMiddleware(r.MiddlewareList)
 
 	if strings.HasPrefix(addr, ":") {
 		if r.tls {

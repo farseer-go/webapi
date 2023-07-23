@@ -7,9 +7,12 @@ import (
 )
 
 // InitMiddleware 初始化管道
-func InitMiddleware(lstRouteTable collections.List[context.HttpRoute], lstMiddleware collections.List[context.IMiddleware]) {
-	for i := 0; i < lstRouteTable.Count(); i++ {
-		route := lstRouteTable.Index(i)
+func InitMiddleware(lstRouteTable map[string]*context.HttpRoute, lstMiddleware collections.List[context.IMiddleware]) {
+	for _, route := range lstRouteTable {
+		// 系统web是没有中间件的
+		if route.HttpMiddleware == nil {
+			continue
+		}
 		// 组装管道
 		lstPipeline := assembledPipeline(route, lstMiddleware)
 		for middlewareIndex := 0; middlewareIndex < lstPipeline.Count(); middlewareIndex++ {
@@ -25,7 +28,7 @@ func InitMiddleware(lstRouteTable collections.List[context.HttpRoute], lstMiddle
 }
 
 // 组装管道
-func assembledPipeline(route context.HttpRoute, lstMiddleware collections.List[context.IMiddleware]) collections.List[context.IMiddleware] {
+func assembledPipeline(route *context.HttpRoute, lstMiddleware collections.List[context.IMiddleware]) collections.List[context.IMiddleware] {
 	// 添加系统中间件
 	lst := collections.NewList[context.IMiddleware](route.HttpMiddleware, &exceptionMiddleware{}, &routing{})
 	// 添加用户自定义中间件

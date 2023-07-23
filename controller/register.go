@@ -10,7 +10,7 @@ import (
 )
 
 // Register 自动注册控制器下的所有Action方法
-func Register(area string, c IController) collections.List[context.HttpRoute] {
+func Register(area string, c IController) collections.List[*context.HttpRoute] {
 	cVal := reflect.ValueOf(c)
 	cType := cVal.Type()
 	controllerType := reflect.Indirect(cVal).Type()
@@ -24,7 +24,7 @@ func Register(area string, c IController) collections.List[context.HttpRoute] {
 	var actionFilter = reflect.TypeOf((*IActionFilter)(nil)).Elem()
 	isImplActionFilter := cType.Implements(actionFilter)
 
-	lst := collections.NewList[context.HttpRoute]()
+	lst := collections.NewList[*context.HttpRoute]()
 	// 遍历controller下的action函数
 	for i := 0; i < cType.NumMethod(); i++ {
 		actionMethod := cType.Method(i)
@@ -32,7 +32,7 @@ func Register(area string, c IController) collections.List[context.HttpRoute] {
 		if actionMethod.IsExported() && !lstControllerMethodName.Contains(actionMethod.Name) {
 			httpRoute := registerAction(area, actionMethod, actions, controllerName, controllerType, autoBindHeaderName, isImplActionFilter)
 			if httpRoute != nil {
-				lst.Add(*httpRoute)
+				lst.Add(httpRoute)
 			}
 		}
 	}

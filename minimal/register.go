@@ -12,7 +12,7 @@ import (
 )
 
 // Register 注册单个Api
-func Register(area string, method string, route string, actionFunc any, paramNames ...string) context.HttpRoute {
+func Register(area string, method string, route string, actionFunc any, paramNames ...string) *context.HttpRoute {
 	actionType := reflect.TypeOf(actionFunc)
 	param := types.GetInParam(actionType)
 
@@ -25,7 +25,8 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 	lstResponseParamType := collections.NewList(types.GetOutParam(actionType)...)
 
 	// 添加到路由表
-	return context.HttpRoute{
+	return &context.HttpRoute{
+		RouteTpl:            route,
 		RouteUrl:            area + route,
 		Action:              actionFunc,
 		Method:              collections.NewList(strings.Split(strings.ToUpper(method), "|")...),
@@ -37,5 +38,10 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 		HttpMiddleware:      &middleware.Http{},
 		HandleMiddleware:    &HandleMiddleware{},
 		IsGoBasicType:       types.IsGoBasicType(lstResponseParamType.First()),
+		RegexpPath:          strings.Contains(route, "{") && strings.Contains(route, "}"),
+		RouteRegexp: context.NewRouteRegexp(route, context.RegexpTypePath, context.RouteRegexpOptions{
+			StrictSlash:    false,
+			UseEncodedPath: false,
+		}),
 	}
 }

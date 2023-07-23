@@ -6,6 +6,8 @@ import (
 	"github.com/farseer-go/webapi/controller"
 )
 
+var defaultApi *applicationBuilder
+
 func RegisterMiddleware(m context.IMiddleware) {
 	// 需要先依赖模块
 	modules.ThrowIfNotLoad(Module{})

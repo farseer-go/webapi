@@ -5,12 +5,14 @@ import (
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/parse"
+	"net/http"
 	"reflect"
 	"strings"
 )
 
 // HttpRoute 路由表
 type HttpRoute struct {
+	RouteTpl            string                         // 原始路由地址
 	RouteUrl            string                         // 路由地址
 	Controller          reflect.Type                   // 控制器类型
 	ControllerName      string                         // 控制器名称
@@ -25,10 +27,14 @@ type HttpRoute struct {
 	AutoBindHeaderName  string                         // 自动绑定header的字段名称
 	IsImplActionFilter  bool                           // 是否实现了IActionFilter
 	IsGoBasicType       bool                           // 返回值只有一个时，是否为基础类型
-	HttpMiddleware      IMiddleware                    // 中间件入口
+	HttpMiddleware      IMiddleware                    // 中间件入口（每个路由的管道都不一样）
 	HandleMiddleware    IMiddleware                    // handle中间件
+	RegexpPath          bool                           // 开启地址正则
+	RouteRegexp         *routeRegexp                   // 正则路由
+	Handler             http.Handler                   // api处理函数
 }
 
+// JsonToParams json入参转成param
 func (receiver *HttpRoute) JsonToParams(request *HttpRequest) []reflect.Value {
 	// dto
 	if receiver.RequestParamIsModel {
