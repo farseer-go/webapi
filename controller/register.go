@@ -87,20 +87,21 @@ func registerAction(area string, actionMethod reflect.Method, actions map[string
 	// 添加到路由表
 	return &context.HttpRoute{
 		RouteUrl:            area + strings.ToLower(controllerName) + "/" + strings.ToLower(actionName),
-		Controller:          controllerType,
-		ControllerName:      controllerName,
 		Action:              methodType,
-		ActionName:          actionName,
+		Method:              collections.NewList(strings.Split(strings.ToUpper(actions[actionName].Method), "|")...),
 		RequestParamType:    lstRequestParamType,
 		ResponseBodyType:    lstResponseParamType,
 		RequestParamIsModel: types.IsDtoModelIgnoreInterface(lstRequestParamType.ToArray()),
 		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
-		Method:              collections.NewList(strings.Split(strings.ToUpper(actions[actionName].Method), "|")...),
 		ParamNames:          collections.NewList(paramNames...),
-		AutoBindHeaderName:  autoBindHeaderName,
-		IsImplActionFilter:  isImplActionFilter,
 		HttpMiddleware:      &middleware.Http{},
 		HandleMiddleware:    &HandleMiddleware{},
 		IsGoBasicType:       types.IsGoBasicType(lstResponseParamType.First()),
+
+		AutoBindHeaderName: autoBindHeaderName,
+		IsImplActionFilter: isImplActionFilter,
+		Controller:         controllerType,
+		ControllerName:     controllerName,
+		ActionName:         actionName,
 	}
 }

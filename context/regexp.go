@@ -56,6 +56,8 @@ type routeRegexp struct {
 	varsR []*regexp.Regexp
 	// Wildcard host-port (no strict port match in hostname)
 	wildcardHostPort bool
+	// 使用了正则匹配
+	UseRegex bool
 }
 
 // NewRouteRegexp 构建支持正则的路由
@@ -170,6 +172,7 @@ func NewRouteRegexp(tpl string, typ RegexpType, options RouteRegexpOptions) *rou
 		varsN:            varsN,
 		varsR:            varsR,
 		wildcardHostPort: wildcardHostPort,
+		UseRegex:         len(varsN) > 0,
 	}
 }
 
@@ -205,4 +208,27 @@ func getPlaceholderIndex(tpl string) ([]int, error) {
 // varGroupName builds a capturing group name for the indexed variable.
 func varGroupName(idx int) string {
 	return "v" + strconv.Itoa(idx)
+}
+
+// Match 是否匹配
+func (receiver *routeRegexp) Match(path string) (map[string]string, bool) {
+	if !receiver.regexp.MatchString(path) {
+		return nil, false
+	}
+
+	matches := receiver.regexp.FindStringSubmatchIndex(path)
+	if len(matches) > 0 {
+		return extractVars(path, matches, receiver.varsN), true
+
+	}
+	return nil, true
+}
+
+func extractVars(path string, matches []int, names []string) map[string]string {
+	output := make(map[string]string)
+	for i, name := range names {
+		output[name] = path[matches[2*i+2]:matches[2*i+3]]
+	}
+
+	return output
 }

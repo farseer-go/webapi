@@ -63,10 +63,9 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 
 	switch httpContext.Method {
 	case "GET":
-		_ = r.ParseForm()
 		httpContext.Request.ParseQuery(r.Form)
 	default:
-		httpContext.Request.ParseForm()
+		httpContext.Request.ParseForm(r.Form)
 	}
 
 	// httpURL

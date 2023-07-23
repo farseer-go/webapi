@@ -26,22 +26,16 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 
 	// 添加到路由表
 	return &context.HttpRoute{
-		RouteTpl:            route,
 		RouteUrl:            area + route,
 		Action:              actionFunc,
 		Method:              collections.NewList(strings.Split(strings.ToUpper(method), "|")...),
 		RequestParamType:    lstRequestParamType,
 		ResponseBodyType:    lstResponseParamType,
-		ParamNames:          collections.NewList(paramNames...),
 		RequestParamIsModel: types.IsDtoModelIgnoreInterface(lstRequestParamType.ToArray()),
 		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
+		ParamNames:          collections.NewList(paramNames...),
 		HttpMiddleware:      &middleware.Http{},
 		HandleMiddleware:    &HandleMiddleware{},
 		IsGoBasicType:       types.IsGoBasicType(lstResponseParamType.First()),
-		RegexpPath:          strings.Contains(route, "{") && strings.Contains(route, "}"),
-		RouteRegexp: context.NewRouteRegexp(route, context.RegexpTypePath, context.RouteRegexpOptions{
-			StrictSlash:    false,
-			UseEncodedPath: false,
-		}),
 	}
 }

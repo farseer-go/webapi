@@ -32,18 +32,21 @@ func (r *HttpRequest) JsonToMap() map[string]any {
 	return mapVal
 }
 
-func (r *HttpRequest) ParseForm() {
+func (r *HttpRequest) ParseForm(form url.Values) {
 	r.Form = make(map[string]any)
-	formValues := strings.Split(r.BodyString, "&")
-	for _, value := range formValues {
-		kv := strings.Split(value, "=")
-		key := strings.ToLower(kv[0])
-		var value any
-		if len(kv) > 1 {
-			value = kv[1]
-		}
-		r.Form[key] = value
+	for k, v := range form {
+		r.Form[strings.ToLower(k)] = v[0]
 	}
+	//formValues := strings.Split(r.BodyString, "&")
+	//for _, value := range formValues {
+	//	kv := strings.Split(value, "=")
+	//	key := strings.ToLower(kv[0])
+	//	var value any
+	//	if len(kv) > 1 {
+	//		value = kv[1]
+	//	}
+	//	r.Form[key] = value
+	//}
 }
 
 func (r *HttpRequest) ParseQuery(values url.Values) {

@@ -51,7 +51,7 @@ func TestRun(t *testing.T) {
 	webapi.RegisterPOST("/mini/hello7", Hello7)
 	webapi.RegisterPOST("/mini/hello9", Hello9)
 	webapi.RegisterPOST("/mini/hello10", Hello10)
-	webapi.RegisterGET("/mini/hello4/{pageSize}-{pageIndex}", Hello4)
+	webapi.RegisterGET("/mini/hello4/{pageSize}-{pageIndex}", Hello4, "pageSize", "pageIndex")
 	assert.Panics(t, func() {
 		webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello3", Method: "GET", Action: Hello2, Params: []string{"aaa"}})
 	})
@@ -315,12 +315,12 @@ func TestRun(t *testing.T) {
 		assert.Equal(t, "application/json", apiResponse.Data)
 	})
 
-	//t.Run("/mini/hello4/{pageSize}-{pageIndex}", func(t *testing.T) {
-	//	req, _ := http.NewRequest("GET", "http://127.0.0.1:8888/mini/hello4/15-6", nil)
-	//	rsp, _ := http.DefaultClient.Do(req)
-	//	apiResponse := core.NewApiResponseByReader[[]int](rsp.Body)
-	//	_ = rsp.Body.Close()
-	//	assert.Equal(t, []int{15, 6}, apiResponse.Data)
-	//	assert.Equal(t, 200, rsp.StatusCode)
-	//})
+	t.Run("/mini/hello4/{pageSize}-{pageIndex}", func(t *testing.T) {
+		req, _ := http.NewRequest("GET", "http://127.0.0.1:8888/mini/hello4/15-6", nil)
+		rsp, _ := http.DefaultClient.Do(req)
+		apiResponse := core.NewApiResponseByReader[[]int](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, []int{15, 6}, apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
 }

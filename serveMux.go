@@ -14,10 +14,11 @@ import (
 )
 
 type serveMux struct {
-	mu    sync.RWMutex
-	m     map[string]*context.HttpRoute
-	es    []*context.HttpRoute // slice of entries sorted from longest to shortest.
-	hosts bool                 // whether any patterns contain hostnames
+	mu          sync.RWMutex
+	m           map[string]*context.HttpRoute
+	es          []*context.HttpRoute // slice of entries sorted from longest to shortest.
+	hosts       bool                 // whether any patterns contain hostnames
+	regexpRoute []*context.HttpRoute // 正则匹配的路由
 }
 
 func (mux *serveMux) checkHandle(pattern string, handler http.Handler) {
@@ -42,6 +43,12 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 	mux.mu.Lock()
 	defer mux.mu.Unlock()
 
+	// 正则路径匹配（如果有）
+	route.RouteRegexp = context.NewRouteRegexp(route.RouteUrl, context.RegexpTypePath, context.RouteRegexpOptions{
+		StrictSlash:    false,
+		UseEncodedPath: false,
+	})
+
 	route.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 解析报文、组装httpContext
 		httpContext := context.NewHttpContext(route, w, r)
@@ -60,6 +67,11 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 
 	if route.RouteUrl[0] != '/' {
 		mux.hosts = true
+	}
+
+	// 如果使用了正则匹配
+	if route.RouteRegexp.UseRegex {
+		mux.regexpRoute = append(mux.regexpRoute, route)
 	}
 }
 
@@ -101,6 +113,7 @@ func (mux *serveMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	_ = r.ParseForm()
 	h := mux.serveHTTPHandler(r)
 	h.Handler.ServeHTTP(w, r)
 }
@@ -114,7 +127,7 @@ func (mux *serveMux) serveHTTPHandler(r *http.Request) (route *context.HttpRoute
 		if u, ok := mux.redirectToPathSlash(r.URL.Host, r.URL.Path, r.URL); ok {
 			return &context.HttpRoute{Handler: http.RedirectHandler(u.String(), http.StatusMovedPermanently)}
 		}
-		return mux.handler(r.Host, r.URL.Path)
+		return mux.handler(r.Host, r.URL.Path, r)
 	}
 
 	// All other requests have any port stripped and path cleaned
@@ -133,20 +146,20 @@ func (mux *serveMux) serveHTTPHandler(r *http.Request) (route *context.HttpRoute
 		return &context.HttpRoute{Handler: http.RedirectHandler(u.String(), http.StatusMovedPermanently)}
 	}
 
-	return mux.handler(host, r.URL.Path)
+	return mux.handler(host, r.URL.Path, r)
 }
 
 // handler 找到pattern对应的Handler
-func (mux *serveMux) handler(host, path string) (route *context.HttpRoute) {
+func (mux *serveMux) handler(host, path string, r *http.Request) (route *context.HttpRoute) {
 	mux.mu.RLock()
 	defer mux.mu.RUnlock()
 
 	// Host-specific pattern takes precedence over generic ones
 	if mux.hosts {
-		route = mux.match(host + path)
+		route = mux.match(host+path, r)
 	}
 	if route == nil {
-		route = mux.match(path)
+		route = mux.match(path, r)
 	}
 	if route == nil {
 		route = &context.HttpRoute{Handler: http.NotFoundHandler()}
@@ -155,15 +168,26 @@ func (mux *serveMux) handler(host, path string) (route *context.HttpRoute) {
 }
 
 // 找到匹配的路由
-func (mux *serveMux) match(path string) *context.HttpRoute {
-	// Check for exact match first.
+func (mux *serveMux) match(path string, req *http.Request) *context.HttpRoute {
+	// 完全匹配
 	v, ok := mux.m[path]
 	if ok {
 		return v
 	}
 
-	// Check for longest valid match.  mux.es contains all patterns
-	// that end in / sorted from longest to shortest.
+	// 正则匹配
+	for _, r := range mux.regexpRoute {
+		match, isMatch := r.RouteRegexp.Match(path)
+		// 匹配到了
+		if isMatch {
+			for n, val := range match {
+				req.Form.Add(n, val)
+			}
+			return r
+		}
+	}
+
+	// 前缀匹配
 	for _, r := range mux.es {
 		if strings.HasPrefix(path, r.RouteUrl) {
 			return r
