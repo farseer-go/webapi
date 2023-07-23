@@ -72,6 +72,13 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 	// 如果使用了正则匹配
 	if route.RouteRegexp.UseRegex {
 		mux.regexpRoute = append(mux.regexpRoute, route)
+		// 如果参数名称没有显示指定时，则自动按顺序指定
+		if route.ParamNames.Count() == 0 {
+			varNames := route.RouteRegexp.GetVarNames()
+			for _, varName := range varNames {
+				route.ParamNames.Add(varName)
+			}
+		}
 	}
 }
 

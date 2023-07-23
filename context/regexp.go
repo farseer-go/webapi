@@ -50,7 +50,7 @@ type routeRegexp struct {
 	regexp *regexp.Regexp
 	// Reverse template.
 	reverse string
-	// Variable names.
+	// 路径中出现的正则变量名称
 	varsN []string
 	// Variable regexps (validators).
 	varsR []*regexp.Regexp
@@ -224,6 +224,10 @@ func (receiver *routeRegexp) Match(path string) (map[string]string, bool) {
 	return nil, true
 }
 
+// GetVarNames 返回路径中出现的正则变量名称
+func (receiver *routeRegexp) GetVarNames() []string {
+	return receiver.varsN
+}
 func extractVars(path string, matches []int, names []string) map[string]string {
 	output := make(map[string]string)
 	for i, name := range names {

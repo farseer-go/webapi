@@ -51,7 +51,8 @@ func TestRun(t *testing.T) {
 	webapi.RegisterPOST("/mini/hello7", Hello7)
 	webapi.RegisterPOST("/mini/hello9", Hello9)
 	webapi.RegisterPOST("/mini/hello10", Hello10)
-	webapi.RegisterGET("/mini/hello4/{pageSize}-{pageIndex}", Hello4, "pageSize", "pageIndex")
+	webapi.RegisterGET("/mini/hello4/{pageSize}-{pageIndex}", Hello4)
+
 	assert.Panics(t, func() {
 		webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello3", Method: "GET", Action: Hello2, Params: []string{"aaa"}})
 	})

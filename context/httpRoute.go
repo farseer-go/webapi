@@ -20,7 +20,7 @@ type HttpRoute struct {
 	RequestParamType    collections.List[reflect.Type] // 入参
 	ResponseBodyType    collections.List[reflect.Type] // 出参
 	Method              collections.List[string]       // method
-	ParamNames          collections.List[string]       // 入参变量名称
+	ParamNames          collections.List[string]       // 入参变量名称（显示指定）
 	RequestParamIsModel bool                           // 是否为DTO结构
 	ResponseBodyIsModel bool                           // 是否为DTO结构
 	AutoBindHeaderName  string                         // 自动绑定header的字段名称
@@ -81,7 +81,7 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 		return receiver.parseInterfaceParam(returnVal)
 	}
 
-	// 多参数
+	// 非dto模式
 	lstParams := make([]reflect.Value, receiver.RequestParamType.Count())
 	for i := 0; i < receiver.RequestParamType.Count(); i++ {
 		fieldType := receiver.RequestParamType.Index(i)
@@ -96,11 +96,11 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 			val = container.ResolveType(fieldType, paramName)
 		} else {
 			val = reflect.New(fieldType).Elem().Interface()
+			//
 			if receiver.ParamNames.Count() > i {
 				paramName := strings.ToLower(receiver.ParamNames.Index(i))
 				paramVal := mapVal[paramName]
 				val = parse.Convert(paramVal, val)
-
 				// 当实际只有一个接收参数时，不需要指定参数
 			} else if receiver.ParamNames.Count() == 0 && len(mapVal) == 1 {
 				for _, paramVal := range mapVal {
