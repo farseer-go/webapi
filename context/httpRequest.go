@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 )
 
@@ -14,11 +13,12 @@ type HttpRequest struct {
 	BodyBytes  []byte
 	Form       map[string]any
 	Query      map[string]any
-	R          *http.Request
+
+	R *http.Request
 }
 
-// JsonToMap 将json转成map类型
-func (r *HttpRequest) JsonToMap() map[string]any {
+// jsonToMap 将json转成map类型
+func (r *HttpRequest) jsonToMap() map[string]any {
 	mapVal := make(map[string]any)
 	_ = json.Unmarshal(r.BodyBytes, &mapVal)
 	// 将Key转小写
@@ -32,27 +32,18 @@ func (r *HttpRequest) JsonToMap() map[string]any {
 	return mapVal
 }
 
-func (r *HttpRequest) ParseForm(form url.Values) {
-	r.Form = make(map[string]any)
-	for k, v := range form {
-		r.Form[strings.ToLower(k)] = v[0]
+// 解析来自form的值
+func (r *HttpRequest) parseForm() {
+	for k, v := range r.R.Form {
+		key := strings.ToLower(k)
+		r.Form[key] = strings.Join(v, "&")
+		r.Query[key] = strings.Join(v, "&")
 	}
-	//formValues := strings.Split(r.BodyString, "&")
-	//for _, value := range formValues {
-	//	kv := strings.Split(value, "=")
-	//	key := strings.ToLower(kv[0])
-	//	var value any
-	//	if len(kv) > 1 {
-	//		value = kv[1]
-	//	}
-	//	r.Form[key] = value
-	//}
 }
 
-func (r *HttpRequest) ParseQuery(values url.Values) {
-	r.Query = make(map[string]any)
-
-	for k, v := range values {
+// 解析来自url的值
+func (r *HttpRequest) parseQuery() {
+	for k, v := range r.R.URL.Query() {
 		key := strings.ToLower(k)
 		r.Query[key] = strings.Join(v, "&")
 	}

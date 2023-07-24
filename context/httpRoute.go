@@ -47,7 +47,7 @@ func (receiver *HttpRoute) JsonToParams(request *HttpRequest) []reflect.Value {
 	}
 
 	// 多参数
-	mapVal := request.JsonToMap()
+	mapVal := request.jsonToMap()
 	return receiver.FormToParams(mapVal)
 }
 

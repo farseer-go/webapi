@@ -1,6 +1,9 @@
 package context
 
-import "github.com/farseer-go/collections"
+import (
+	"net/http"
+	"strings"
+)
 
 type HttpURL struct {
 	Url         string // 请求地址
@@ -10,5 +13,14 @@ type HttpURL struct {
 	Proto       string // http协议
 	RequestURI  string
 	QueryString string
-	Query       collections.Dictionary[string, string]
+	Query       map[string]any
+
+	R *http.Request
+}
+
+func (r *HttpURL) parseQuery() {
+	for k, v := range r.R.URL.Query() {
+		key := strings.ToLower(k)
+		r.Query[key] = strings.Join(v, "&")
+	}
 }

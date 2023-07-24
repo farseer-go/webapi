@@ -38,6 +38,8 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 			BodyString: buf.String(),
 			BodyBytes:  buf.Bytes(),
 			R:          r,
+			Form:       make(map[string]any),
+			Query:      make(map[string]any),
 		},
 		Response: &HttpResponse{
 			W: w,
@@ -49,8 +51,9 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 			Proto:       r.Proto,
 			RequestURI:  r.RequestURI,
 			QueryString: r.URL.RawQuery,
-			Query:       collections.NewDictionary[string, string](),
+			Query:       make(map[string]any),
 			Url:         "https://" + r.Host + r.RequestURI, // 先默认https，后边在处理
+			R:           r,
 		},
 		Method:           r.Method,
 		ContentLength:    r.ContentLength,
@@ -61,17 +64,9 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 		Cookie:           initCookies(w, r),
 	}
 
-	switch httpContext.Method {
-	case "GET":
-		httpContext.Request.ParseQuery(r.Form)
-	default:
-		httpContext.Request.ParseForm(r.Form)
-	}
-
-	// httpURL
-	for k, v := range r.URL.Query() {
-		httpContext.URI.Query.Add(k, strings.Join(v, ";"))
-	}
+	httpContext.URI.parseQuery()
+	httpContext.Request.parseQuery()
+	httpContext.Request.parseForm()
 
 	if r.TLS == nil {
 		httpContext.URI.Url = "http://" + r.Host + r.RequestURI
