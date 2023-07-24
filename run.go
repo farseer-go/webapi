@@ -21,22 +21,22 @@ func RegisterController(c controller.IController) {
 	defaultApi.RegisterController(c)
 }
 
-// RegisterPOST 注册单个Api
+// RegisterPOST 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func RegisterPOST(route string, actionFunc any, params ...string) {
 	defaultApi.RegisterPOST(route, actionFunc, params...)
 }
 
-// RegisterGET 注册单个Api
+// RegisterGET 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func RegisterGET(route string, actionFunc any, params ...string) {
 	defaultApi.RegisterGET(route, actionFunc, params...)
 }
 
-// RegisterPUT 注册单个Api
+// RegisterPUT 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func RegisterPUT(route string, actionFunc any, params ...string) {
 	defaultApi.RegisterPUT(route, actionFunc, params...)
 }
 
-// RegisterDELETE 注册单个Api
+// RegisterDELETE 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func RegisterDELETE(route string, actionFunc any, params ...string) {
 	defaultApi.RegisterDELETE(route, actionFunc, params...)
 }

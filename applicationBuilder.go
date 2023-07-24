@@ -16,20 +16,18 @@ import (
 )
 
 type applicationBuilder struct {
-	area     string
-	mux      *serveMux
-	certFile string // https证书
-	keyFile  string // https证书 key
-	tls      bool   // 是否使用https
-	//LstRouteTable  collections.List[context.HttpRoute]   // 注册的路由表
+	area           string
+	mux            *serveMux
+	certFile       string                                // https证书
+	keyFile        string                                // https证书 key
+	tls            bool                                  // 是否使用https
 	MiddlewareList collections.List[context.IMiddleware] // 注册的中间件
 }
 
 func NewApplicationBuilder() *applicationBuilder {
 	return &applicationBuilder{
-		area: "/",
-		mux:  new(serveMux),
-		//LstRouteTable:  collections.NewList[context.HttpRoute](),
+		area:           "/",
+		mux:            new(serveMux),
 		MiddlewareList: collections.NewList[context.IMiddleware](),
 	}
 }
@@ -38,22 +36,22 @@ func (r *applicationBuilder) RegisterMiddleware(m context.IMiddleware) {
 	r.MiddlewareList.Add(m)
 }
 
-// RegisterPOST 注册单个Api
+// RegisterPOST 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func (r *applicationBuilder) RegisterPOST(route string, actionFunc any, params ...string) {
 	r.registerAction(Route{Url: route, Method: "POST", Action: actionFunc, Params: params})
 }
 
-// RegisterGET 注册单个Api
+// RegisterGET 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func (r *applicationBuilder) RegisterGET(route string, actionFunc any, params ...string) {
 	r.registerAction(Route{Url: route, Method: "GET", Action: actionFunc, Params: params})
 }
 
-// RegisterPUT 注册单个Api
+// RegisterPUT 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func (r *applicationBuilder) RegisterPUT(route string, actionFunc any, params ...string) {
 	r.registerAction(Route{Url: route, Method: "PUT", Action: actionFunc, Params: params})
 }
 
-// RegisterDELETE 注册单个Api
+// RegisterDELETE 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func (r *applicationBuilder) RegisterDELETE(route string, actionFunc any, params ...string) {
 	r.registerAction(Route{Url: route, Method: "DELETE", Action: actionFunc, Params: params})
 }
