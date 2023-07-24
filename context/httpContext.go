@@ -95,8 +95,8 @@ func GetHttpContext() *HttpContext {
 	return routineHttpContext.Get()
 }
 
-// BuildActionInValue 根据method映射入参
-func (httpContext *HttpContext) BuildActionInValue() []reflect.Value {
+// ParseParams 根据method映射入参
+func (httpContext *HttpContext) ParseParams() []reflect.Value {
 	// 没有入参时，忽略request.body
 	if httpContext.Route.RequestParamType.Count() == 0 {
 		return []reflect.Value{}
@@ -109,7 +109,7 @@ func (httpContext *HttpContext) BuildActionInValue() []reflect.Value {
 	case "": // GET
 		return httpContext.Route.FormToParams(httpContext.Request.Query)
 	default: //case "application/x-www-form-urlencoded", "multipart/form-data":
-		return httpContext.Route.FormToParams(httpContext.Request.Form)
+		return httpContext.Route.FormToParams(httpContext.Request.Query) // Query比Form有更齐全的值，所以不用Form
 	}
 }
 

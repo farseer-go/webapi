@@ -22,7 +22,7 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	receiver.bindHeader(httpContext, controllerVal)
 
 	// 入参
-	params := httpContext.BuildActionInValue()
+	params := httpContext.ParseParams()
 	actionMethod := controllerVal.MethodByName(httpContext.Route.ActionName)
 
 	sw := stopwatch.StartNew()

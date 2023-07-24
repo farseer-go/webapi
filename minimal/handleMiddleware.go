@@ -12,7 +12,7 @@ type HandleMiddleware struct {
 
 func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 入参
-	params := httpContext.BuildActionInValue()
+	params := httpContext.ParseParams()
 
 	sw := stopwatch.StartNew()
 	// 调用action
