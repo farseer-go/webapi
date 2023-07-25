@@ -3,8 +3,8 @@ package test
 import (
 	"fmt"
 	"github.com/farseer-go/fs/exception"
+	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/action"
-	"github.com/farseer-go/webapi/context"
 )
 
 type pageSizeRequest struct {
@@ -74,5 +74,5 @@ func Hello9(req pageSizeRequest, testInject ITestInject) string {
 }
 
 func Hello10() string {
-	return context.GetHttpContext().ContentType
+	return webapi.GetHttpContext().ContentType
 }

@@ -3,13 +3,10 @@ package context
 import (
 	"bytes"
 	"github.com/farseer-go/collections"
-	"github.com/timandy/routine"
 	"net/http"
 	"reflect"
 	"strings"
 )
-
-var routineHttpContext = routine.NewInheritableThreadLocal[*HttpContext]()
 
 type HttpContext struct {
 	Request          *HttpRequest
@@ -86,13 +83,7 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	routineHttpContext.Set(&httpContext)
 	return &httpContext
-}
-
-// GetHttpContext 在minimalApi模式下也可以获取到上下文
-func GetHttpContext() *HttpContext {
-	return routineHttpContext.Get()
 }
 
 // ParseParams 根据method映射入参

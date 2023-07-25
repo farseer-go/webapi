@@ -4,6 +4,7 @@ import (
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
+	"github.com/timandy/routine"
 	"net"
 	"net/http"
 	"net/url"
@@ -12,6 +13,8 @@ import (
 	"strings"
 	"sync"
 )
+
+var routineHttpContext = routine.NewInheritableThreadLocal[*context.HttpContext]()
 
 type serveMux struct {
 	mu          sync.RWMutex
@@ -52,6 +55,8 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 	route.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 解析报文、组装httpContext
 		httpContext := context.NewHttpContext(route, w, r)
+		// 设置到routine，可用于任意子函数获取
+		routineHttpContext.Set(httpContext)
 		// 执行第一个中间件
 		route.HttpMiddleware.Invoke(httpContext)
 	})
@@ -289,4 +294,9 @@ func appendSorted(es []*context.HttpRoute, e *context.HttpRoute) []*context.Http
 	copy(es[i+1:], es[i:])                // Move shorter entries down
 	es[i] = e
 	return es
+}
+
+// GetHttpContext 在minimalApi模式下也可以获取到上下文
+func GetHttpContext() *context.HttpContext {
+	return routineHttpContext.Get()
 }
