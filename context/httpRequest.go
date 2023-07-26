@@ -39,6 +39,19 @@ func (r *HttpRequest) parseForm() {
 		r.Form[key] = strings.Join(v, "&")
 		r.Query[key] = strings.Join(v, "&")
 	}
+
+	// multipart/form-data提交的数据在Body中
+	if r.BodyString != "" {
+		formValues := strings.Split(r.BodyString, "&")
+		for _, value := range formValues {
+			kv := strings.Split(value, "=")
+			if len(kv) > 1 {
+				key := strings.ToLower(kv[0])
+				r.Form[key] = kv[1]
+				r.Query[key] = kv[1]
+			}
+		}
+	}
 }
 
 // 解析来自url的值
