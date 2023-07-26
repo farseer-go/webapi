@@ -19,14 +19,13 @@ func TestNewApplicationBuilder(t *testing.T) {
 	configure.SetDefault("Log.Component.webapi", true)
 
 	server := webapi.NewApplicationBuilder()
-	//server.RegisterController(&TestController{})
 	server.RegisterRoutes(webapi.Route{Url: "/mini/test1", Method: "POST|GET", Action: func(req pageSizeRequest) string {
 		return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 	}})
-	server.RegisterPOST("/mini/hello8", func() {})
+	server.RegisterPOST("/mini/test2", func() {})
 	server.UseCors()
 	go server.Run(":8083")
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	t.Run("mini/test1:8083-POST", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
@@ -45,10 +44,10 @@ func TestNewApplicationBuilder(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 	})
 
-	t.Run("mini/hello8:8083", func(t *testing.T) {
+	t.Run("mini/test2:8083", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
 		marshal, _ := json.Marshal(sizeRequest)
-		rsp, _ := http.Post("http://127.0.0.1:8083/mini/hello8", "application/json", bytes.NewReader(marshal))
+		rsp, _ := http.Post("http://127.0.0.1:8083/mini/test2", "application/json", bytes.NewReader(marshal))
 		body, _ := io.ReadAll(rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, "", string(body))

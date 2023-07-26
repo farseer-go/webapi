@@ -22,7 +22,7 @@ func TestCors(t *testing.T) {
 	}, "page_Size", "pageIndex")
 	server.UseCors()
 	go server.Run(":8080")
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	t.Run("/cors/test:8080", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}

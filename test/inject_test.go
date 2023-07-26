@@ -60,7 +60,7 @@ func TestInject(t *testing.T) {
 	}, "str", "ins2")
 
 	go webapi.Run(":8082")
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	// 测试MVC模式
 	t.Run("/testinject/hello1", func(t *testing.T) {

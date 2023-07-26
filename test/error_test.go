@@ -22,7 +22,7 @@ func TestError(t *testing.T) {
 	})
 	webapi.UseApiResponse()
 	go webapi.Run(":8081")
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	t.Run("error/1", func(t *testing.T) {
 		rsp, _ := http.Post("http://127.0.0.1:8081/error/1", "application/json", nil)
