@@ -24,11 +24,11 @@ func TestRouteRegexp(t *testing.T) {
 
 	webapi.UseApiResponse()
 
-	go webapi.Run(":8087")
+	go webapi.Run(":8091")
 	time.Sleep(10 * time.Millisecond)
 
 	t.Run("/mini/{pageSize}-{pageIndex}-get", func(t *testing.T) {
-		req, _ := http.NewRequest("GET", "http://127.0.0.1:8087/mini/15-6", nil)
+		req, _ := http.NewRequest("GET", "http://127.0.0.1:8091/mini/15-6", nil)
 		rsp, _ := http.DefaultClient.Do(req)
 		apiResponse := core.NewApiResponseByReader[[]int](rsp.Body)
 		_ = rsp.Body.Close()
@@ -37,7 +37,7 @@ func TestRouteRegexp(t *testing.T) {
 	})
 
 	t.Run("/mini/{pageSize}/{pageIndex}-post", func(t *testing.T) {
-		req, _ := http.NewRequest("POST", "http://127.0.0.1:8087/mini/15/6", nil)
+		req, _ := http.NewRequest("POST", "http://127.0.0.1:8091/mini/15/6", nil)
 		rsp, _ := http.DefaultClient.Do(req)
 		apiResponse := core.NewApiResponseByReader[[]int](rsp.Body)
 		_ = rsp.Body.Close()

@@ -1,9 +1,15 @@
 package test
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/webapi"
+	"github.com/stretchr/testify/assert"
+	"net/http"
 	"testing"
 	"time"
 )
@@ -11,7 +17,39 @@ import (
 func TestResponse(t *testing.T) {
 	fs.Initialize[webapi.Module]("demo")
 	configure.SetDefault("Log.Component.webapi", true)
+
+	webapi.RegisterDELETE("/multiResponse", func(pageSize int, pageIndex int) (int, int) {
+		return pageSize, pageIndex
+	}, "page_size", "pageIndex")
+
+	webapi.RegisterPOST("/basicTypeResponse", func(req pageSizeRequest) string {
+		return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
+	})
+
 	webapi.UseApiResponse()
 	go webapi.Run(":8086")
 	time.Sleep(10 * time.Millisecond)
+
+	t.Run("multiResponse", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		req, _ := http.NewRequest("DELETE", "http://127.0.0.1:8086/multiResponse", bytes.NewReader(marshal))
+		req.Header.Set("Content-Type", "application/json")
+		rsp, _ := http.DefaultClient.Do(req)
+		apiResponse := core.NewApiResponseByReader[[]int](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, []int{10, 2}, apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+	})
+
+	t.Run("basicTypeResponse", func(t *testing.T) {
+		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		marshal, _ := json.Marshal(sizeRequest)
+		rsp, _ := http.Post("http://127.0.0.1:8086/basicTypeResponse", "application/json", bytes.NewReader(marshal))
+		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, Hello1(sizeRequest), apiResponse.Data)
+		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, 200, apiResponse.StatusCode)
+	})
 }
