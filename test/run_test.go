@@ -28,7 +28,9 @@ func TestRun(t *testing.T) {
 		webapi.RegisterPOST("/mini/hello1", Hello1)
 		webapi.RegisterGET("/mini/hello2", Hello2)
 		webapi.RegisterPUT("/mini/hello3", Hello3, "page_size", "pageIndex")
-		webapi.RegisterDELETE("/mini/hello4", Hello4, "page_size", "pageIndex")
+		webapi.RegisterDELETE("/mini/hello4", func(pageSize int, pageIndex int) (int, int) {
+			return pageSize, pageIndex
+		}, "page_size", "pageIndex")
 	})
 	webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello2", Method: "GET", Action: Hello2})
 	webapi.RegisterPOST("/mini/hello7", func(actionType int) action.IResult {
@@ -56,7 +58,9 @@ func TestRun(t *testing.T) {
 		return webapi.GetHttpContext().ContentType
 	})
 	webapi.RegisterGET("/mini/hello4/{pageSize}-{pageIndex}", Hello4)
-	webapi.RegisterPOST("/mini/hello4/{pageSize}/{pageIndex}", Hello4)
+	webapi.RegisterPOST("/mini/hello4/{pageSize}/{pageIndex}", func(pageSize int, pageIndex int) (int, int) {
+		return pageSize, pageIndex
+	})
 
 	assert.Panics(t, func() {
 		webapi.RegisterRoutes(webapi.Route{Url: "/mini/hello3", Method: "GET", Action: Hello2, Params: []string{"aaa"}})
@@ -85,8 +89,8 @@ func TestRun(t *testing.T) {
 		rsp, _ := http.Get("http://127.0.0.1:8888/api/1.0/mini/hello2")
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
-		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
+		assert.Equal(t, 3, apiResponse.Data.PageSize)
+		assert.Equal(t, 2, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
@@ -99,7 +103,7 @@ func TestRun(t *testing.T) {
 		rsp, _ := http.DefaultClient.Do(req)
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, Hello3(sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
+		assert.Equal(t, pageSizeRequest{PageSize: sizeRequest.PageSize, PageIndex: sizeRequest.PageIndex}, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
@@ -114,8 +118,8 @@ func TestRun(t *testing.T) {
 		rsp, _ := http.DefaultClient.Do(req)
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, Hello3(10, 2).PageSize, apiResponse.Data.PageSize)
-		assert.Equal(t, Hello3(10, 2).PageIndex, apiResponse.Data.PageIndex)
+		assert.Equal(t, 10, apiResponse.Data.PageSize)
+		assert.Equal(t, 2, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
@@ -136,8 +140,8 @@ func TestRun(t *testing.T) {
 		rsp, _ := http.Get("http://127.0.0.1:8888/mini/hello2")
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
-		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
+		assert.Equal(t, 3, apiResponse.Data.PageSize)
+		assert.Equal(t, 2, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
@@ -148,8 +152,8 @@ func TestRun(t *testing.T) {
 		rsp, _ := http.PostForm("http://127.0.0.1:8888/mini/hello7", val)
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, Hello2().(pageSizeRequest).PageSize, apiResponse.Data.PageSize)
-		assert.Equal(t, Hello2().(pageSizeRequest).PageIndex, apiResponse.Data.PageIndex)
+		assert.Equal(t, 3, apiResponse.Data.PageSize)
+		assert.Equal(t, 2, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
