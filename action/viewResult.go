@@ -15,15 +15,19 @@ type ViewResult struct {
 
 func (receiver ViewResult) ExecuteResult(httpContext *context.HttpContext) {
 	// 默认视图，则以routeUrl为视图位置
+	action := httpContext.URI.Path[strings.LastIndex(httpContext.URI.Path, "/")+1:]
+	path, _ := strings.CutPrefix(httpContext.URI.Path, "/")
+	path = path[:len(path)-len(action)]
+
 	if receiver.viewName == "" {
-		receiver.viewName = "./views/" + strings.TrimPrefix(httpContext.URI.Path, "/") + ".html"
+		receiver.viewName = "./views/" + path + action + ".html"
 	} else {
 		receiver.viewName = strings.TrimPrefix(receiver.viewName, "/")
 		lstViewPath := collections.NewList(strings.Split(receiver.viewName, "/")...)
 		if !strings.Contains(lstViewPath.Last(), ".") {
-			receiver.viewName = "./views/" + receiver.viewName + ".html"
+			receiver.viewName = "./views/" + path + receiver.viewName + ".html"
 		} else {
-			receiver.viewName = "./views/" + receiver.viewName
+			receiver.viewName = "./views/" + path + receiver.viewName
 		}
 	}
 
