@@ -9,19 +9,20 @@ import (
 )
 
 type HttpContext struct {
-	Request          *HttpRequest
-	Response         *HttpResponse
-	Header           collections.ReadonlyDictionary[string, string]
-	Cookie           *HttpCookies
-	Session          *HttpSession
-	Route            *HttpRoute
-	URI              *HttpURL
-	Method           string
-	ContentLength    int64
+	Request          *HttpRequest                                   // Request
+	Response         *HttpResponse                                  // Response
+	Header           collections.ReadonlyDictionary[string, string] // 头部信息
+	Cookie           *HttpCookies                                   // Cookies信息
+	Session          *HttpSession                                   // Session信息
+	Route            *HttpRoute                                     // 路由信息
+	URI              *HttpURL                                       // URL信息
+	Data             *HttpData                                      // 用于传递值
+	Method           string                                         // 客户端提交时的Method
+	ContentLength    int64                                          // 客户端提交时的内容长度
+	ContentType      string                                         // 客户端提交时的内容类型
+	Exception        any                                            // 是否发生异常
 	Close            bool
 	TransferEncoding []string
-	ContentType      string
-	Exception        any
 }
 
 // NewHttpContext 初始化上下文
@@ -52,6 +53,7 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 			Url:         "https://" + r.Host + r.RequestURI, // 先默认https，后边在处理
 			R:           r,
 		},
+		Data:             &HttpData{value: collections.NewDictionary[string, any]()},
 		Method:           r.Method,
 		ContentLength:    r.ContentLength,
 		Close:            r.Close,
