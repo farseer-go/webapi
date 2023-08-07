@@ -28,6 +28,7 @@ type TestHeaderController struct {
 }
 
 func (r *TestHeaderController) Hello1(req pageSizeRequest) string {
+	r.Response.SetMessage("修改成功")
 	return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 }
 
@@ -87,8 +88,7 @@ func TestController(t *testing.T) {
 		rsp, _ := http.Post("http://127.0.0.1:8079/api/1.0/testheader/hello1", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
-		controller := TestHeaderController{}
-		assert.Equal(t, controller.Hello1(sizeRequest), apiResponse.Data)
+		assert.Equal(t, fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, "true", rsp.Header.Get("Executing"))

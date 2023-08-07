@@ -43,7 +43,7 @@ func (receiver HandleMiddleware) initController(httpContext *context.HttpContext
 	for i := 0; i < controllerElem.NumField(); i++ {
 		fieldVal := controllerElem.Field(i)
 		if fieldVal.Type().String() == "controller.BaseController" {
-			fieldVal.Set(reflect.ValueOf(BaseController{HttpContext: *httpContext}))
+			fieldVal.Set(reflect.ValueOf(BaseController{HttpContext: httpContext}))
 			return
 		}
 	}

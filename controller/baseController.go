@@ -5,8 +5,8 @@ import (
 )
 
 type BaseController struct {
-	HttpContext context.HttpContext // 上下文
-	Action      map[string]Action   // 设置每个Action参数
+	*context.HttpContext                   // 上下文
+	Action               map[string]Action // 设置每个Action参数
 }
 
 func (receiver *BaseController) getAction() map[string]Action {
