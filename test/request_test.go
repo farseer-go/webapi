@@ -22,6 +22,7 @@ func TestRequest(t *testing.T) {
 	configure.SetDefault("Log.Component.webapi", true)
 
 	webapi.RegisterPOST("/dto", func(req pageSizeRequest) string {
+		webapi.GetHttpContext().Response.SetMessage("测试成功")
 		return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 	})
 
@@ -51,6 +52,7 @@ func TestRequest(t *testing.T) {
 		assert.Equal(t, expected, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
+		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
 	})
 
 	t.Run("dto-form", func(t *testing.T) {
@@ -66,6 +68,7 @@ func TestRequest(t *testing.T) {
 		assert.Equal(t, expected, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
+		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
 	})
 
 	t.Run("dto-formData", func(t *testing.T) {
@@ -82,6 +85,7 @@ func TestRequest(t *testing.T) {
 		assert.Equal(t, expected, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
+		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
 	})
 
 	t.Run("empty", func(t *testing.T) {
