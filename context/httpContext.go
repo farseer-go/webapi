@@ -40,7 +40,8 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 			Query:      make(map[string]any),
 		},
 		Response: &HttpResponse{
-			W: w,
+			W:             w,
+			StatusMessage: "成功",
 		},
 		URI: &HttpURL{
 			Path:        r.URL.Path,
