@@ -17,11 +17,11 @@ import (
 var routineHttpContext = routine.NewInheritableThreadLocal[*context.HttpContext]()
 
 type serveMux struct {
-	mu          sync.RWMutex
-	m           map[string]*context.HttpRoute
-	es          []*context.HttpRoute // slice of entries sorted from longest to shortest.
-	hosts       bool                 // whether any patterns contain hostnames
-	regexpRoute []*context.HttpRoute // 正则匹配的路由
+	mu          sync.RWMutex                  // lock
+	m           map[string]*context.HttpRoute // 完全地址匹配
+	es          []*context.HttpRoute          // 前缀匹配
+	hosts       bool                          // whether any patterns contain hostnames
+	regexpRoute []*context.HttpRoute          // 正则匹配的路由
 }
 
 func (mux *serveMux) checkHandle(pattern string, handler http.Handler) {
@@ -64,6 +64,7 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 	// 检查规则
 	mux.checkHandle(route.RouteUrl, route.Handler)
 
+	// 完全地址匹配的路由
 	mux.m[route.RouteUrl] = route
 
 	if route.RouteUrl[len(route.RouteUrl)-1] == '/' {
