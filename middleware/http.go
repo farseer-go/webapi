@@ -3,6 +3,7 @@ package middleware
 import (
 	"github.com/farseer-go/webapi/action"
 	"github.com/farseer-go/webapi/context"
+	"net/http"
 )
 
 // Http HTTP报文响应中间件（默认加载）
@@ -26,7 +27,7 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 	}
 
 	if httpContext.Response.StatusCode == 0 {
-		httpContext.Response.StatusCode = 200
+		httpContext.Response.StatusCode = http.StatusOK
 	}
 
 	// 输出返回值

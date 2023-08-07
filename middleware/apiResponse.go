@@ -6,6 +6,7 @@ import (
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/webapi/context"
+	"net/http"
 	"reflect"
 )
 
@@ -36,7 +37,7 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 			}
 			returnVal = lst
 		}
-		apiResponse = core.Success[any]("成功", returnVal)
+		apiResponse = core.Success[any](httpContext.Response.StatusMessage, returnVal)
 	}).CatchWebException(func(exp *exception.WebException) {
 		// 响应码
 		httpContext.Response.StatusCode = exp.StatusCode
@@ -44,7 +45,7 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 		apiResponse = core.Error[any](exp.Message, httpContext.Response.StatusCode)
 	}).CatchException(func(exp any) {
 		// 响应码
-		httpContext.Response.StatusCode = 500
+		httpContext.Response.StatusCode = http.StatusInternalServerError
 		httpContext.Exception = exp
 		apiResponse = core.Error[any](fmt.Sprint(exp), httpContext.Response.StatusCode)
 	})

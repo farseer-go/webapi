@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/farseer-go/webapi/context"
+	"net/http"
 )
 
 type routing struct {
@@ -12,7 +13,7 @@ func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 	// 检查method
 	if httpContext.Method != "OPTIONS" && !httpContext.Route.Method.Contains(httpContext.Method) {
 		// 响应码
-		httpContext.Response.StatusCode = 405
+		httpContext.Response.StatusCode = http.StatusMethodNotAllowed
 		return
 	}
 	receiver.IMiddleware.Invoke(httpContext)
