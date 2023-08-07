@@ -48,7 +48,7 @@ func TestResponse(t *testing.T) {
 		rsp, _ := http.Post("http://127.0.0.1:8086/basicTypeResponse", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, Hello1(sizeRequest), apiResponse.Data)
+		assert.Equal(t, fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", sizeRequest.PageSize, sizeRequest.PageIndex), apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
