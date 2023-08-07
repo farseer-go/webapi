@@ -1,7 +1,7 @@
 package test
 
 type pageSizeRequest struct {
-	PageSize   int `json:"page_size"`
+	PageSize   int `json:"Page_size"`
 	PageIndex  int
 	noExported string //测试不导出字段
 }
