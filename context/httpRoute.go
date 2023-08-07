@@ -64,7 +64,7 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 				continue
 			}
 			// 支持json标签
-			key := field.Tag.Get("json")
+			key := strings.ToLower(field.Tag.Get("json"))
 			if key == "" {
 				key = strings.ToLower(field.Name)
 			}
