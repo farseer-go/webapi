@@ -2,6 +2,8 @@ package webapi
 
 import (
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/timandy/routine"
@@ -53,6 +55,8 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 	})
 
 	route.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		//设置文件上传最大值
+		SetMaxMultipartMemory(r)
 		// 解析报文、组装httpContext
 		httpContext := context.NewHttpContext(route, w, r)
 		// 设置到routine，可用于任意子函数获取
@@ -299,5 +303,21 @@ func appendSorted(es []*context.HttpRoute, e *context.HttpRoute) []*context.Http
 
 // GetHttpContext 在minimalApi模式下也可以获取到上下文
 func GetHttpContext() *context.HttpContext {
-	return routineHttpContext.Get()
+	return routineHttpContext.Get().(*context.HttpContext)
+}
+
+// 设置文件上传最大值
+func SetMaxMultipartMemory(r *http.Request) {
+	for _, item := range strings.Split(r.Header.Get("Content-Type"), ";") {
+		if item == "multipart/form-data" {
+			MaxMultipartMemory := configure.GetInt64("WebApi.MaxMultipartMemory")
+			if MaxMultipartMemory == 0 {
+				MaxMultipartMemory = 10
+			}
+			err := r.ParseMultipartForm(MaxMultipartMemory << 20)
+			if err != nil {
+				flog.Error("SetMaxMultipartMemory err : ", err.Error())
+			}
+		}
+	}
 }
