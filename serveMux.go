@@ -303,7 +303,7 @@ func appendSorted(es []*context.HttpRoute, e *context.HttpRoute) []*context.Http
 
 // GetHttpContext 在minimalApi模式下也可以获取到上下文
 func GetHttpContext() *context.HttpContext {
-	return routineHttpContext.Get().(*context.HttpContext)
+	return routineHttpContext.Get()
 }
 
 // 设置文件上传最大值
