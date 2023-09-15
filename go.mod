@@ -1,6 +1,6 @@
 module github.com/farseer-go/webapi
 
-go 1.19
+go 1.20
 
 require (
 	github.com/farseer-go/cache v0.8.0
