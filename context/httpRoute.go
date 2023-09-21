@@ -30,6 +30,7 @@ type HttpRoute struct {
 	HandleMiddleware    IMiddleware                    // handle中间件
 	RouteRegexp         *routeRegexp                   // 正则路由
 	Handler             http.Handler                   // api处理函数
+	Filters             []IFilter                      // 过滤器（对单个路由的执行单元）
 }
 
 // JsonToParams json入参转成param

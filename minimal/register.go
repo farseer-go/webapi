@@ -12,7 +12,7 @@ import (
 )
 
 // Register 注册单个Api
-func Register(area string, method string, route string, actionFunc any, paramNames ...string) *context.HttpRoute {
+func Register(area string, method string, route string, actionFunc any, filters []context.IFilter, paramNames ...string) *context.HttpRoute {
 	actionType := reflect.TypeOf(actionFunc)
 	param := types.GetInParam(actionType)
 
@@ -37,5 +37,6 @@ func Register(area string, method string, route string, actionFunc any, paramNam
 		HttpMiddleware:      &middleware.Http{},
 		HandleMiddleware:    &HandleMiddleware{},
 		IsGoBasicType:       types.IsGoBasicType(lstResponseParamType.First()),
+		Filters:             filters,
 	}
 }

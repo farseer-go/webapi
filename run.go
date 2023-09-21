@@ -14,6 +14,11 @@ func RegisterMiddleware(m context.IMiddleware) {
 	defaultApi.RegisterMiddleware(m)
 }
 
+// RegisterRoutes 批量注册路由
+func RegisterRoutes(routes ...Route) {
+	defaultApi.RegisterRoutes(routes...)
+}
+
 // RegisterController 自动注册控制器下的所有Action方法
 func RegisterController(c controller.IController) {
 	// 需要先依赖模块
@@ -39,11 +44,6 @@ func RegisterPUT(route string, actionFunc any, params ...string) {
 // RegisterDELETE 注册单个Api（支持占位符，例如：/{cateId}/{Id}）
 func RegisterDELETE(route string, actionFunc any, params ...string) {
 	defaultApi.RegisterDELETE(route, actionFunc, params...)
-}
-
-// RegisterRoutes 批量注册路由
-func RegisterRoutes(routes ...Route) {
-	defaultApi.RegisterRoutes(routes...)
 }
 
 // Area 设置区域
