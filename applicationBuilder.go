@@ -81,7 +81,7 @@ func (r *applicationBuilder) registerAction(route Route) {
 	if route.Url == "" {
 		flog.Panicf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
 	}
-	r.mux.HandleRoute(minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Params...))
+	r.mux.HandleRoute(minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Filters, route.Params...))
 }
 
 // Area 设置区域

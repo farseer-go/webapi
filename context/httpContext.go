@@ -21,6 +21,7 @@ type HttpContext struct {
 	ContentLength    int64                                          // 客户端提交时的内容长度
 	ContentType      string                                         // 客户端提交时的内容类型
 	Exception        any                                            // 是否发生异常
+	Jwt              *HttpJwt                                       // jwt验证
 	Close            bool
 	TransferEncoding []string
 }
@@ -64,6 +65,10 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 		ContentType:      "",
 		Route:            httpRoute,
 		Cookie:           initCookies(w, r),
+		Jwt: &HttpJwt{
+			w: w,
+			r: r,
+		},
 	}
 
 	httpContext.URI.parseQuery()
