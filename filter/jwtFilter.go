@@ -8,11 +8,11 @@ import (
 type JwtFilter struct {
 }
 
-func (receiver *JwtFilter) OnActionExecuting(httpContext *context.HttpContext) {
+func (receiver JwtFilter) OnActionExecuting(httpContext *context.HttpContext) {
 	if !httpContext.Jwt.Valid() {
 		exception.ThrowWebExceptionf(context.InvalidStatusCode, context.InvalidMessage)
 	}
 }
 
-func (receiver *JwtFilter) OnActionExecuted(httpContext *context.HttpContext) {
+func (receiver JwtFilter) OnActionExecuted(httpContext *context.HttpContext) {
 }

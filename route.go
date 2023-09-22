@@ -17,7 +17,7 @@ type Route struct {
 
 // UseJwt 使用Jwt
 func (receiver Route) UseJwt() Route {
-	receiver.Filters = append(receiver.Filters, &filter.JwtFilter{})
+	receiver.Filters = append(receiver.Filters, filter.JwtFilter{})
 	return receiver
 }
 
@@ -31,4 +31,11 @@ func (receiver Route) POST() Route {
 func (receiver Route) GET() Route {
 	receiver.Method = "GET"
 	return receiver
+}
+
+// Filter 添加过滤器
+func (receiver Route) Filter(filter context.IFilter) Route {
+	receiver.Filters = append(receiver.Filters, filter)
+	return receiver
+
 }

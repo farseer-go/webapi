@@ -22,11 +22,11 @@ func TestJwt(t *testing.T) {
 	configure.SetDefault("WebApi.Jwt.InvalidMessage", "您没有权限访问")
 
 	fs.Initialize[webapi.Module]("demo")
-
+	// 颁发Token给到前端
 	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/build", Action: func() {
 		claims := make(map[string]any)
 		claims["farseer-go"] = "v0.8.0"
-		buildToken, _ = webapi.GetHttpContext().Jwt.Build(claims)
+		buildToken, _ = webapi.GetHttpContext().Jwt.Build(claims) // 会写到http head中
 	}}.POST())
 
 	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/validate", Action: func() string {
