@@ -18,15 +18,13 @@ func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {
 	}).CatchWebException(func(exp *exception.WebException) {
 		// 响应码
 		httpContext.Response.StatusCode = exp.StatusCode
-		httpContext.Response.BodyString = exp.Message
-		httpContext.Response.BodyBytes = []byte(exp.Message)
+		httpContext.Response.Write([]byte(exp.Message))
 		httpContext.Exception = exp.Message
 	}).CatchException(func(exp any) {
 		// 响应码
 		httpContext.Response.StatusCode = 500
-		httpContext.Response.BodyString = fmt.Sprint(exp)
-		httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
+		httpContext.Response.Write([]byte(fmt.Sprint(exp)))
 		httpContext.Exception = exp
-		flog.Warningf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, httpContext.Response.BodyString)
+		flog.Warningf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, fmt.Sprint(exp))
 	})
 }

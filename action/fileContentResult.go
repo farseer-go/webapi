@@ -12,8 +12,7 @@ type FileContentResult struct {
 
 func (receiver FileContentResult) ExecuteResult(httpContext *context.HttpContext) {
 	file, _ := os.ReadFile(receiver.filePath)
-	httpContext.Response.BodyString = string(file)
-	httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
+	httpContext.Response.Write(file)
 	httpContext.Response.StatusCode = 200
 }
 

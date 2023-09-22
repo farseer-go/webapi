@@ -10,8 +10,7 @@ type ContentResult struct {
 }
 
 func (receiver ContentResult) ExecuteResult(httpContext *context.HttpContext) {
-	httpContext.Response.BodyString = receiver.content
-	httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
+	httpContext.Response.WriteString(receiver.content)
 	httpContext.Response.StatusCode = 200
 }
 

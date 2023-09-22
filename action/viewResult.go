@@ -60,8 +60,8 @@ func (receiver ViewResult) ExecuteResult(httpContext *context.HttpContext) {
 	//} else {
 	//
 	//}
-	httpContext.Response.BodyString = string(file)
-	httpContext.Response.BodyBytes = file
+
+	httpContext.Response.Write(file)
 	httpContext.Response.StatusCode = 200
 }
 

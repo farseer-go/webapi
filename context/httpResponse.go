@@ -1,17 +1,17 @@
 package context
 
 import (
+	"encoding/json"
 	"net/http"
 	"reflect"
 )
 
 type HttpResponse struct {
-	Body          []reflect.Value
-	BodyString    string
-	BodyBytes     []byte
 	W             http.ResponseWriter
-	StatusCode    int    // 响应代码
-	StatusMessage string // 响应提示
+	Body          []reflect.Value // Action执行的结果（Action返回值）
+	BodyBytes     []byte          // 自定义输出结果
+	StatusCode    int             // 响应代码
+	StatusMessage string          // 响应提示
 }
 
 // WriteCode 将响应状态写入http流
@@ -20,8 +20,19 @@ func (receiver *HttpResponse) WriteCode(statusCode int) {
 }
 
 // Write 将响应内容写入http流
-func (receiver *HttpResponse) Write(content []byte) (int, error) {
-	return receiver.W.Write(content)
+func (receiver *HttpResponse) Write(content []byte) {
+	receiver.BodyBytes = content
+}
+
+// WriteString 将响应内容写入http流
+func (receiver *HttpResponse) WriteString(content string) {
+	receiver.BodyBytes = []byte(content)
+}
+
+// WriteJson 将响应内容转成json后写入http流
+func (receiver *HttpResponse) WriteJson(content any) {
+	receiver.BodyBytes, _ = json.Marshal(content)
+	receiver.W.Header().Set("Content-Type", "application/json")
 }
 
 // AddHeader 添加头部
@@ -42,4 +53,10 @@ func (receiver *HttpResponse) DelHeader(key string) {
 // SetMessage 设计响应提示信息
 func (receiver *HttpResponse) SetMessage(statusMessage string) {
 	receiver.StatusMessage = statusMessage
+}
+
+// Error405 405 Method不被允许访问
+func (receiver *HttpResponse) Error405() {
+	receiver.StatusCode = http.StatusMethodNotAllowed
+	receiver.BodyBytes = []byte("405 Method NotAllowed")
 }

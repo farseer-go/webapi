@@ -1,7 +1,6 @@
 package action
 
 import (
-	"encoding/json"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/webapi/context"
@@ -22,11 +21,9 @@ func (receiver callResult) ExecuteResult(httpContext *context.HttpContext) {
 		responseBody := httpContext.Response.Body[0].Interface()
 		// 基本类型直接转string
 		if httpContext.Route.IsGoBasicType {
-			httpContext.Response.BodyString = parse.Convert(responseBody, "")
-			httpContext.Response.BodyBytes = []byte(httpContext.Response.BodyString)
+			httpContext.Response.Write([]byte(parse.ToString(responseBody)))
 		} else { // dto
-			httpContext.Response.BodyBytes, _ = json.Marshal(responseBody)
-			httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
+			httpContext.Response.WriteJson(responseBody)
 			httpContext.Response.SetHeader("Content-Type", "application/json")
 		}
 		httpContext.Response.StatusCode = http.StatusOK
@@ -38,8 +35,6 @@ func (receiver callResult) ExecuteResult(httpContext *context.HttpContext) {
 	for i := 0; i < len(httpContext.Response.Body); i++ {
 		lst.Add(httpContext.Response.Body[i].Interface())
 	}
-	httpContext.Response.BodyBytes, _ = json.Marshal(lst)
-	httpContext.Response.BodyString = string(httpContext.Response.BodyBytes)
+	httpContext.Response.WriteJson(lst)
 	httpContext.Response.StatusCode = http.StatusOK
-	httpContext.Response.SetHeader("Content-Type", "application/json")
 }

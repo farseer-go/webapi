@@ -18,13 +18,15 @@ func TestJwt(t *testing.T) {
 	configure.SetDefault("WebApi.Jwt.Key", "123456888")
 	configure.SetDefault("WebApi.Jwt.KeyType", "HS256")
 	configure.SetDefault("WebApi.Jwt.HeaderName", "Auto_test")
+	configure.SetDefault("WebApi.Jwt.InvalidStatusCode", 403)
+	configure.SetDefault("WebApi.Jwt.InvalidMessage", "您没有权限访问")
 	fs.Initialize[webapi.Module]("demo")
 
-	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/build", Method: "POST|GET", Action: func() {
+	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/build", Action: func() {
 		buildToken, _ = webapi.GetHttpContext().Jwt.Build()
-	}})
+	}}.POST())
 
-	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/validate", Method: "POST|GET", Action: func() string {
+	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/validate", Action: func() string {
 		return "hello"
 	}}.UseJwt())
 
@@ -43,7 +45,7 @@ func TestJwt(t *testing.T) {
 		request := fasthttp.AcquireRequest()
 		request.SetRequestURI("http://127.0.0.1:8090/jwt/validate")
 		request.Header.SetContentType("application/json")
-		request.Header.Set(context.HeaderName, buildToken)
+		//request.Header.Set(context.HeaderName, buildToken)
 		request.Header.SetMethod("POST")
 		response := fasthttp.AcquireResponse()
 		defer fasthttp.ReleaseRequest(request)
@@ -52,5 +54,6 @@ func TestJwt(t *testing.T) {
 		_ = client.DoTimeout(request, response, 2000*time.Millisecond)
 
 		assert.Equal(t, "hello", string(response.Body()))
+		assert.Equal(t, 200, response.StatusCode())
 	})
 }

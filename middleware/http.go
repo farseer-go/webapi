@@ -35,6 +35,6 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 
 	// 写入Response流
 	if len(httpContext.Response.BodyBytes) > 0 {
-		_, _ = httpContext.Response.Write(httpContext.Response.BodyBytes)
+		_, _ = httpContext.Response.W.Write(httpContext.Response.BodyBytes)
 	}
 }

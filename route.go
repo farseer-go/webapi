@@ -20,3 +20,15 @@ func (receiver Route) UseJwt() Route {
 	receiver.Filters = append(receiver.Filters, &filter.JwtFilter{})
 	return receiver
 }
+
+// POST 使用POST
+func (receiver Route) POST() Route {
+	receiver.Method = "POST"
+	return receiver
+}
+
+// GET 使用GET
+func (receiver Route) GET() Route {
+	receiver.Method = "GET"
+	return receiver
+}
