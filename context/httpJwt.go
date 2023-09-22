@@ -26,10 +26,7 @@ func (receiver *HttpJwt) GetToken() string {
 }
 
 // Build 生成jwt token，并写入head
-func (receiver *HttpJwt) Build() (string, error) {
-	claims := make(map[string]any)
-	claims["farseer-go"] = "v0.8.0"
-
+func (receiver *HttpJwt) Build(claims map[string]any) (string, error) {
 	// 生成token对象
 	token := jwt.NewWithClaims(JwtKeyMethod, jwt.MapClaims(claims))
 	var sign string
@@ -58,6 +55,7 @@ func (receiver *HttpJwt) Valid() bool {
 		return JwtKey, nil
 	})
 
+	// 签名不对
 	if err != nil {
 		return false
 	}
@@ -69,7 +67,12 @@ func (receiver *HttpJwt) Valid() bool {
 	return false
 }
 
-type MyCustomClaims struct {
-	Foo string `json:"foo"`
-	jwt.RegisteredClaims
+// GetClaims 读取前端提交过来的Claims
+func (receiver *HttpJwt) GetClaims() jwt.MapClaims {
+	return receiver.claims
 }
+
+//type MyCustomClaims struct {
+//	Foo string `json:"foo"`
+//	jwt.RegisteredClaims
+//}

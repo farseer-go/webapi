@@ -20,15 +20,18 @@ func TestJwt(t *testing.T) {
 	configure.SetDefault("WebApi.Jwt.HeaderName", "Auto_test")
 	configure.SetDefault("WebApi.Jwt.InvalidStatusCode", 403)
 	configure.SetDefault("WebApi.Jwt.InvalidMessage", "您没有权限访问")
+
 	fs.Initialize[webapi.Module]("demo")
 
 	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/build", Action: func() {
-		buildToken, _ = webapi.GetHttpContext().Jwt.Build()
+		claims := make(map[string]any)
+		claims["farseer-go"] = "v0.8.0"
+		buildToken, _ = webapi.GetHttpContext().Jwt.Build(claims)
 	}}.POST())
 
 	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/validate", Action: func() string {
 		return "hello"
-	}}.UseJwt())
+	}}.POST().UseJwt())
 
 	go webapi.Run(":8090")
 	time.Sleep(10 * time.Millisecond)
@@ -40,12 +43,29 @@ func TestJwt(t *testing.T) {
 		assert.Equal(t, token, buildToken)
 	})
 
-	t.Run("test jwt validate", func(t *testing.T) {
+	t.Run("test jwt validate error", func(t *testing.T) {
 		client := fasthttp.Client{}
 		request := fasthttp.AcquireRequest()
 		request.SetRequestURI("http://127.0.0.1:8090/jwt/validate")
 		request.Header.SetContentType("application/json")
-		//request.Header.Set(context.HeaderName, buildToken)
+		request.Header.Set(context.HeaderName, "123123123")
+		request.Header.SetMethod("POST")
+		response := fasthttp.AcquireResponse()
+		defer fasthttp.ReleaseRequest(request)
+		defer fasthttp.ReleaseResponse(response)
+		defer request.SetConnectionClose()
+		_ = client.DoTimeout(request, response, 2000*time.Millisecond)
+
+		assert.Equal(t, configure.GetString("WebApi.Jwt.InvalidMessage"), string(response.Body()))
+		assert.Equal(t, configure.GetInt("WebApi.Jwt.InvalidStatusCode"), response.StatusCode())
+	})
+
+	t.Run("test jwt validate success", func(t *testing.T) {
+		client := fasthttp.Client{}
+		request := fasthttp.AcquireRequest()
+		request.SetRequestURI("http://127.0.0.1:8090/jwt/validate")
+		request.Header.SetContentType("application/json")
+		request.Header.Set(context.HeaderName, buildToken)
 		request.Header.SetMethod("POST")
 		response := fasthttp.AcquireResponse()
 		defer fasthttp.ReleaseRequest(request)
