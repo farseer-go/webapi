@@ -55,8 +55,8 @@ func (receiver *HttpResponse) SetMessage(statusMessage string) {
 	receiver.StatusMessage = statusMessage
 }
 
-// Error405 405 Method不被允许访问
-func (receiver *HttpResponse) Error405() {
-	receiver.StatusCode = http.StatusMethodNotAllowed
-	receiver.BodyBytes = []byte("405 Method NotAllowed")
+// Reject 拒绝服务
+func (receiver *HttpResponse) Reject(statusCode int, content string) {
+	receiver.StatusCode = statusCode
+	receiver.BodyBytes = []byte(content)
 }

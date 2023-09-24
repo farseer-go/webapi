@@ -11,7 +11,7 @@ type HttpURL struct {
 	RemoteAddr      string // 客户端IP端口
 	X_Forwarded_For string // 客户端IP端口
 	X_Real_Ip       string // 客户端IP端口
-	Host            string
+	Host            string // 请求的Host主机头
 	Proto           string // http协议
 	RequestURI      string
 	QueryString     string
