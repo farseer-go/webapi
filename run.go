@@ -94,3 +94,8 @@ func Run(params ...string) {
 	modules.ThrowIfNotLoad(Module{})
 	defaultApi.Run(params...)
 }
+
+// PrintRoute 打印所有路由信息到控制台
+func PrintRoute() {
+	defaultApi.PrintRoute()
+}

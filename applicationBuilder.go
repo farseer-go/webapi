@@ -1,6 +1,7 @@
 package webapi
 
 import (
+	"fmt"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/core/eumLogLevel"
@@ -22,6 +23,7 @@ type applicationBuilder struct {
 	keyFile        string                                // https证书 key
 	tls            bool                                  // 是否使用https
 	MiddlewareList collections.List[context.IMiddleware] // 注册的中间件
+	printRoute     bool                                  // 打印所有路由信息到控制台
 }
 
 func NewApplicationBuilder() *applicationBuilder {
@@ -158,13 +160,25 @@ func (r *applicationBuilder) Run(params ...string) {
 
 	// 初始化中间件
 	r.mux.initMiddleware(r.MiddlewareList)
+	var hostAddress string
+	if r.tls {
+		hostAddress = fmt.Sprintf("https://127.0.0.1%s", addr)
+	} else {
+		hostAddress = fmt.Sprintf("http://127.0.0.1%s", addr)
+	}
+
+	// 打印路由地址
+	if r.printRoute {
+		for _, httpRoute := range r.mux.m {
+			if httpRoute.Controller == nil && httpRoute.Action == nil {
+				continue
+			}
+			flog.Printf("[%s]：%s%s\n", strings.Join(httpRoute.Method.ToArray(), "|"), hostAddress, httpRoute.RouteUrl)
+		}
+	}
 
 	if strings.HasPrefix(addr, ":") {
-		if r.tls {
-			flog.Infof("Web service is started：https://127.0.0.1%s/", addr)
-		} else {
-			flog.Infof("Web service is started：http://127.0.0.1%s/", addr)
-		}
+		flog.Infof("Web service is started：%s/", hostAddress)
 	}
 
 	if r.tls {
@@ -172,4 +186,9 @@ func (r *applicationBuilder) Run(params ...string) {
 	} else {
 		flog.Info(http.ListenAndServe(addr, r.mux))
 	}
+}
+
+// PrintRoute 打印所有路由信息到控制台
+func (r *applicationBuilder) PrintRoute() {
+	r.printRoute = true
 }
