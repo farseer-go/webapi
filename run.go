@@ -83,6 +83,11 @@ func UseApiResponse() {
 	defaultApi.UseApiResponse()
 }
 
+// UseValidate 使用字段验证器
+func UseValidate() {
+	defaultApi.UseValidate()
+}
+
 // UseTLS 使用https
 func UseTLS(certFile, keyFile string) {
 	defaultApi.UseTLS(certFile, keyFile)

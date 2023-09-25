@@ -136,6 +136,12 @@ func (r *applicationBuilder) UseApiResponse() {
 	r.RegisterMiddleware(&middleware.ApiResponse{})
 }
 
+// UseValidate 使用字段验证器
+func (r *applicationBuilder) UseValidate() {
+	middleware.InitValidate()
+	r.RegisterMiddleware(&middleware.Validate{})
+}
+
 // UseTLS 使用https
 func (r *applicationBuilder) UseTLS(certFile, keyFile string) {
 	r.certFile = certFile
