@@ -17,6 +17,7 @@ type Route struct {
 
 // UseJwt 使用Jwt
 func (receiver Route) UseJwt() Route {
+	context.InitJwt()
 	receiver.Filters = append(receiver.Filters, filter.JwtFilter{})
 	return receiver
 }

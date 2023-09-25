@@ -4,7 +4,6 @@ import (
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/webapi"
-	"github.com/farseer-go/webapi/context"
 	"github.com/stretchr/testify/assert"
 	"github.com/valyala/fasthttp"
 	"net/http"
@@ -39,7 +38,7 @@ func TestJwt(t *testing.T) {
 	t.Run("test jwt build", func(t *testing.T) {
 		rsp, _ := http.Post("http://127.0.0.1:8090/jwt/build", "application/json", nil)
 		_ = rsp.Body.Close()
-		token := rsp.Header.Get(context.HeaderName)
+		token := rsp.Header.Get("Auto_test")
 		assert.Equal(t, token, buildToken)
 	})
 
@@ -48,7 +47,7 @@ func TestJwt(t *testing.T) {
 		request := fasthttp.AcquireRequest()
 		request.SetRequestURI("http://127.0.0.1:8090/jwt/validate")
 		request.Header.SetContentType("application/json")
-		request.Header.Set(context.HeaderName, "123123123")
+		request.Header.Set("Auto_test", "123123123")
 		request.Header.SetMethod("POST")
 		response := fasthttp.AcquireResponse()
 		defer fasthttp.ReleaseRequest(request)
@@ -65,7 +64,7 @@ func TestJwt(t *testing.T) {
 		request := fasthttp.AcquireRequest()
 		request.SetRequestURI("http://127.0.0.1:8090/jwt/validate")
 		request.Header.SetContentType("application/json")
-		request.Header.Set(context.HeaderName, buildToken)
+		request.Header.Set("Auto_test", buildToken)
 		request.Header.SetMethod("POST")
 		response := fasthttp.AcquireResponse()
 		defer fasthttp.ReleaseRequest(request)
