@@ -58,10 +58,11 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 	// dto模式
 	if receiver.RequestParamIsModel {
 		// 第一个参数，将json反序列化到dto
-		param := receiver.RequestParamType.First()
-		paramVal := reflect.New(param).Elem()
-		for i := 0; i < param.NumField(); i++ {
-			field := param.Field(i)
+		dtoParam := receiver.RequestParamType.First()
+		// 反序列后的dto对象值
+		dtoParamVal := reflect.New(dtoParam).Elem()
+		for i := 0; i < dtoParam.NumField(); i++ {
+			field := dtoParam.Field(i)
 			if !field.IsExported() {
 				continue
 			}
@@ -72,12 +73,12 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 			}
 			kv, exists := mapVal[key]
 			if exists {
-				fieldVal := parse.ConvertValue(kv, paramVal.Field(i).Type())
+				fieldVal := parse.ConvertValue(kv, dtoParamVal.Field(i).Type())
 				// dto中的字段赋值
-				paramVal.FieldByName(field.Name).Set(fieldVal)
+				dtoParamVal.FieldByName(field.Name).Set(fieldVal)
 			}
 		}
-		returnVal := []reflect.Value{paramVal}
+		returnVal := []reflect.Value{dtoParamVal}
 
 		// 第2个参数起，为interface类型，需要做注入操作
 		return receiver.parseInterfaceParam(returnVal)

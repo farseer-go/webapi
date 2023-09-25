@@ -1,7 +1,6 @@
 package context
 
 import (
-	"bytes"
 	"github.com/farseer-go/collections"
 	"net/http"
 	"reflect"
@@ -28,17 +27,12 @@ type HttpContext struct {
 
 // NewHttpContext 初始化上下文
 func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request) *HttpContext {
-	// Body
-	buf := new(bytes.Buffer)
-	_, _ = buf.ReadFrom(r.Body)
 	var httpContext = HttpContext{
 		Request: &HttpRequest{
-			Body:       r.Body,
-			BodyString: buf.String(),
-			BodyBytes:  buf.Bytes(),
-			R:          r,
-			Form:       make(map[string]any),
-			Query:      make(map[string]any),
+			Body:  r.Body,
+			R:     r,
+			Form:  make(map[string]any),
+			Query: make(map[string]any),
 		},
 		Response: &HttpResponse{
 			W:             w,
@@ -71,10 +65,6 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 		},
 	}
 
-	httpContext.URI.parseQuery()
-	httpContext.Request.parseQuery()
-	httpContext.Request.parseForm()
-
 	if r.TLS == nil {
 		httpContext.URI.Url = "http://" + r.Host + r.RequestURI
 	}
@@ -92,11 +82,10 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 			httpContext.ContentType = contentType
 		}
 	}
-
 	return &httpContext
 }
 
-// ParseParams 根据method映射入参
+// ParseParams 转换成Handle函数需要的参数
 func (httpContext *HttpContext) ParseParams() []reflect.Value {
 	// 没有入参时，忽略request.body
 	if httpContext.Route.RequestParamType.Count() == 0 {

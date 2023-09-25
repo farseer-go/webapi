@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 )
 
@@ -13,8 +14,8 @@ type HttpRequest struct {
 	BodyBytes  []byte
 	Form       map[string]any
 	Query      map[string]any
-
-	R *http.Request
+	Params     []reflect.Value // 转换成Handle函数需要的参数
+	R          *http.Request
 }
 
 // jsonToMap 将json转成map类型
@@ -33,7 +34,7 @@ func (r *HttpRequest) jsonToMap() map[string]any {
 }
 
 // 解析来自form的值
-func (r *HttpRequest) parseForm() {
+func (r *HttpRequest) ParseForm() {
 	for k, v := range r.R.Form {
 		key := strings.ToLower(k)
 		r.Form[key] = strings.Join(v, "&")
@@ -55,7 +56,7 @@ func (r *HttpRequest) parseForm() {
 }
 
 // 解析来自url的值
-func (r *HttpRequest) parseQuery() {
+func (r *HttpRequest) ParseQuery() {
 	for k, v := range r.R.URL.Query() {
 		key := strings.ToLower(k)
 		r.Query[key] = strings.Join(v, "&")

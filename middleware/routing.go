@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"bytes"
 	"github.com/farseer-go/webapi/context"
 )
 
@@ -15,5 +16,20 @@ func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 		httpContext.Response.Reject(405, "405 Method NotAllowed")
 		return
 	}
+
+	// 解析Body
+	buf := new(bytes.Buffer)
+	_, _ = buf.ReadFrom(httpContext.Request.R.Body)
+	httpContext.Request.BodyString = buf.String()
+	httpContext.Request.BodyBytes = buf.Bytes()
+
+	// 解析请求的参数
+	httpContext.URI.ParseQuery()
+	httpContext.Request.ParseQuery()
+	httpContext.Request.ParseForm()
+
+	// 转换成Handle函数需要的参数
+	httpContext.Request.Params = httpContext.ParseParams()
+
 	receiver.IMiddleware.Invoke(httpContext)
 }

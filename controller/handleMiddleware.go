@@ -21,18 +21,16 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 自动绑定头部
 	receiver.bindHeader(httpContext, controllerVal)
 
-	// 入参
-	params := httpContext.ParseParams()
 	actionMethod := controllerVal.MethodByName(httpContext.Route.ActionName)
 
 	sw := stopwatch.StartNew()
 	// 是否要执行ActionFilter
 	if httpContext.Route.IsImplActionFilter {
 		controllerVal.MethodByName("OnActionExecuting").Call([]reflect.Value{})
-		httpContext.Response.Body = actionMethod.Call(params) // 调用action
+		httpContext.Response.Body = actionMethod.Call(httpContext.Request.Params) // 调用action
 		controllerVal.MethodByName("OnActionExecuted").Call([]reflect.Value{})
 	} else {
-		httpContext.Response.Body = actionMethod.Call(params) // 调用action
+		httpContext.Response.Body = actionMethod.Call(httpContext.Request.Params) // 调用action
 	}
 	flog.ComponentInfof("webapi", "%s Use：%s", httpContext.URI.Url, sw.GetMillisecondsText())
 }

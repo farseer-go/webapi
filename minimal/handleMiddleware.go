@@ -11,8 +11,6 @@ type HandleMiddleware struct {
 }
 
 func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
-	// 入参
-	params := httpContext.ParseParams()
 
 	sw := stopwatch.StartNew()
 	// 执行过滤器OnActionExecuting
@@ -21,7 +19,7 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	}
 
 	// 调用action
-	httpContext.Response.Body = reflect.ValueOf(httpContext.Route.Action).Call(params)
+	httpContext.Response.Body = reflect.ValueOf(httpContext.Route.Action).Call(httpContext.Request.Params)
 
 	// 执行过滤器OnActionExecuted
 	for i := 0; i < len(httpContext.Route.Filters); i++ {
