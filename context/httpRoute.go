@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/container"
+	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/parse"
 	"net/http"
 	"reflect"
@@ -94,7 +95,11 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 			if i < receiver.ParamNames.Count() {
 				paramName = receiver.ParamNames.Index(i)
 			}
-			val = container.ResolveType(fieldType, paramName)
+			var err error
+			val, err = container.ResolveType(fieldType, paramName)
+			if err != nil {
+				exception.ThrowWebException(500, err.Error())
+			}
 		} else {
 			val = reflect.New(fieldType).Elem().Interface()
 			//
@@ -122,7 +127,7 @@ func (receiver *HttpRoute) parseInterfaceParam(returnVal []reflect.Value) []refl
 		if i < receiver.ParamNames.Count() {
 			paramName = receiver.ParamNames.Index(i)
 		}
-		val := container.ResolveType(receiver.RequestParamType.Index(i), paramName)
+		val, _ := container.ResolveType(receiver.RequestParamType.Index(i), paramName)
 		returnVal = append(returnVal, reflect.ValueOf(val))
 	}
 	return returnVal
