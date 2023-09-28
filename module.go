@@ -25,3 +25,7 @@ func (module Module) PreInitialize() {
 		context.SessionTimeout = sessionTimeout
 	}
 }
+
+func (module Module) PostInitialize() {
+	context.InitJwt()
+}
