@@ -37,17 +37,16 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 			}
 			returnVal = lst
 		}
-		apiResponse = core.Success[any](httpContext.Response.StatusMessage, returnVal)
+		apiResponse = core.Success[any](httpContext.Response.GetStatusMessage(), returnVal)
+		apiResponse.StatusCode = httpContext.Response.GetStatusCode()
 	}).CatchWebException(func(exp *exception.WebException) {
 		// 响应码
-		httpContext.Response.StatusCode = exp.StatusCode
 		httpContext.Exception = exp.Message
-		apiResponse = core.Error[any](exp.Message, httpContext.Response.StatusCode)
+		apiResponse = core.Error[any](exp.Message, exp.StatusCode)
 	}).CatchException(func(exp any) {
 		// 响应码
-		httpContext.Response.StatusCode = http.StatusInternalServerError
 		httpContext.Exception = exp
-		apiResponse = core.Error[any](fmt.Sprint(exp), httpContext.Response.StatusCode)
+		apiResponse = core.Error[any](fmt.Sprint(exp), http.StatusInternalServerError)
 	})
 
 	httpContext.Route.IsGoBasicType = false

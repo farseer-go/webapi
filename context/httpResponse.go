@@ -10,13 +10,19 @@ type HttpResponse struct {
 	W             http.ResponseWriter
 	Body          []reflect.Value // Action执行的结果（Action返回值）
 	BodyBytes     []byte          // 自定义输出结果
-	StatusCode    int             // 响应代码
-	StatusMessage string          // 响应提示
+	httpCode      int             // http响应代码
+	statusCode    int             // ApiResponse响应代码
+	statusMessage string          // ApiResponse响应提示
 }
 
-// WriteCode 将响应状态写入http流
-func (receiver *HttpResponse) WriteCode(statusCode int) {
-	receiver.W.WriteHeader(statusCode)
+// GetHttpCode 获取响应的HttpCode
+func (receiver *HttpResponse) GetHttpCode() int {
+	return receiver.httpCode
+}
+
+// SetHttpCode 将响应状态写入http流
+func (receiver *HttpResponse) SetHttpCode(httpCode int) {
+	receiver.httpCode = httpCode
 }
 
 // Write 将响应内容写入http流
@@ -50,13 +56,30 @@ func (receiver *HttpResponse) DelHeader(key string) {
 	receiver.W.Header().Del(key)
 }
 
+// SetStatusCode 设置StatusCode
+func (receiver *HttpResponse) SetStatusCode(statusCode int) {
+	receiver.statusCode = statusCode
+}
+
 // SetMessage 设计响应提示信息
-func (receiver *HttpResponse) SetMessage(statusMessage string) {
-	receiver.StatusMessage = statusMessage
+func (receiver *HttpResponse) SetMessage(statusCode int, statusMessage string) {
+	receiver.statusCode = statusCode
+	receiver.statusMessage = statusMessage
 }
 
 // Reject 拒绝服务
-func (receiver *HttpResponse) Reject(statusCode int, content string) {
-	receiver.StatusCode = statusCode
+func (receiver *HttpResponse) Reject(httpCode int, content string) {
+	receiver.httpCode = httpCode
+	receiver.statusCode = httpCode
 	receiver.BodyBytes = []byte(content)
+}
+
+// GetStatusMessage 获取statusMessage
+func (receiver *HttpResponse) GetStatusMessage() string {
+	return receiver.statusMessage
+}
+
+// GetStatusCode 获取statusCode
+func (receiver *HttpResponse) GetStatusCode() int {
+	return receiver.statusCode
 }

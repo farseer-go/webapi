@@ -4,7 +4,6 @@ import (
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/webapi/context"
-	"net/http"
 )
 
 // callResult 默认调用Action结果
@@ -26,7 +25,6 @@ func (receiver callResult) ExecuteResult(httpContext *context.HttpContext) {
 			httpContext.Response.WriteJson(responseBody)
 			httpContext.Response.SetHeader("Content-Type", "application/json")
 		}
-		httpContext.Response.StatusCode = http.StatusOK
 		return
 	}
 
@@ -36,5 +34,4 @@ func (receiver callResult) ExecuteResult(httpContext *context.HttpContext) {
 		lst.Add(httpContext.Response.Body[i].Interface())
 	}
 	httpContext.Response.WriteJson(lst)
-	httpContext.Response.StatusCode = http.StatusOK
 }

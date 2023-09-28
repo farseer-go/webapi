@@ -62,7 +62,6 @@ func (receiver ViewResult) ExecuteResult(httpContext *context.HttpContext) {
 	//}
 
 	httpContext.Response.Write(file)
-	httpContext.Response.StatusCode = 200
 }
 
 // View 视图

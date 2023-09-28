@@ -12,6 +12,9 @@ type Http struct {
 }
 
 func (receiver *Http) Invoke(httpContext *context.HttpContext) {
+	httpContext.Response.SetHttpCode(http.StatusOK)
+	httpContext.Response.SetStatusCode(http.StatusOK)
+
 	receiver.IMiddleware.Invoke(httpContext)
 
 	// 说明没有中间件对输出做处理
@@ -26,12 +29,8 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 		}
 	}
 
-	if httpContext.Response.StatusCode == 0 {
-		httpContext.Response.StatusCode = http.StatusOK
-	}
-
 	// 输出返回值
-	httpContext.Response.WriteCode(httpContext.Response.StatusCode)
+	httpContext.Response.W.WriteHeader(httpContext.Response.GetHttpCode())
 
 	// 写入Response流
 	if len(httpContext.Response.BodyBytes) > 0 {

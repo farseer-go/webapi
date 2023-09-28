@@ -36,7 +36,7 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 		},
 		Response: &HttpResponse{
 			W:             w,
-			StatusMessage: "成功",
+			statusMessage: "成功",
 		},
 		URI: &HttpURL{
 			Path:            r.URL.Path,

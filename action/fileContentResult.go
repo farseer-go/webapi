@@ -13,7 +13,6 @@ type FileContentResult struct {
 func (receiver FileContentResult) ExecuteResult(httpContext *context.HttpContext) {
 	file, _ := os.ReadFile(receiver.filePath)
 	httpContext.Response.Write(file)
-	httpContext.Response.StatusCode = 200
 }
 
 // FileContent 文件

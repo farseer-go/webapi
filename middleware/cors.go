@@ -17,7 +17,7 @@ func (receiver *Cors) Invoke(httpContext *context.HttpContext) {
 	}
 
 	if httpContext.Method == "OPTIONS" {
-		httpContext.Response.StatusCode = 204
+		httpContext.Response.SetHttpCode(204)
 		return
 	}
 	receiver.IMiddleware.Invoke(httpContext)

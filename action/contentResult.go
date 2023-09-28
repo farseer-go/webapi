@@ -11,7 +11,6 @@ type ContentResult struct {
 
 func (receiver ContentResult) ExecuteResult(httpContext *context.HttpContext) {
 	httpContext.Response.WriteString(receiver.content)
-	httpContext.Response.StatusCode = 200
 }
 
 // Content 内容

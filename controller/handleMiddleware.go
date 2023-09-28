@@ -32,6 +32,7 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	} else {
 		httpContext.Response.Body = actionMethod.Call(httpContext.Request.Params) // 调用action
 	}
+
 	flog.ComponentInfof("webapi", "%s Use：%s", httpContext.URI.Url, sw.GetMillisecondsText())
 }
 

@@ -28,7 +28,7 @@ type TestHeaderController struct {
 }
 
 func (r *TestHeaderController) Hello1(req pageSizeRequest) string {
-	r.Response.SetMessage("修改成功")
+	r.Response.SetMessage(200, "修改成功")
 	return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 }
 

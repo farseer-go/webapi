@@ -12,7 +12,7 @@ type RedirectToRouteResult struct {
 
 func (receiver RedirectToRouteResult) ExecuteResult(httpContext *context.HttpContext) {
 	httpContext.Response.AddHeader("Location", receiver.url)
-	httpContext.Response.StatusCode = http.StatusFound
+	httpContext.Response.SetHttpCode(http.StatusFound)
 }
 
 // Redirect 重定向

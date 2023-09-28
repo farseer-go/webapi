@@ -24,7 +24,7 @@ type HttpJwt struct {
 func InitJwt() {
 	jwtKey = []byte(configure.GetString("WebApi.Jwt.Key"))
 	jwtKeyType = configure.GetString("WebApi.Jwt.KeyType")
-	headerName = configure.GetString("WebApi.Jwt.headerName")
+	headerName = configure.GetString("WebApi.Jwt.HeaderName")
 	InvalidStatusCode = configure.GetInt("WebApi.Jwt.InvalidStatusCode")
 	InvalidMessage = configure.GetString("WebApi.Jwt.InvalidMessage")
 
