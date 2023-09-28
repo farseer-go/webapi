@@ -175,12 +175,18 @@ func (r *applicationBuilder) Run(params ...string) {
 
 	// 打印路由地址
 	if r.printRoute {
+		lstRoute := collections.NewList[context.HttpRoute]()
 		for _, httpRoute := range r.mux.m {
 			if httpRoute.Controller == nil && httpRoute.Action == nil {
 				continue
 			}
-			flog.Printf("[%s]：%s%s\n", strings.Join(httpRoute.Method.ToArray(), "|"), hostAddress, httpRoute.RouteUrl)
+			lstRoute.Add(*httpRoute)
 		}
+		lstRoute.OrderBy(func(item context.HttpRoute) any {
+			return item.RouteUrl
+		}).Foreach(func(httpRoute *context.HttpRoute) {
+			flog.Printf("[%s]：%s%s\n", strings.Join(httpRoute.Method.ToArray(), "|"), hostAddress, httpRoute.RouteUrl)
+		})
 	}
 
 	if strings.HasPrefix(addr, ":") {
