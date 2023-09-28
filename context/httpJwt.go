@@ -128,6 +128,11 @@ func (receiver *HttpJwt) GetClaims() jwt.MapClaims {
 	return receiver.claims
 }
 
+// 清除token
+func (receiver *HttpJwt) Clear() {
+	receiver.w.Header().Del(headerName)
+}
+
 //type MyCustomClaims struct {
 //	Foo string `json:"foo"`
 //	jwt.RegisteredClaims
