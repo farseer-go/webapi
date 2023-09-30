@@ -104,3 +104,8 @@ func Run(params ...string) {
 func PrintRoute() {
 	defaultApi.PrintRoute()
 }
+
+// UseApiDoc 是否开启Api文档
+func UseApiDoc() {
+	defaultApi.UseApiDoc()
+}

@@ -1,18 +1,21 @@
 package webapi
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/modules"
+	"github.com/farseer-go/webapi/action"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
 	"net/http"
 	"net/http/pprof"
+	"reflect"
 	"strings"
 )
 
@@ -24,6 +27,8 @@ type applicationBuilder struct {
 	tls            bool                                  // 是否使用https
 	MiddlewareList collections.List[context.IMiddleware] // 注册的中间件
 	printRoute     bool                                  // 打印所有路由信息到控制台
+	addr           string
+	hostAddress    string
 }
 
 func NewApplicationBuilder() *applicationBuilder {
@@ -121,6 +126,37 @@ func (r *applicationBuilder) UsePprof() {
 	r.mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 }
 
+// UseApiDoc 是否开启Api文档
+func (r *applicationBuilder) UseApiDoc() {
+	r.registerAction(Route{Url: "/doc/api", Method: "GET", Action: func() action.IResult {
+		lstBody := collections.NewList[string]("<html><body>\n")
+		lstRoute := collections.NewList[context.HttpRoute]()
+		for _, httpRoute := range r.mux.m {
+			lstRoute.Add(*httpRoute)
+		}
+		lstRoute.OrderBy(func(item context.HttpRoute) any {
+			return item.RouteUrl
+		}).Foreach(func(httpRoute *context.HttpRoute) {
+			method := strings.Join(httpRoute.Method.ToArray(), "|")
+			if method == "" {
+				method = "GET"
+			}
+			lstBody.Add(fmt.Sprintf("[%s]：<a href=\"%s\" target=\"_blank\">%s</a><br />\n", method, r.hostAddress+httpRoute.RouteUrl, r.hostAddress+httpRoute.RouteUrl))
+			lstBody.Add("<textarea style=\"width: 100%; height: 120px;\">")
+			if httpRoute.RequestParamIsModel {
+				val := reflect.New(httpRoute.RequestParamType.First()).Interface()
+				indent, _ := json.MarshalIndent(val, "", "  ")
+				lstBody.Add(string(indent))
+			}
+			lstBody.Add("</textarea>")
+			lstBody.Add("<hr />")
+		})
+		lstBody.Add("</body><html>")
+
+		return action.Content(lstBody.ToString(""))
+	}, Params: nil})
+}
+
 // UseSession 开启Session
 func (r *applicationBuilder) UseSession() {
 	r.RegisterMiddleware(&middleware.Session{})
@@ -152,51 +188,53 @@ func (r *applicationBuilder) UseTLS(certFile, keyFile string) {
 // Run 运行Web服务
 func (r *applicationBuilder) Run(params ...string) {
 	// 设置监听地址
-	var addr string
 	if len(params) > 0 {
-		addr = params[0]
+		r.addr = params[0]
 	}
-	if addr == "" {
-		addr = configure.GetString("WebApi.Url")
-		if addr == "" {
-			addr = ":8888"
+	if r.addr == "" {
+		r.addr = configure.GetString("WebApi.Url")
+		if r.addr == "" {
+			r.addr = ":8888"
 		}
 	}
-	addr = strings.TrimSuffix(addr, "/")
+	r.addr = strings.TrimSuffix(r.addr, "/")
 
 	// 初始化中间件
 	r.mux.initMiddleware(r.MiddlewareList)
-	var hostAddress string
 	if r.tls {
-		hostAddress = fmt.Sprintf("https://127.0.0.1%s", addr)
+		r.hostAddress = fmt.Sprintf("https://127.0.0.1%s", r.addr)
 	} else {
-		hostAddress = fmt.Sprintf("http://127.0.0.1%s", addr)
+		r.hostAddress = fmt.Sprintf("http://127.0.0.1%s", r.addr)
 	}
 
 	// 打印路由地址
 	if r.printRoute {
 		lstRoute := collections.NewList[context.HttpRoute]()
 		for _, httpRoute := range r.mux.m {
-			if httpRoute.Controller == nil && httpRoute.Action == nil {
-				continue
-			}
+			//if httpRoute.Controller == nil && httpRoute.Action == nil {
+			//	continue
+			//}
 			lstRoute.Add(*httpRoute)
 		}
 		lstRoute.OrderBy(func(item context.HttpRoute) any {
 			return item.RouteUrl
 		}).Foreach(func(httpRoute *context.HttpRoute) {
-			flog.Printf("[%s]：%s%s\n", strings.Join(httpRoute.Method.ToArray(), "|"), hostAddress, httpRoute.RouteUrl)
+			method := strings.Join(httpRoute.Method.ToArray(), "|")
+			if method == "" {
+				method = "GET"
+			}
+			flog.Printf("[%s]：%s%s\n", method, r.hostAddress, httpRoute.RouteUrl)
 		})
 	}
 
-	if strings.HasPrefix(addr, ":") {
-		flog.Infof("Web service is started：%s/", hostAddress)
+	if strings.HasPrefix(r.addr, ":") {
+		flog.Infof("Web service is started：%s/", r.hostAddress)
 	}
 
 	if r.tls {
-		flog.Info(http.ListenAndServeTLS(addr, r.certFile, r.keyFile, r.mux))
+		flog.Info(http.ListenAndServeTLS(r.addr, r.certFile, r.keyFile, r.mux))
 	} else {
-		flog.Info(http.ListenAndServe(addr, r.mux))
+		flog.Info(http.ListenAndServe(r.addr, r.mux))
 	}
 }
 
