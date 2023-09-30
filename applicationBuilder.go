@@ -134,18 +134,37 @@ func (r *applicationBuilder) UseApiDoc() {
 		for _, httpRoute := range r.mux.m {
 			lstRoute.Add(*httpRoute)
 		}
+
+		// 遍历路由
 		lstRoute.OrderBy(func(item context.HttpRoute) any {
 			return item.RouteUrl
 		}).Foreach(func(httpRoute *context.HttpRoute) {
 			method := strings.Join(httpRoute.Method.ToArray(), "|")
-			if method == "" {
-				method = "GET"
+			if httpRoute.RouteUrl == "/" && method == "" && httpRoute.Controller == nil && httpRoute.Action == nil {
+				return
 			}
+			// API地址
 			lstBody.Add(fmt.Sprintf("[%s]：<a href=\"%s\" target=\"_blank\">%s</a><br />\n", method, r.hostAddress+httpRoute.RouteUrl, r.hostAddress+httpRoute.RouteUrl))
+			// 使用textarea
 			lstBody.Add("<textarea style=\"width: 100%; height: 120px;\">")
+
+			// dto模式转成json
 			if httpRoute.RequestParamIsModel {
 				val := reflect.New(httpRoute.RequestParamType.First()).Interface()
 				indent, _ := json.MarshalIndent(val, "", "  ")
+				lstBody.Add(string(indent))
+			} else {
+				var mapVal = make(map[string]any)
+				for i := 0; i < httpRoute.RequestParamType.Count(); i++ {
+					fieldType := httpRoute.RequestParamType.Index(i)
+					// 必须是非interface类型
+					if fieldType.Kind() != reflect.Interface && httpRoute.ParamNames.Count() > i {
+						// 指定了参数名称
+						paramName := strings.ToLower(httpRoute.ParamNames.Index(i))
+						mapVal[paramName] = reflect.New(fieldType).Elem().Interface()
+					}
+				}
+				indent, _ := json.MarshalIndent(mapVal, "", "  ")
 				lstBody.Add(string(indent))
 			}
 			lstBody.Add("</textarea>")
@@ -211,9 +230,9 @@ func (r *applicationBuilder) Run(params ...string) {
 	if r.printRoute {
 		lstRoute := collections.NewList[context.HttpRoute]()
 		for _, httpRoute := range r.mux.m {
-			//if httpRoute.Controller == nil && httpRoute.Action == nil {
-			//	continue
-			//}
+			if httpRoute.Controller == nil && httpRoute.Action == nil && httpRoute.RouteUrl == "/" && httpRoute.Method.Count() == 0 {
+				continue
+			}
 			lstRoute.Add(*httpRoute)
 		}
 		lstRoute.OrderBy(func(item context.HttpRoute) any {

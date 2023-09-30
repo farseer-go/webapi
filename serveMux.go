@@ -46,6 +46,10 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 	mux.mu.Lock()
 	defer mux.mu.Unlock()
 
+	if route.Method.Count() == 0 {
+		route.Method = collections.NewList("GET")
+	}
+
 	// 正则路径匹配（如果有）
 	route.RouteRegexp = context.NewRouteRegexp(route.RouteUrl, context.RegexpTypePath, context.RouteRegexpOptions{
 		StrictSlash:    false,
