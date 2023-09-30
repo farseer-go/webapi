@@ -103,7 +103,7 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 			}
 		} else {
 			val = reflect.New(fieldType).Elem().Interface()
-			//
+			// 指定了参数名称
 			if receiver.ParamNames.Count() > i {
 				paramName := strings.ToLower(receiver.ParamNames.Index(i))
 				paramVal := mapVal[paramName]
