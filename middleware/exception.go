@@ -17,7 +17,7 @@ func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {
 	// exceptionMiddleware 与 ApiResponse 中间件是互诉的。
 	exception.Try(func() {
 		receiver.IMiddleware.Invoke(httpContext)
-	}).CatchWebException(func(exp *exception.WebException) {
+	}).CatchWebException(func(exp exception.WebException) {
 		// 响应码
 		httpContext.Response.Write([]byte(exp.Message))
 		httpContext.Exception = exp.Message

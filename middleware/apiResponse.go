@@ -39,7 +39,7 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 		}
 		apiResponse = core.Success[any](httpContext.Response.GetStatusMessage(), returnVal)
 		apiResponse.StatusCode = httpContext.Response.GetStatusCode()
-	}).CatchWebException(func(exp *exception.WebException) {
+	}).CatchWebException(func(exp exception.WebException) {
 		// 响应码
 		httpContext.Exception = exp.Message
 		apiResponse = core.Error[any](exp.Message, exp.StatusCode)
