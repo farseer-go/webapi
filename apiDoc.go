@@ -45,7 +45,7 @@ func (r *applicationBuilder) UseApiDoc() {
 					// 必须是非interface类型
 					if fieldType.Kind() != reflect.Interface && httpRoute.ParamNames.Count() > i {
 						// 指定了参数名称
-						paramName := strings.ToLower(httpRoute.ParamNames.Index(i))
+						paramName := httpRoute.ParamNames.Index(i)
 						mapVal[paramName] = reflect.New(fieldType).Elem().Interface()
 					}
 				}
