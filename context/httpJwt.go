@@ -3,6 +3,7 @@ package context
 import (
 	"fmt"
 	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/fs/exception"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 )
@@ -85,14 +86,10 @@ func (receiver *HttpJwt) GetToken() string {
 func (receiver *HttpJwt) Build(claims map[string]any) (string, error) {
 	// 生成token对象
 	token := jwt.NewWithClaims(jwtKeyMethod, jwt.MapClaims(claims))
-	var sign string
-	var err error
 
-	if len(jwtKey) == 0 {
-		sign, err = token.SigningString() // 不带秘钥的签名
-	} else {
-		sign, err = token.SignedString(jwtKey) // 带秘钥的签名
-	}
+	exception.ThrowWebExceptionBool(len(jwtKey) == 0, 403, "未设置jwt的秘钥，请到./farseer.yaml的WebApi.Jwt.Key节点中配置")
+
+	sign, err := token.SignedString(jwtKey) // 带秘钥的签名
 
 	// 成功生成后，写入到head
 	if err == nil {
@@ -103,14 +100,14 @@ func (receiver *HttpJwt) Build(claims map[string]any) (string, error) {
 
 // Valid 验证前端提交过来的token是否正确
 func (receiver *HttpJwt) Valid() bool {
-	token, err := jwt.Parse(receiver.GetToken(), func(token *jwt.Token) (any, error) {
+	t := receiver.GetToken()
+	token, err := jwt.Parse(t, func(token *jwt.Token) (any, error) {
 		// 验证加密方式
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("非预期的签名方法： %v", token.Header["alg"])
 		}
 		return jwtKey, nil
 	})
-
 	// 签名不对
 	if err != nil {
 		return false
