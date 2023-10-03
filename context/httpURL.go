@@ -33,5 +33,8 @@ func (receiver *HttpURL) GetRealIp() string {
 	if ip == "" {
 		ip = strings.Split(receiver.X_Forwarded_For, ",")[0]
 	}
+	if ip == "" {
+		ip = receiver.RemoteAddr
+	}
 	return strings.Split(ip, ":")[0]
 }
