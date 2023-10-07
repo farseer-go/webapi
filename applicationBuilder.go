@@ -7,6 +7,7 @@ import (
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/modules"
+	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
@@ -174,6 +175,25 @@ func (r *applicationBuilder) Run(params ...string) {
 	}
 
 	// 打印路由地址
+	r.print()
+
+	if strings.HasPrefix(r.addr, ":") {
+		flog.Infof("Web service is started：%s/", r.hostAddress)
+	}
+
+	if apiDoc, exists := r.mux.m["/doc/api"]; exists {
+		flog.Infof("Api Document is：%s%s", r.hostAddress, apiDoc.RouteUrl)
+	}
+
+	if r.tls {
+		flog.Info(http.ListenAndServeTLS(r.addr, r.certFile, r.keyFile, r.mux))
+	} else {
+		flog.Info(http.ListenAndServe(r.addr, r.mux))
+	}
+}
+
+// 打印路由地址
+func (r *applicationBuilder) print() {
 	if r.printRoute {
 		lstRoute := collections.NewList[context.HttpRoute]()
 		for _, httpRoute := range r.mux.m {
@@ -184,23 +204,15 @@ func (r *applicationBuilder) Run(params ...string) {
 		}
 		lstRoute.OrderBy(func(item context.HttpRoute) any {
 			return item.RouteUrl
-		}).Foreach(func(httpRoute *context.HttpRoute) {
+		}).Where(func(item context.HttpRoute) bool {
+			return item.RouteUrl != "/doc/api"
+		}).For(func(index int, httpRoute *context.HttpRoute) {
 			method := strings.Join(httpRoute.Method.ToArray(), "|")
 			if method == "" {
 				method = "GET"
 			}
-			flog.Printf("[%s]：%s%s\n", method, r.hostAddress, httpRoute.RouteUrl)
+			flog.Printf("%s：%s %s%s\n", flog.Blue(parse.ToString(index+1)), flog.Red(method), r.hostAddress, httpRoute.RouteUrl)
 		})
-	}
-
-	if strings.HasPrefix(r.addr, ":") {
-		flog.Infof("Web service is started：%s/", r.hostAddress)
-	}
-
-	if r.tls {
-		flog.Info(http.ListenAndServeTLS(r.addr, r.certFile, r.keyFile, r.mux))
-	} else {
-		flog.Info(http.ListenAndServe(r.addr, r.mux))
 	}
 }
 
