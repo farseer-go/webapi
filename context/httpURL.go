@@ -6,7 +6,7 @@ import (
 )
 
 type HttpURL struct {
-	Url             string // 请求地址
+	Url             string // 请求地址 http(s)://xxx.xxx.xxx/xxx
 	Path            string // 请求地址
 	RemoteAddr      string // 客户端IP端口
 	X_Forwarded_For string // 客户端IP端口
