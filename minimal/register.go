@@ -18,7 +18,7 @@ func Register(area string, method string, route string, actionFunc any, filters 
 
 	// 如果设置了方法的入参（多参数），则需要全部设置
 	if len(paramNames) > 0 && len(paramNames) != len(param) {
-		flog.Panicf("注册minimalApi失败：%s函数入参个数设置与%s不匹配", flog.Colors[eumLogLevel.Error](actionType.String()), flog.Colors[eumLogLevel.Error](paramNames))
+		flog.Panicf("路由注册失败：%s函数入参与%s不匹配，建议重新运行fsctl -r命令", flog.Colors[eumLogLevel.Error](actionType.String()), flog.Colors[eumLogLevel.Error](paramNames))
 	}
 
 	lstRequestParamType := collections.NewList(param...)
