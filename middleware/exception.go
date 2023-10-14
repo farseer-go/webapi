@@ -16,6 +16,7 @@ type exceptionMiddleware struct {
 func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {
 	// exceptionMiddleware 与 ApiResponse 中间件是互诉的。
 	exception.Try(func() {
+		// 下一步：routing
 		receiver.IMiddleware.Invoke(httpContext)
 	}).CatchWebException(func(exp exception.WebException) {
 		// 响应码
