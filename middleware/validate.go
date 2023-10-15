@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/webapi/context"
@@ -36,7 +37,8 @@ func (receiver *Validate) Invoke(httpContext *context.HttpContext) {
 		lstError := collections.NewList[string]()
 		err := validate.Struct(httpContext.Request.Params[0].Interface())
 		if err != nil {
-			validationErrors := err.(validator.ValidationErrors)
+			var validationErrors validator.ValidationErrors
+			errors.As(err, &validationErrors)
 			for _, validationError := range validationErrors {
 				lstError.Add(validationError.Translate(trans))
 			}

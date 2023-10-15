@@ -18,6 +18,8 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 
 	trackContext := linkTrace.NewWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header, "", httpContext.URI.GetRealIp())
 	linkTrace.SetCurTrace(trackContext)
+	httpContext.Data.Set("TraceId", trackContext.TraceId)
+	httpContext.Data.Set("Trace", trackContext)
 
 	// 下一步：exceptionMiddleware
 	receiver.IMiddleware.Invoke(httpContext)
