@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"github.com/farseer-go/linkTrace"
 	"github.com/farseer-go/webapi/action"
 	"github.com/farseer-go/webapi/context"
 	"net/http"
@@ -15,11 +14,6 @@ type Http struct {
 func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 	httpContext.Response.SetHttpCode(http.StatusOK)
 	httpContext.Response.SetStatusCode(http.StatusOK)
-
-	trackContext := linkTrace.NewWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header, "", httpContext.URI.GetRealIp())
-	linkTrace.SetCurTrace(trackContext)
-	httpContext.Data.Set("TraceId", trackContext.TraceId)
-	httpContext.Data.Set("Trace", trackContext)
 
 	// 下一步：exceptionMiddleware
 	receiver.IMiddleware.Invoke(httpContext)
@@ -35,11 +29,6 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 			action.NewCallResult().ExecuteResult(httpContext)
 		}
 	}
-
-	trackContext.StatusCode = httpContext.Response.GetHttpCode()
-	trackContext.ResponseBody = string(httpContext.Response.BodyBytes)
-	// 结束链路追踪
-	trackContext.End()
 
 	// 输出返回值
 	httpContext.Response.W.WriteHeader(httpContext.Response.GetHttpCode())

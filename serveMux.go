@@ -2,6 +2,7 @@ package webapi
 
 import (
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/linkTrace"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/timandy/routine"
@@ -59,6 +60,21 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 	route.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// 解析报文、组装httpContext
 		httpContext := context.NewHttpContext(route, w, r)
+		// 创建链路追踪上下文
+		trackContext := linkTrace.NewWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header, "", httpContext.URI.GetRealIp())
+		// 结束链路追踪
+		defer trackContext.End()
+		// 记录出入参
+		defer func() {
+			trackContext.RequestBody = httpContext.Request.BodyString
+			trackContext.StatusCode = httpContext.Response.GetHttpCode()
+			trackContext.ResponseBody = string(httpContext.Response.BodyBytes)
+		}()
+		// 写入到全局上下文中
+		linkTrace.SetCurTrace(trackContext)
+		//httpContext.Data.Set("TraceId", trackContext.TraceId)
+		httpContext.Data.Set("Trace", trackContext)
+
 		// 设置到routine，可用于任意子函数获取
 		routineHttpContext.Set(httpContext)
 		// 执行第一个中间件
