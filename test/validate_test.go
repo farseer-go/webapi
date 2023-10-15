@@ -25,7 +25,6 @@ func TestValidate(t *testing.T) {
 	webapi.RegisterRoutes(webapi.Route{Url: "/Validate", Method: "POST", Action: func(dto ValidateRequest) string {
 		return fmt.Sprintf("%+v", dto)
 	}})
-	webapi.UseApiResponse()
 	webapi.UseValidate()
 	go webapi.Run(":8092")
 	time.Sleep(10 * time.Millisecond)
@@ -36,8 +35,8 @@ func TestValidate(t *testing.T) {
 		rsp, _ := http.Post("http://127.0.0.1:8092/Validate", "application/json", bytes.NewReader(marshal))
 		body, _ := io.ReadAll(rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, "{\"Status\":false,\"StatusCode\":403,\"StatusMessage\":\"账号为必填字段,年龄必须小于或等于100\",\"Data\":null}", string(body))
-		assert.Equal(t, 200, rsp.StatusCode)
+		assert.Equal(t, "账号为必填字段,年龄必须小于或等于100", string(body))
+		assert.Equal(t, 403, rsp.StatusCode)
 	})
 
 	t.Run("/Validate success", func(t *testing.T) {
@@ -46,7 +45,7 @@ func TestValidate(t *testing.T) {
 		rsp, _ := http.Post("http://127.0.0.1:8092/Validate", "application/json", bytes.NewReader(marshal))
 		body, _ := io.ReadAll(rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, "{\"Status\":true,\"StatusCode\":200,\"StatusMessage\":\"成功\",\"Data\":\"{Name:steden Age:37}\"}", string(body))
+		assert.Equal(t, "{Name:steden Age:37}", string(body))
 		assert.Equal(t, 200, rsp.StatusCode)
 	})
 }

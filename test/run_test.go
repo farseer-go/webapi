@@ -35,11 +35,11 @@ func TestRun(t *testing.T) {
 	webapi.UseApiResponse()
 	webapi.RegisterMiddleware(&middleware.UrlRewriting{})
 
-	go webapi.Run("")
+	go webapi.Run(":8093")
 	time.Sleep(10 * time.Millisecond)
 
 	t.Run("mini/hello2", func(t *testing.T) {
-		rsp, _ := http.Get("http://127.0.0.1:8888/mini/hello2")
+		rsp, _ := http.Get("http://127.0.0.1:8093/mini/hello2")
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, 3, apiResponse.Data.PageSize)

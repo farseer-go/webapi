@@ -29,5 +29,5 @@ func TestApiDoc(t *testing.T) {
 		}
 	}, "page_size", "pageIndex")
 
-	webapi.Run("")
+	go webapi.Run("")
 }
