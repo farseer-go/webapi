@@ -34,8 +34,8 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 		}
 	}
 
-	linkTrace.GetCurTrace().StatusCode = httpContext.Response.GetHttpCode()
-	linkTrace.GetCurTrace().ResponseBody = string(httpContext.Response.BodyBytes)
+	trackContext.StatusCode = httpContext.Response.GetHttpCode()
+	trackContext.ResponseBody = string(httpContext.Response.BodyBytes)
 	// 结束链路追踪
 	trackContext.End()
 
