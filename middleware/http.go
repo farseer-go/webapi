@@ -26,7 +26,7 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 	if len(httpContext.Response.BodyBytes) == 0 && len(httpContext.Response.Body) > 0 {
 		// IActionResult
 		if httpContext.IsActionResult() {
-			actionResult := httpContext.Response.Body[0].Interface().(action.IResult)
+			actionResult := httpContext.Response.Body[0].(action.IResult)
 			actionResult.ExecuteResult(httpContext)
 		} else {
 			// 则转成callResult

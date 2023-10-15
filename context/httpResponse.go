@@ -8,11 +8,11 @@ import (
 
 type HttpResponse struct {
 	W             http.ResponseWriter
-	Body          []reflect.Value // Action执行的结果（Action返回值）
-	BodyBytes     []byte          // 自定义输出结果
-	httpCode      int             // http响应代码
-	statusCode    int             // ApiResponse响应代码
-	statusMessage string          // ApiResponse响应提示
+	Body          []any  // Action执行的结果（Action返回值）
+	BodyBytes     []byte // 自定义输出结果
+	httpCode      int    // http响应代码
+	statusCode    int    // ApiResponse响应代码
+	statusMessage string // ApiResponse响应提示
 }
 
 // GetHttpCode 获取响应的HttpCode
@@ -82,4 +82,11 @@ func (receiver *HttpResponse) GetStatusMessage() string {
 // GetStatusCode 获取statusCode
 func (receiver *HttpResponse) GetStatusCode() int {
 	return receiver.statusCode
+}
+
+// SetValues 设置Body值
+func (receiver *HttpResponse) SetValues(callValues ...reflect.Value) {
+	for _, value := range callValues {
+		receiver.Body = append(receiver.Body, value.Interface())
+	}
 }

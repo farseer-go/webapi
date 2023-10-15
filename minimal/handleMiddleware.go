@@ -19,8 +19,8 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	}
 
 	// 调用action
-	httpContext.Response.Body = reflect.ValueOf(httpContext.Route.Action).Call(httpContext.Request.Params)
-
+	callValues := reflect.ValueOf(httpContext.Route.Action).Call(httpContext.Request.Params)
+	httpContext.Response.SetValues(callValues...)
 	// 执行过滤器OnActionExecuted
 	for i := 0; i < len(httpContext.Route.Filters); i++ {
 		httpContext.Route.Filters[i].OnActionExecuted(httpContext)

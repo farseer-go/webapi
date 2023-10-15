@@ -7,7 +7,6 @@ import (
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/webapi/context"
 	"net/http"
-	"reflect"
 )
 
 type ApiResponse struct {
@@ -28,12 +27,12 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 		var returnVal any
 		// 只有一个返回值
 		if len(httpContext.Response.Body) == 1 {
-			returnVal = httpContext.Response.Body[0].Interface()
+			returnVal = httpContext.Response.Body[0]
 		} else {
 			// 多个返回值，则转成数组Json
 			lst := collections.NewListAny()
 			for i := 0; i < len(httpContext.Response.Body); i++ {
-				lst.Add(httpContext.Response.Body[i].Interface())
+				lst.Add(httpContext.Response.Body[i])
 			}
 			returnVal = lst
 		}
@@ -50,5 +49,5 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 	})
 
 	httpContext.Route.IsGoBasicType = false
-	httpContext.Response.Body = []reflect.Value{reflect.ValueOf(apiResponse)}
+	httpContext.Response.Body = []any{apiResponse}
 }

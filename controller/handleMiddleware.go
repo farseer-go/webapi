@@ -24,15 +24,17 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	actionMethod := controllerVal.MethodByName(httpContext.Route.ActionName)
 
 	sw := stopwatch.StartNew()
+	var callValues []reflect.Value
 	// 是否要执行ActionFilter
 	if httpContext.Route.IsImplActionFilter {
 		controllerVal.MethodByName("OnActionExecuting").Call([]reflect.Value{})
-		httpContext.Response.Body = actionMethod.Call(httpContext.Request.Params) // 调用action
+		callValues = actionMethod.Call(httpContext.Request.Params) // 调用action
 		controllerVal.MethodByName("OnActionExecuted").Call([]reflect.Value{})
 	} else {
-		httpContext.Response.Body = actionMethod.Call(httpContext.Request.Params) // 调用action
+		callValues = actionMethod.Call(httpContext.Request.Params) // 调用action
 	}
 
+	httpContext.Response.SetValues(callValues...)
 	flog.ComponentInfof("webapi", "%s Use：%s", httpContext.URI.Url, sw.GetMillisecondsText())
 }
 
