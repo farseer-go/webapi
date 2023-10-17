@@ -11,7 +11,6 @@ type HandleMiddleware struct {
 }
 
 func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
-
 	sw := stopwatch.StartNew()
 	// 执行过滤器OnActionExecuting
 	for i := 0; i < len(httpContext.Route.Filters); i++ {
@@ -25,6 +24,5 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	for i := 0; i < len(httpContext.Route.Filters); i++ {
 		httpContext.Route.Filters[i].OnActionExecuted(httpContext)
 	}
-
 	flog.ComponentInfof("webapi", "%s Use：%s", httpContext.URI.Url, sw.GetMillisecondsText())
 }
