@@ -5,7 +5,7 @@ import (
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/exception"
-	"github.com/farseer-go/linkTrace"
+	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"net/http"
 	"time"
@@ -50,9 +50,9 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 		apiResponse = core.Error[any](fmt.Sprint(exp), http.StatusInternalServerError)
 	})
 
-	traceContext := httpContext.Data.Get("Trace").(*linkTrace.TraceContext)
-	apiResponse.TraceId = traceContext.TraceId
-	apiResponse.ElapsedMilliseconds = (time.Now().UnixMicro() - traceContext.StartTs) / 1000
+	traceContext := httpContext.Data.Get("Trace").(trace.ITraceContext)
+	apiResponse.TraceId = traceContext.GetTraceId()
+	apiResponse.ElapsedMilliseconds = (time.Now().UnixMicro() - traceContext.GetStartTs()) / 1000
 	httpContext.Route.IsGoBasicType = false
 	httpContext.Response.Body = []any{apiResponse}
 }
