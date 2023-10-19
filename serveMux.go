@@ -6,7 +6,6 @@ import (
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
-	"github.com/timandy/routine"
 	"net"
 	"net/http"
 	"net/url"
@@ -15,8 +14,6 @@ import (
 	"strings"
 	"sync"
 )
-
-var routineHttpContext = routine.NewInheritableThreadLocal[*context.HttpContext]()
 
 type serveMux struct {
 	mu          sync.RWMutex                  // lock
