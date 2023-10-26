@@ -23,7 +23,7 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 	}
 
 	var apiResponse core.ApiResponse[any]
-	exception.Try(func() {
+	catch := exception.Try(func() {
 		receiver.IMiddleware.Invoke(httpContext)
 
 		var returnVal any
@@ -40,11 +40,15 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 		}
 		apiResponse = core.Success[any](httpContext.Response.GetStatusMessage(), returnVal)
 		apiResponse.StatusCode = httpContext.Response.GetStatusCode()
-	}).CatchWebException(func(exp exception.WebException) {
+	})
+
+	catch.CatchWebException(func(exp exception.WebException) {
 		// 响应码
 		httpContext.Exception = exp.Message
 		apiResponse = core.Error[any](exp.Message, exp.StatusCode)
-	}).CatchException(func(exp any) {
+	})
+
+	catch.CatchException(func(exp any) {
 		// 响应码
 		httpContext.Exception = exp
 		apiResponse = core.Error[any](fmt.Sprint(exp), http.StatusInternalServerError)
