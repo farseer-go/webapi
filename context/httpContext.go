@@ -92,12 +92,14 @@ func (httpContext *HttpContext) ParseParams() []reflect.Value {
 		return []reflect.Value{}
 	}
 
+	if httpContext.Method == "GET" {
+		return httpContext.Route.FormToParams(httpContext.Request.Query)
+	}
+
 	// application/json
 	switch httpContext.ContentType {
 	case "application/json":
 		return httpContext.Route.JsonToParams(httpContext.Request)
-	case "": // GET
-		return httpContext.Route.FormToParams(httpContext.Request.Query)
 	default: //case "application/x-www-form-urlencoded", "multipart/form-data":
 		return httpContext.Route.FormToParams(httpContext.Request.Query) // Query比Form有更齐全的值，所以不用Form
 	}

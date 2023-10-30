@@ -33,7 +33,7 @@ func (r *HttpRequest) jsonToMap() map[string]any {
 	return mapVal
 }
 
-// 解析来自form的值
+// ParseForm 解析来自form的值
 func (r *HttpRequest) ParseForm() {
 	for k, v := range r.R.Form {
 		key := strings.ToLower(k)
@@ -55,7 +55,7 @@ func (r *HttpRequest) ParseForm() {
 	}
 }
 
-// 解析来自url的值
+// ParseQuery 解析来自url的值
 func (r *HttpRequest) ParseQuery() {
 	for k, v := range r.R.URL.Query() {
 		key := strings.ToLower(k)
