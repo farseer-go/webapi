@@ -106,7 +106,7 @@ func (r *applicationBuilder) Area(area string, f func()) {
 
 // UseCors 使用CORS中间件
 func (r *applicationBuilder) UseCors() {
-	r.RegisterMiddleware(&middleware.Cors{})
+	r.MiddlewareList.Insert(0, &middleware.Cors{})
 }
 
 // UseStaticFiles 支持静态目录，在根目录./wwwroot中的文件，直接以静态文件提供服务
