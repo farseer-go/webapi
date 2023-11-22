@@ -16,7 +16,7 @@ type ViewResult struct {
 func (receiver ViewResult) ExecuteResult(httpContext *context.HttpContext) {
 	// 默认视图，则以routeUrl为视图位置
 	action := httpContext.URI.Path[strings.LastIndex(httpContext.URI.Path, "/")+1:]
-	path, _ := strings.CutPrefix(httpContext.URI.Path, "/")
+	path, _ := receiver.cutPrefix(httpContext.URI.Path, "/")
 	path = path[:len(path)-len(action)]
 
 	if receiver.viewName == "" {
@@ -62,6 +62,14 @@ func (receiver ViewResult) ExecuteResult(httpContext *context.HttpContext) {
 	//}
 
 	httpContext.Response.Write(file)
+}
+
+// CutPrefix go 1.20
+func (receiver ViewResult) cutPrefix(s, prefix string) (after string, found bool) {
+	if !strings.HasPrefix(s, prefix) {
+		return s, false
+	}
+	return s[len(prefix):], true
 }
 
 // View 视图
