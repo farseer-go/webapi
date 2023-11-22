@@ -59,7 +59,7 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 		// 解析报文、组装httpContext
 		httpContext := context.NewHttpContext(route, w, r)
 		// 创建链路追踪上下文
-		trackContext := container.Resolve[trace.IManager]().EntryWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header, "", httpContext.URI.GetRealIp())
+		trackContext := container.Resolve[trace.IManager]().EntryWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header.ToMap(), "", httpContext.URI.GetRealIp())
 		// 结束链路追踪
 		defer trackContext.End()
 		// 记录出入参
