@@ -1,5 +1,6 @@
 go get github.com/farseer-go/collections
 go get github.com/farseer-go/fs
+go get github.com/farseer-go/redis
 go get github.com/go-playground/locales
 go get github.com/go-playground/universal-translator
 go get github.com/go-playground/validator/v10
