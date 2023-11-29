@@ -93,7 +93,7 @@ func UseTLS(certFile, keyFile string) {
 	defaultApi.UseTLS(certFile, keyFile)
 }
 
-// Run 运行Web服务
+// Run 运行Web服务（默认8888端口）
 func Run(params ...string) {
 	// 需要先依赖模块
 	modules.ThrowIfNotLoad(Module{})
