@@ -3,6 +3,7 @@ package webapi
 import (
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/container"
+	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
@@ -189,6 +190,7 @@ func (mux *serveMux) handler(host, path string, r *http.Request) (route *context
 	}
 	if route == nil {
 		route = &context.HttpRoute{Handler: http.NotFoundHandler()}
+		flog.Infof("404：%s %s", host, path)
 	}
 	return
 }
