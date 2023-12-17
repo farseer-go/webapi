@@ -1,3 +1,4 @@
+go get github.com/farseer-go/cacheMemory
 go get github.com/farseer-go/collections
 go get github.com/farseer-go/fs
 go get github.com/farseer-go/redis
