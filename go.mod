@@ -6,7 +6,7 @@ require (
 	github.com/farseer-go/cacheMemory v0.10.0
 	github.com/farseer-go/collections v0.10.0
 	github.com/farseer-go/fs v0.10.0
-	github.com/farseer-go/redis v0.9.0
+	github.com/farseer-go/redis v0.10.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.16.0
