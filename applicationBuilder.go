@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/modules"
@@ -126,8 +127,10 @@ func (r *applicationBuilder) UsePprof() {
 
 // UseSession 开启Session
 func (r *applicationBuilder) UseSession() {
-	r.RegisterMiddleware(&middleware.Session{})
-	go context.ClearSession()
+	if !container.IsRegister[ISessionMiddlewareCreat]() {
+		panic("要使用Session，请加载模块：session-redis")
+	}
+	r.RegisterMiddleware(container.Resolve[ISessionMiddlewareCreat]().Create())
 }
 
 func (r *applicationBuilder) UseWebApi() {

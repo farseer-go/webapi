@@ -1,4 +1,4 @@
-module github.com/farseer-go/webapi/webapi-session-redis
+module github.com/farseer-go/webapi/session-redis
 
 go 1.19
 

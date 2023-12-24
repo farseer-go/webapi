@@ -12,7 +12,7 @@ type HttpContext struct {
 	Response         *HttpResponse                                  // Response
 	Header           collections.ReadonlyDictionary[string, string] // 头部信息
 	Cookie           *HttpCookies                                   // Cookies信息
-	Session          *HttpSession                                   // Session信息
+	Session          IHttpSession                                   // Session信息
 	Route            *HttpRoute                                     // 路由信息
 	URI              *HttpURL                                       // URL信息
 	Data             *HttpData                                      // 用于传递值

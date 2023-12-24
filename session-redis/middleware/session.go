@@ -2,7 +2,7 @@ package middleware
 
 import (
 	webapiContext "github.com/farseer-go/webapi/context"
-	"github.com/farseer-go/webapi/webapi-session-redis/context"
+	"github.com/farseer-go/webapi/session-redis/context"
 )
 
 type Session struct {

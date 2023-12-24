@@ -1,9 +1,9 @@
-package webapi_session_redis
+package session_redis
 
 import (
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/modules"
-	"github.com/farseer-go/webapi/webapi-session-redis/context"
+	"github.com/farseer-go/webapi/session-redis/context"
 )
 
 type Module struct {

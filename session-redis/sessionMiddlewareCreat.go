@@ -1,9 +1,9 @@
-package webapi_session_redis
+package session_redis
 
 import (
 	webapiContext "github.com/farseer-go/webapi/context"
-	"github.com/farseer-go/webapi/webapi-session-redis/context"
-	"github.com/farseer-go/webapi/webapi-session-redis/middleware"
+	"github.com/farseer-go/webapi/session-redis/context"
+	"github.com/farseer-go/webapi/session-redis/middleware"
 )
 
 type SessionMiddlewareCreat struct {
