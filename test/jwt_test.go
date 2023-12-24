@@ -5,7 +5,7 @@ import (
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/webapi"
 	"github.com/stretchr/testify/assert"
-	"github.com/valyala/fasthttp"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -43,36 +43,22 @@ func TestJwt(t *testing.T) {
 	})
 
 	t.Run("test jwt validate error", func(t *testing.T) {
-		client := fasthttp.Client{}
-		request := fasthttp.AcquireRequest()
-		request.SetRequestURI("http://127.0.0.1:8090/jwt/validate")
-		request.Header.SetContentType("application/json")
-		request.Header.Set("Auto_test", "123123123")
-		request.Header.SetMethod("POST")
-		response := fasthttp.AcquireResponse()
-		defer fasthttp.ReleaseRequest(request)
-		defer fasthttp.ReleaseResponse(response)
-		defer request.SetConnectionClose()
-		_ = client.DoTimeout(request, response, 2000*time.Millisecond)
-
-		assert.Equal(t, configure.GetString("WebApi.Jwt.InvalidMessage"), string(response.Body()))
-		assert.Equal(t, configure.GetInt("WebApi.Jwt.InvalidStatusCode"), response.StatusCode())
+		newRequest, _ := http.NewRequest("POST", "http://127.0.0.1:8090/jwt/validate", nil)
+		newRequest.Header.Set("Auto_test", "123123123")
+		client := &http.Client{}
+		rsp, _ := client.Do(newRequest)
+		rspBytes, _ := io.ReadAll(rsp.Body)
+		assert.Equal(t, configure.GetString("WebApi.Jwt.InvalidMessage"), string(rspBytes))
+		assert.Equal(t, configure.GetInt("WebApi.Jwt.InvalidStatusCode"), rsp.StatusCode)
 	})
 
 	t.Run("test jwt validate success", func(t *testing.T) {
-		client := fasthttp.Client{}
-		request := fasthttp.AcquireRequest()
-		request.SetRequestURI("http://127.0.0.1:8090/jwt/validate")
-		request.Header.SetContentType("application/json")
-		request.Header.Set("Auto_test", buildToken)
-		request.Header.SetMethod("POST")
-		response := fasthttp.AcquireResponse()
-		defer fasthttp.ReleaseRequest(request)
-		defer fasthttp.ReleaseResponse(response)
-		defer request.SetConnectionClose()
-		_ = client.DoTimeout(request, response, 2000*time.Millisecond)
-
-		assert.Equal(t, "hello", string(response.Body()))
-		assert.Equal(t, 200, response.StatusCode())
+		newRequest, _ := http.NewRequest("POST", "http://127.0.0.1:8090/jwt/validate", nil)
+		newRequest.Header.Set("Auto_test", buildToken)
+		client := &http.Client{}
+		rsp, _ := client.Do(newRequest)
+		rspBytes, _ := io.ReadAll(rsp.Body)
+		assert.Equal(t, "hello", string(rspBytes))
+		assert.Equal(t, 200, rsp.StatusCode)
 	})
 }
