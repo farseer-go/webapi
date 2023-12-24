@@ -3,6 +3,7 @@ package session_redis
 import (
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/modules"
+	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/session-redis/context"
 )
 
@@ -10,7 +11,7 @@ type Module struct {
 }
 
 func (module Module) DependsModule() []modules.FarseerModule {
-	return nil
+	return []modules.FarseerModule{webapi.Module{}}
 }
 
 func (module Module) PreInitialize() {
