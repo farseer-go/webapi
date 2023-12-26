@@ -14,7 +14,7 @@ import (
 func TestJwt(t *testing.T) {
 	// 测试生成出来的token与head是否一致
 	var buildToken string
-	configure.SetDefault("WebApi.Jwt.Key", "123456888")
+	configure.SetDefault("WebApi.Jwt.WatchKey", "123456888")
 	configure.SetDefault("WebApi.Jwt.KeyType", "HS256")
 	configure.SetDefault("WebApi.Jwt.HeaderName", "Auto_test")
 	configure.SetDefault("WebApi.Jwt.InvalidStatusCode", 403)

@@ -45,7 +45,7 @@ func (r *TestHeaderController) Hello3() (TValue string) {
 
 func (r *TestHeaderController) OnActionExecuting() {
 	if r.HttpContext.Method != "GET" && r.Header.ContentType == "" {
-		panic("测试失败，未获取到：Header.ContentType")
+		panic("测试失败，未获取到：Header.WebContentType")
 	}
 	r.HttpContext.Response.AddHeader("Executing", "true")
 	r.HttpContext.Response.SetHeader("Set-Header1", "true")
