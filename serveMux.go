@@ -148,7 +148,7 @@ func (mux *serveMux) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (mux *serveMux) serveHTTPHandler(r *http.Request) (route *context.HttpRoute) {
 	// CONNECT requests are not canonicalized.
 	if r.Method == "CONNECT" {
-		// If r.URL.WebPath is /tree and its handler is not registered,
+		// If r.URL.Path is /tree and its handler is not registered,
 		// the /tree -> /tree/ redirect applies to CONNECT requests
 		// but the path canonicalization does not.
 		if u, ok := mux.redirectToPathSlash(r.URL.Host, r.URL.Path, r.URL); ok {

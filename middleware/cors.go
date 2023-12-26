@@ -7,7 +7,7 @@ type Cors struct {
 }
 
 func (receiver *Cors) Invoke(httpContext *context.HttpContext) {
-	httpContext.Response.AddHeader("Access-Control-Allow-WebHeaders", httpContext.Header.GetValue("Access-Control-Request-WebHeaders"))
+	httpContext.Response.AddHeader("Access-Control-Allow-Headers", httpContext.Header.GetValue("Access-Control-Request-Headers"))
 	httpContext.Response.AddHeader("Access-Control-Allow-Methods", httpContext.Header.GetValue("Access-Control-Request-Methods"))
 	httpContext.Response.AddHeader("Access-Control-Allow-Credentials", "true")
 	httpContext.Response.AddHeader("Access-Control-Max-Age", "86400")

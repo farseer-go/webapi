@@ -76,7 +76,7 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 	}
 	httpContext.Header = header.ToReadonlyDictionary()
 
-	// WebContentType
+	// ContentType
 	for _, contentType := range strings.Split(httpContext.Header.GetValue("Content-Type"), ";") {
 		if strings.Contains(contentType, "/") {
 			httpContext.ContentType = contentType
