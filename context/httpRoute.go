@@ -2,6 +2,7 @@ package context
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/exception"
@@ -128,7 +129,11 @@ func (receiver *HttpRoute) parseInterfaceParam(returnVal []reflect.Value) []refl
 		if i < receiver.ParamNames.Count() {
 			paramName = receiver.ParamNames.Index(i)
 		}
-		val, _ := container.ResolveType(receiver.RequestParamType.Index(i), paramName)
+		iocType := receiver.RequestParamType.Index(i)
+		if !container.IsRegisterType(iocType, paramName) {
+			panic(fmt.Sprintf("类型：%s 未注册到IOC", iocType.String()))
+		}
+		val, _ := container.ResolveType(iocType, paramName)
 		returnVal = append(returnVal, reflect.ValueOf(val))
 	}
 	return returnVal
