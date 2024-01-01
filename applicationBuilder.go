@@ -5,7 +5,9 @@ import (
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/container"
+	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/core/eumLogLevel"
+	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/modules"
 	"github.com/farseer-go/fs/parse"
@@ -222,4 +224,27 @@ func (r *applicationBuilder) print() {
 // PrintRoute 打印所有路由信息到控制台
 func (r *applicationBuilder) PrintRoute() {
 	r.printRoute = true
+}
+
+// UseHealthCheck 【GET】开启健康检查（默认route = "/healthCheck"）
+func (r *applicationBuilder) UseHealthCheck(routes ...string) {
+	route := "/healthCheck"
+	if len(routes) > 0 && routes[0] != "" {
+		route = routes[0]
+	}
+	r.RegisterGET(route, func() []string {
+		healthChecks := container.ResolveAll[core.IHealthCheck]()
+		lstError := collections.NewList[string]()
+		lstSuccess := collections.NewList[string]()
+		for _, healthCheck := range healthChecks {
+			item, err := healthCheck.Check()
+			if err == nil {
+				lstSuccess.Add(item)
+			} else {
+				lstError.Add(err.Error())
+			}
+		}
+		exception.ThrowWebExceptionBool(lstError.Count() > 0, 403, lstError.ToString("，"))
+		return lstSuccess.ToArray()
+	})
 }

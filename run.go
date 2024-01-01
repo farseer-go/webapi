@@ -109,3 +109,8 @@ func PrintRoute() {
 func UseApiDoc() {
 	defaultApi.UseApiDoc()
 }
+
+// UseHealthCheck 【GET】开启健康检查（默认route = "/healthCheck"）
+func UseHealthCheck(routes ...string) {
+	defaultApi.UseHealthCheck(routes...)
+}
