@@ -218,6 +218,7 @@ func (r *applicationBuilder) print() {
 			}
 			flog.Printf("%s：%s %s%s\n", flog.Blue(parse.ToString(index+1)), flog.Red(method), r.hostAddress, httpRoute.RouteUrl)
 		})
+		flog.Println("---------------------------------------")
 	}
 }
 
