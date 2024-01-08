@@ -37,6 +37,9 @@ func TestRequest(t *testing.T) {
 		}
 	}, "page_size", "pageIndex")
 
+	webapi.RegisterPOST("/array", func(ids []int, enable bool) []int {
+		return ids
+	}, "ids", "enable")
 	webapi.UseApiResponse()
 	go webapi.Run(":8085")
 	time.Sleep(10 * time.Millisecond)
@@ -141,5 +144,17 @@ func TestRequest(t *testing.T) {
 		assert.Equal(t, 2, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
+	})
+
+	t.Run("ids", func(t *testing.T) {
+		type array struct {
+			Ids    []int
+			Enable bool
+		}
+		b, _ := json.Marshal(array{Ids: []int{1, 2, 3}, Enable: true})
+		rsp, _ := http.Post("http://127.0.0.1:8085/array", "application/json", bytes.NewReader(b))
+		apiResponse := core.NewApiResponseByReader[[]int](rsp.Body)
+		_ = rsp.Body.Close()
+		assert.Equal(t, []int{1, 2, 3}, apiResponse.Data)
 	})
 }
