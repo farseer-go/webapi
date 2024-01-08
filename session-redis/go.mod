@@ -4,10 +4,10 @@ go 1.19
 
 require (
 	github.com/farseer-go/cache v0.12.0
-	github.com/farseer-go/cacheMemory v0.11.0
+	github.com/farseer-go/cacheMemory v0.12.0
 	github.com/farseer-go/fs v0.12.0
 	github.com/farseer-go/redis v0.11.0
-	github.com/farseer-go/webapi v0.11.0
+	github.com/farseer-go/webapi v0.12.0
 )
 
 require (
