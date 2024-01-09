@@ -73,7 +73,7 @@ func (r *applicationBuilder) RegisterRoutes(routes ...Route) {
 
 // RegisterController 自动注册控制器下的所有Action方法
 func (r *applicationBuilder) RegisterController(c controller.IController) {
-	lst := controller.Register(defaultApi.area, c)
+	lst := controller.Register(r.area, c)
 	for i := 0; i < lst.Count(); i++ {
 		r.mux.HandleRoute(lst.Index(i))
 	}
@@ -89,7 +89,7 @@ func (r *applicationBuilder) registerAction(route Route) {
 	if route.Url == "" {
 		flog.Panicf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
 	}
-	r.mux.HandleRoute(minimal.Register(defaultApi.area, route.Method, route.Url, route.Action, route.Filters, route.Params...))
+	r.mux.HandleRoute(minimal.Register(r.area, route.Method, route.Url, route.Action, route.Filters, route.Params...))
 }
 
 // Area 设置区域
