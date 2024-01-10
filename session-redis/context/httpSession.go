@@ -5,7 +5,7 @@ import (
 	"github.com/farseer-go/cacheMemory"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/container"
-	"github.com/farseer-go/fs/snowflake"
+	"github.com/farseer-go/fs/sonyflake"
 	"github.com/farseer-go/redis"
 	"net/http"
 	"strconv"
@@ -44,7 +44,7 @@ func InitSession(w http.ResponseWriter, r *http.Request) *HttpSession {
 
 	// 第一次请求
 	if httpSession.id == "" {
-		httpSession.id = strconv.FormatInt(snowflake.GenerateId(), 10)
+		httpSession.id = strconv.FormatInt(sonyflake.GenerateId(), 10)
 		// 写入Cookies
 		http.SetCookie(w, &http.Cookie{
 			Name:     sessionId,
