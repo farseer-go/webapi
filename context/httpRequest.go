@@ -1,6 +1,7 @@
 package context
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -21,7 +22,11 @@ type HttpRequest struct {
 // jsonToMap 将json转成map类型
 func (r *HttpRequest) jsonToMap() map[string]any {
 	mapVal := make(map[string]any)
-	_ = json.Unmarshal(r.BodyBytes, &mapVal)
+	//_ = json.Unmarshal(r.BodyBytes, &mapVal)
+	d := json.NewDecoder(bytes.NewReader(r.BodyBytes))
+	d.UseNumber()
+	_ = d.Decode(&mapVal)
+
 	// 将Key转小写
 	for k, v := range mapVal {
 		kLower := strings.ToLower(k)
