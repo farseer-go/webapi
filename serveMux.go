@@ -73,6 +73,11 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 		routineHttpContext.Set(httpContext)
 		// 执行第一个中间件
 		route.HttpMiddleware.Invoke(httpContext)
+		// 记录异常
+		if httpContext.Exception != nil {
+			trackContext.Error(httpContext.Exception)
+			_ = flog.Errorf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, httpContext.Exception.Error())
+		}
 	})
 
 	// 检查规则

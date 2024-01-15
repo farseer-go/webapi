@@ -44,13 +44,17 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 
 	catch.CatchWebException(func(exp exception.WebException) {
 		// 响应码
-		httpContext.Exception = exp.Message
 		apiResponse = core.Error[any](exp.Message, exp.StatusCode)
 	})
 
 	catch.CatchException(func(exp any) {
+		switch e := exp.(type) {
+		case error:
+			httpContext.Exception = e
+		default:
+			httpContext.Exception = fmt.Errorf("%s", e)
+		}
 		// 响应码
-		httpContext.Exception = exp
 		apiResponse = core.Error[any](fmt.Sprint(exp), http.StatusInternalServerError)
 	})
 

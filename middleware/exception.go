@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 	"github.com/farseer-go/fs/exception"
-	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/webapi/context"
 	"net/http"
 )
@@ -21,13 +20,16 @@ func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {
 	}).CatchWebException(func(exp exception.WebException) {
 		// 响应码
 		httpContext.Response.Write([]byte(exp.Message))
-		httpContext.Exception = exp.Message
 		httpContext.Response.SetHttpCode(exp.StatusCode)
 	}).CatchException(func(exp any) {
+		switch e := exp.(type) {
+		case error:
+			httpContext.Exception = e
+		default:
+			httpContext.Exception = fmt.Errorf("%s", e)
+		}
 		// 响应码
 		httpContext.Response.Write([]byte(fmt.Sprint(exp)))
-		httpContext.Exception = exp
 		httpContext.Response.SetHttpCode(http.StatusInternalServerError)
-		flog.Warningf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, fmt.Sprint(exp))
 	})
 }

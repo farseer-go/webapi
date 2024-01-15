@@ -19,7 +19,7 @@ type HttpContext struct {
 	Method           string                                         // 客户端提交时的Method
 	ContentLength    int64                                          // 客户端提交时的内容长度
 	ContentType      string                                         // 客户端提交时的内容类型
-	Exception        any                                            // 是否发生异常
+	Exception        error                                          // 是否发生异常
 	Jwt              *HttpJwt                                       // jwt验证
 	Close            bool
 	TransferEncoding []string
