@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/farseer-go/fs/flog"
+	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/parse"
-	"github.com/farseer-go/fs/stopwatch"
+	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"reflect"
 )
@@ -12,6 +12,9 @@ type HandleMiddleware struct {
 }
 
 func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
+	traceDetail := container.Resolve[trace.IManager]().TraceHand("执行路由")
+	defer traceDetail.End(nil)
+
 	// 实例化控制器
 	controllerVal := reflect.New(httpContext.Route.Controller)
 
@@ -23,7 +26,6 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 
 	actionMethod := controllerVal.MethodByName(httpContext.Route.ActionName)
 
-	sw := stopwatch.StartNew()
 	var callValues []reflect.Value
 	// 是否要执行ActionFilter
 	if httpContext.Route.IsImplActionFilter {
@@ -35,7 +37,6 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	}
 
 	httpContext.Response.SetValues(callValues...)
-	flog.ComponentInfof("webapi", "%s Use：%s", httpContext.URI.Url, sw.GetMillisecondsText())
 }
 
 // 找到 "controller.BaseController" 字段，并初始化赋值

@@ -1,8 +1,8 @@
 package minimal
 
 import (
-	"github.com/farseer-go/fs/flog"
-	"github.com/farseer-go/fs/stopwatch"
+	"github.com/farseer-go/fs/container"
+	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"reflect"
 )
@@ -11,7 +11,9 @@ type HandleMiddleware struct {
 }
 
 func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
-	sw := stopwatch.StartNew()
+	traceDetail := container.Resolve[trace.IManager]().TraceHand("执行路由")
+	defer traceDetail.End(nil)
+
 	// 执行过滤器OnActionExecuting
 	for i := 0; i < len(httpContext.Route.Filters); i++ {
 		httpContext.Route.Filters[i].OnActionExecuting(httpContext)
@@ -24,5 +26,4 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	for i := 0; i < len(httpContext.Route.Filters); i++ {
 		httpContext.Route.Filters[i].OnActionExecuted(httpContext)
 	}
-	flog.ComponentInfof("webapi", "%s Use：%s", httpContext.URI.Url, sw.GetMillisecondsText())
 }
