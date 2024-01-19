@@ -2,6 +2,7 @@ package minimal
 
 import (
 	"github.com/farseer-go/fs/container"
+	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"reflect"
@@ -11,19 +12,32 @@ type HandleMiddleware struct {
 }
 
 func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
-	traceDetail := container.Resolve[trace.IManager]().TraceHand("执行路由")
-	defer traceDetail.End(nil)
 
 	// 执行过滤器OnActionExecuting
 	for i := 0; i < len(httpContext.Route.Filters); i++ {
+		traceDetail := container.Resolve[trace.IManager]().TraceHand("执行过滤器OnActionExecuting：" + parse.ToString(i+1))
 		httpContext.Route.Filters[i].OnActionExecuting(httpContext)
+		traceDetail.End(nil)
+		// 约定小于1us，不显示
+		if traceDetail.GetTraceDetail().UnTraceTs.Microseconds() <= 1 {
+			traceDetail.Ignore()
+		}
 	}
 
+	traceDetail := container.Resolve[trace.IManager]().TraceHand("执行路由")
 	// 调用action
 	callValues := reflect.ValueOf(httpContext.Route.Action).Call(httpContext.Request.Params)
 	httpContext.Response.SetValues(callValues...)
+	traceDetail.End(nil)
+
 	// 执行过滤器OnActionExecuted
 	for i := 0; i < len(httpContext.Route.Filters); i++ {
+		traceDetail := container.Resolve[trace.IManager]().TraceHand("执行过滤器OnActionExecuted" + parse.ToString(i+1))
 		httpContext.Route.Filters[i].OnActionExecuted(httpContext)
+		traceDetail.End(nil)
+		// 约定小于1us，不显示
+		if traceDetail.GetTraceDetail().UnTraceTs.Microseconds() <= 1 {
+			traceDetail.Ignore()
+		}
 	}
 }
