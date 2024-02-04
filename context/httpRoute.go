@@ -76,7 +76,7 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 			if exists {
 				fieldVal := parse.ConvertValue(kv, dtoParamVal.Field(i).Type())
 				// dto中的字段赋值
-				dtoParamVal.FieldByName(field.Name).Set(fieldVal)
+				dtoParamVal.FieldByName(field.Name).Set(reflect.ValueOf(fieldVal))
 			}
 		}
 		returnVal := []reflect.Value{dtoParamVal}

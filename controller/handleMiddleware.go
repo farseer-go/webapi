@@ -74,6 +74,6 @@ func (receiver HandleMiddleware) bindHeader(httpContext *context.HttpContext, co
 			continue
 		}
 		headerValue := parse.ConvertValue(headerVal, headerFieldType)
-		headerFieldVal.Set(headerValue)
+		headerFieldVal.Set(reflect.ValueOf(headerValue))
 	}
 }
