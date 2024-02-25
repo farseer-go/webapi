@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"github.com/farseer-go/webapi/check"
 	"github.com/farseer-go/webapi/context"
 )
 
@@ -30,6 +31,12 @@ func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 
 	// 转换成Handle函数需要的参数
 	httpContext.Request.Params = httpContext.ParseParams()
+
+	// 实现了check.ICheck
+	if httpContext.Route.RequestParamIsImplCheck {
+		dto := httpContext.Request.Params[0]
+		dto.Interface().(check.ICheck).Check()
+	}
 
 	receiver.IMiddleware.Invoke(httpContext)
 }

@@ -29,9 +29,12 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	var callValues []reflect.Value
 	// 是否要执行ActionFilter
 	if httpContext.Route.IsImplActionFilter {
-		controllerVal.MethodByName("OnActionExecuting").Call([]reflect.Value{})
+		actionFilter := controllerVal.Interface().(IActionFilter)
+		actionFilter.OnActionExecuting()
+		//controllerVal.MethodByName("OnActionExecuting").Call([]reflect.Value{})
 		callValues = actionMethod.Call(httpContext.Request.Params) // 调用action
-		controllerVal.MethodByName("OnActionExecuted").Call([]reflect.Value{})
+		//controllerVal.MethodByName("OnActionExecuted").Call([]reflect.Value{})
+		actionFilter.OnActionExecuted()
 	} else {
 		callValues = actionMethod.Call(httpContext.Request.Params) // 调用action
 	}

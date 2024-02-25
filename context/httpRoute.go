@@ -14,25 +14,26 @@ import (
 
 // HttpRoute 路由表
 type HttpRoute struct {
-	RouteUrl            string                         // 路由地址
-	Controller          reflect.Type                   // 控制器类型
-	ControllerName      string                         // 控制器名称
-	Action              any                            // action类型
-	ActionName          string                         // action名称
-	RequestParamType    collections.List[reflect.Type] // 入参
-	ResponseBodyType    collections.List[reflect.Type] // 出参
-	Method              collections.List[string]       // method
-	ParamNames          collections.List[string]       // 入参变量名称（显示指定）
-	RequestParamIsModel bool                           // 是否为DTO结构
-	ResponseBodyIsModel bool                           // 是否为DTO结构
-	AutoBindHeaderName  string                         // 自动绑定header的字段名称
-	IsImplActionFilter  bool                           // 是否实现了IActionFilter
-	IsGoBasicType       bool                           // 返回值只有一个时，是否为基础类型
-	HttpMiddleware      IMiddleware                    // 中间件入口（每个路由的管道都不一样）
-	HandleMiddleware    IMiddleware                    // handle中间件
-	RouteRegexp         *routeRegexp                   // 正则路由
-	Handler             http.Handler                   // api处理函数
-	Filters             []IFilter                      // 过滤器（对单个路由的执行单元）
+	RouteUrl                string                         // 路由地址
+	Controller              reflect.Type                   // 控制器类型
+	ControllerName          string                         // 控制器名称
+	Action                  any                            // action类型
+	ActionName              string                         // action名称
+	RequestParamType        collections.List[reflect.Type] // 入参
+	ResponseBodyType        collections.List[reflect.Type] // 出参
+	Method                  collections.List[string]       // method
+	ParamNames              collections.List[string]       // 入参变量名称（显示指定）
+	RequestParamIsImplCheck bool                           // 入参DTO是否实现了Check接口
+	RequestParamIsModel     bool                           // 入参是否为DTO结构
+	ResponseBodyIsModel     bool                           // 出参是否为DTO结构
+	AutoBindHeaderName      string                         // 自动绑定header的字段名称
+	IsImplActionFilter      bool                           // 是否实现了IActionFilter
+	IsGoBasicType           bool                           // 返回值只有一个时，是否为基础类型
+	HttpMiddleware          IMiddleware                    // 中间件入口（每个路由的管道都不一样）
+	HandleMiddleware        IMiddleware                    // handle中间件
+	RouteRegexp             *routeRegexp                   // 正则路由
+	Handler                 http.Handler                   // api处理函数
+	Filters                 []IFilter                      // 过滤器（对单个路由的执行单元）
 }
 
 // JsonToParams json入参转成param

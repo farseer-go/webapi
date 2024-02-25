@@ -17,21 +17,34 @@ import (
 	"time"
 )
 
+var checkResult int
+
+type psRequest struct {
+	PageSize   int `json:"Page_size"`
+	PageIndex  int
+	noExported string //测试不导出字段
+}
+
+// 测试check
+func (receiver psRequest) Check() {
+	checkResult++
+}
+
 func TestRequest(t *testing.T) {
 	fs.Initialize[webapi.Module]("demo")
 	configure.SetDefault("Log.Component.webapi", true)
 
-	webapi.RegisterPOST("/dto", func(req pageSizeRequest) string {
+	webapi.RegisterPOST("/dto", func(req psRequest) string {
 		webapi.GetHttpContext().Response.SetMessage(200, "测试成功")
 		return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
 	})
 
 	webapi.RegisterGET("/empty", func() any {
-		return pageSizeRequest{PageSize: 3, PageIndex: 2}
+		return psRequest{PageSize: 3, PageIndex: 2}
 	})
 
-	webapi.RegisterPUT("/multiParam", func(pageSize int, pageIndex int) pageSizeRequest {
-		return pageSizeRequest{
+	webapi.RegisterPUT("/multiParam", func(pageSize int, pageIndex int) psRequest {
+		return psRequest{
 			PageSize:  pageSize,
 			PageIndex: pageIndex,
 		}
@@ -45,7 +58,7 @@ func TestRequest(t *testing.T) {
 	time.Sleep(10 * time.Millisecond)
 
 	t.Run("dto-json", func(t *testing.T) {
-		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		sizeRequest := psRequest{PageSize: 10, PageIndex: 2}
 		marshal, _ := json.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8085/dto", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
@@ -56,6 +69,7 @@ func TestRequest(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
+		assert.Equal(t, 1, checkResult)
 	})
 
 	t.Run("dto-form", func(t *testing.T) {
@@ -72,6 +86,7 @@ func TestRequest(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
+		assert.Equal(t, 2, checkResult)
 	})
 
 	t.Run("dto-formData", func(t *testing.T) {
@@ -89,11 +104,12 @@ func TestRequest(t *testing.T) {
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
+		assert.Equal(t, 3, checkResult)
 	})
 
 	t.Run("empty", func(t *testing.T) {
 		rsp, _ := http.Get("http://127.0.0.1:8085/empty")
-		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		apiResponse := core.NewApiResponseByReader[psRequest](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, 3, apiResponse.Data.PageSize)
 		assert.Equal(t, 2, apiResponse.Data.PageIndex)
@@ -102,14 +118,14 @@ func TestRequest(t *testing.T) {
 	})
 
 	t.Run("multiParam-json", func(t *testing.T) {
-		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
+		sizeRequest := psRequest{PageSize: 10, PageIndex: 2}
 		marshal, _ := json.Marshal(sizeRequest)
 		req, _ := http.NewRequest("PUT", "http://127.0.0.1:8085/multiParam", bytes.NewReader(marshal))
 		req.Header.Set("Content-Type", "application/json")
 		rsp, _ := http.DefaultClient.Do(req)
-		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		apiResponse := core.NewApiResponseByReader[psRequest](rsp.Body)
 		_ = rsp.Body.Close()
-		assert.Equal(t, pageSizeRequest{PageSize: sizeRequest.PageSize, PageIndex: sizeRequest.PageIndex}, apiResponse.Data)
+		assert.Equal(t, psRequest{PageSize: sizeRequest.PageSize, PageIndex: sizeRequest.PageIndex}, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 	})
@@ -122,7 +138,7 @@ func TestRequest(t *testing.T) {
 		req, _ := http.NewRequest("PUT", "http://127.0.0.1:8085/multiParam", strings.NewReader(val.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 		rsp, _ := http.DefaultClient.Do(req)
-		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		apiResponse := core.NewApiResponseByReader[psRequest](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, 10, apiResponse.Data.PageSize)
 		assert.Equal(t, 2, apiResponse.Data.PageIndex)
@@ -138,7 +154,7 @@ func TestRequest(t *testing.T) {
 		req, _ := http.NewRequest("PUT", "http://127.0.0.1:8085/multiParam", strings.NewReader(val.Encode()))
 		req.Header.Set("Content-Type", "multipart/form-data")
 		rsp, _ := http.DefaultClient.Do(req)
-		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
+		apiResponse := core.NewApiResponseByReader[psRequest](rsp.Body)
 		_ = rsp.Body.Close()
 		assert.Equal(t, 10, apiResponse.Data.PageSize)
 		assert.Equal(t, 2, apiResponse.Data.PageIndex)

@@ -5,6 +5,7 @@ import (
 	"github.com/farseer-go/fs/core/eumLogLevel"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/types"
+	"github.com/farseer-go/webapi/check"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
 	"reflect"
@@ -24,19 +25,30 @@ func Register(area string, method string, route string, actionFunc any, filters 
 	lstRequestParamType := collections.NewList(param...)
 	lstResponseParamType := collections.NewList(types.GetOutParam(actionType)...)
 
+	// 入参是否为DTO模式
+	isDtoModel := types.IsDtoModelIgnoreInterface(lstRequestParamType.ToArray())
+	// 是否实现了ICheck
+	var requestParamIsImplCheck bool
+	if isDtoModel {
+		// 是否实现了check.ICheck
+		var checker = reflect.TypeOf((*check.ICheck)(nil)).Elem()
+		requestParamIsImplCheck = lstRequestParamType.First().Implements(checker)
+	}
+
 	// 添加到路由表
 	return &context.HttpRoute{
-		RouteUrl:            area + route,
-		Action:              actionFunc,
-		Method:              collections.NewList(strings.Split(strings.ToUpper(method), "|")...),
-		RequestParamType:    lstRequestParamType,
-		ResponseBodyType:    lstResponseParamType,
-		RequestParamIsModel: types.IsDtoModelIgnoreInterface(lstRequestParamType.ToArray()),
-		ResponseBodyIsModel: types.IsDtoModel(lstResponseParamType.ToArray()),
-		ParamNames:          collections.NewList(paramNames...),
-		HttpMiddleware:      &middleware.Http{},
-		HandleMiddleware:    &HandleMiddleware{},
-		IsGoBasicType:       types.IsGoBasicType(lstResponseParamType.First()),
-		Filters:             filters,
+		RouteUrl:                area + route,
+		Action:                  actionFunc,
+		Method:                  collections.NewList(strings.Split(strings.ToUpper(method), "|")...),
+		RequestParamType:        lstRequestParamType,
+		ResponseBodyType:        lstResponseParamType,
+		RequestParamIsImplCheck: requestParamIsImplCheck,
+		RequestParamIsModel:     isDtoModel,
+		ResponseBodyIsModel:     types.IsDtoModel(lstResponseParamType.ToArray()),
+		ParamNames:              collections.NewList(paramNames...),
+		HttpMiddleware:          &middleware.Http{},
+		HandleMiddleware:        &HandleMiddleware{},
+		IsGoBasicType:           types.IsGoBasicType(lstResponseParamType.First()),
+		Filters:                 filters,
 	}
 }
