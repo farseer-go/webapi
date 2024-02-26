@@ -31,12 +31,6 @@ func InitMiddleware(lstRouteTable map[string]*context.HttpRoute, lstMiddleware c
 func assembledPipeline(route *context.HttpRoute, lstMiddleware collections.List[context.IMiddleware]) collections.List[context.IMiddleware] {
 	// 添加系统中间件
 	lst := collections.NewList[context.IMiddleware](route.HttpMiddleware, &exceptionMiddleware{}, &routing{})
-	// 如果加载了Cors中间件，则要插入到http中间件的下一个。让Cors优先执行。
-	if corsMiddleware, isHaveCors := lstMiddleware.First().(*Cors); isHaveCors {
-		lst.Insert(1, corsMiddleware)
-		lstMiddleware.RemoveAt(0)
-	}
-
 	// 添加用户自定义中间件
 	for i := 0; i < lstMiddleware.Count(); i++ {
 		valIns := reflect.New(reflect.TypeOf(lstMiddleware.Index(i)).Elem()).Interface()
@@ -44,6 +38,15 @@ func assembledPipeline(route *context.HttpRoute, lstMiddleware collections.List[
 	}
 	// 添加Handle中间件
 	lst.Add(route.HandleMiddleware)
+
+	// 找到cors中间件，放入到http之后（即移到第2个索引）
+	for i := 3; i < lst.Count(); i++ {
+		if corsMiddleware, isHaveCors := lst.Index(i).(*Cors); isHaveCors {
+			lst.RemoveAt(i)
+			lst.Insert(1, corsMiddleware)
+			break
+		}
+	}
 	return lst
 }
 
