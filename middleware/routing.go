@@ -35,7 +35,8 @@ func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 	// 实现了check.ICheck
 	if httpContext.Route.RequestParamIsImplCheck {
 		dto := httpContext.Request.Params[0]
-		dto.Interface().(check.ICheck).Check()
+		val := dto.Addr().Interface()
+		val.(check.ICheck).Check()
 	}
 
 	receiver.IMiddleware.Invoke(httpContext)

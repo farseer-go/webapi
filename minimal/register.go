@@ -33,6 +33,9 @@ func Register(area string, method string, route string, actionFunc any, filters 
 		// 是否实现了check.ICheck
 		var checker = reflect.TypeOf((*check.ICheck)(nil)).Elem()
 		requestParamIsImplCheck = lstRequestParamType.First().Implements(checker)
+		if !requestParamIsImplCheck {
+			requestParamIsImplCheck = reflect.PointerTo(lstRequestParamType.First()).Implements(checker)
+		}
 	}
 
 	// 添加到路由表

@@ -17,17 +17,16 @@ import (
 	"time"
 )
 
-var checkResult int
-
 type psRequest struct {
-	PageSize   int `json:"Page_size"`
-	PageIndex  int
-	noExported string //测试不导出字段
+	PageSize    int `json:"Page_size"`
+	PageIndex   int
+	noExported  string //测试不导出字段
+	CheckResult int
 }
 
 // 测试check
-func (receiver psRequest) Check() {
-	checkResult++
+func (receiver *psRequest) Check() {
+	receiver.CheckResult++
 }
 
 func TestRequest(t *testing.T) {
@@ -36,7 +35,7 @@ func TestRequest(t *testing.T) {
 
 	webapi.RegisterPOST("/dto", func(req psRequest) string {
 		webapi.GetHttpContext().Response.SetMessage(200, "测试成功")
-		return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", req.PageSize, req.PageIndex)
+		return fmt.Sprintf("hello world pageSize=%d，pageIndex=%d，checkResult=%d", req.PageSize, req.PageIndex, req.CheckResult)
 	})
 
 	webapi.RegisterGET("/empty", func() any {
@@ -64,12 +63,11 @@ func TestRequest(t *testing.T) {
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
 
-		expected := fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", sizeRequest.PageSize, sizeRequest.PageIndex)
+		expected := fmt.Sprintf("hello world pageSize=%d，pageIndex=%d，checkResult=1", sizeRequest.PageSize, sizeRequest.PageIndex)
 		assert.Equal(t, expected, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
-		assert.Equal(t, 1, checkResult)
 	})
 
 	t.Run("dto-form", func(t *testing.T) {
@@ -81,12 +79,11 @@ func TestRequest(t *testing.T) {
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
 
-		expected := fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", 10, 2)
+		expected := fmt.Sprintf("hello world pageSize=%d，pageIndex=%d，checkResult=1", 10, 2)
 		assert.Equal(t, expected, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
-		assert.Equal(t, 2, checkResult)
 	})
 
 	t.Run("dto-formData", func(t *testing.T) {
@@ -99,12 +96,11 @@ func TestRequest(t *testing.T) {
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
 
-		expected := fmt.Sprintf("hello world pageSize=%d，pageIndex=%d", 10, 2)
+		expected := fmt.Sprintf("hello world pageSize=%d，pageIndex=%d，checkResult=1", 10, 2)
 		assert.Equal(t, expected, apiResponse.Data)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
 		assert.Equal(t, "测试成功", apiResponse.StatusMessage)
-		assert.Equal(t, 3, checkResult)
 	})
 
 	t.Run("empty", func(t *testing.T) {
