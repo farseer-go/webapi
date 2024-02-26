@@ -2,6 +2,7 @@ package context
 
 import (
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/webapi/check"
 	"net/http"
 	"reflect"
 	"strings"
@@ -86,26 +87,35 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 }
 
 // ParseParams 转换成Handle函数需要的参数
-func (httpContext *HttpContext) ParseParams() []reflect.Value {
+func (receiver *HttpContext) ParseParams() []reflect.Value {
 	// 没有入参时，忽略request.body
-	if httpContext.Route.RequestParamType.Count() == 0 {
+	if receiver.Route.RequestParamType.Count() == 0 {
 		return []reflect.Value{}
 	}
 
-	if httpContext.Method == "GET" {
-		return httpContext.Route.FormToParams(httpContext.Request.Query)
+	if receiver.Method == "GET" {
+		return receiver.Route.FormToParams(receiver.Request.Query)
 	}
 
 	// application/json
-	switch httpContext.ContentType {
+	switch receiver.ContentType {
 	case "application/json":
-		return httpContext.Route.JsonToParams(httpContext.Request)
+		return receiver.Route.JsonToParams(receiver.Request)
 	default: //case "application/x-www-form-urlencoded", "multipart/form-data":
-		return httpContext.Route.FormToParams(httpContext.Request.Query) // Query比Form有更齐全的值，所以不用Form
+		return receiver.Route.FormToParams(receiver.Request.Query) // Query比Form有更齐全的值，所以不用Form
 	}
 }
 
 // IsActionResult 是否为ActionResult类型
-func (httpContext *HttpContext) IsActionResult() bool {
-	return httpContext.Route.ResponseBodyType.Count() == 1 && httpContext.Route.ResponseBodyType.First().String() == "action.IResult"
+func (receiver *HttpContext) IsActionResult() bool {
+	return receiver.Route.ResponseBodyType.Count() == 1 && receiver.Route.ResponseBodyType.First().String() == "action.IResult"
+}
+
+// RequestParamCheck 实现了check.ICheck（必须放在过滤器之后执行）
+func (receiver *HttpContext) RequestParamCheck() {
+	if receiver.Route.RequestParamIsImplCheck {
+		dto := receiver.Request.Params[0]
+		val := dto.Addr().Interface()
+		val.(check.ICheck).Check()
+	}
 }

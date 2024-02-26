@@ -16,16 +16,15 @@ type HttpURL struct {
 	RequestURI      string
 	QueryString     string
 	Query           map[string]any
-
-	R *http.Request
+	R               *http.Request
 }
 
-func (r *HttpURL) ParseQuery() {
-	for k, v := range r.R.URL.Query() {
-		key := strings.ToLower(k)
-		r.Query[key] = strings.Join(v, "&")
-	}
-}
+//func (receiver *HttpURL) ParseQuery() {
+//	for k, v := range receiver.R.URL.Query() {
+//		key := strings.ToLower(k)
+//		receiver.Query[key] = strings.Join(v, "&")
+//	}
+//}
 
 // GetRealIp 获取真实IP
 func (receiver *HttpURL) GetRealIp() string {

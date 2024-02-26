@@ -31,11 +31,15 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	if httpContext.Route.IsImplActionFilter {
 		actionFilter := controllerVal.Interface().(IActionFilter)
 		actionFilter.OnActionExecuting()
-		//controllerVal.MethodByName("OnActionExecuting").Call([]reflect.Value{})
+
+		// 实现了check.ICheck（必须放在过滤器之后执行）
+		httpContext.RequestParamCheck()
 		callValues = actionMethod.Call(httpContext.Request.Params) // 调用action
-		//controllerVal.MethodByName("OnActionExecuted").Call([]reflect.Value{})
+
 		actionFilter.OnActionExecuted()
 	} else {
+		// 实现了check.ICheck（必须放在过滤器之后执行）
+		httpContext.RequestParamCheck()
 		callValues = actionMethod.Call(httpContext.Request.Params) // 调用action
 	}
 
