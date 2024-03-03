@@ -216,9 +216,9 @@ func (r *applicationBuilder) print() {
 			if method == "" {
 				method = "GET"
 			}
-			flog.Printf("%s：%s %s%s\n", flog.Blue(parse.ToString(index+1)), flog.Red(method), r.hostAddress, httpRoute.RouteUrl)
+			fmt.Printf("%s：%s %s%s\n", flog.Blue(parse.ToString(index+1)), flog.Red(method), r.hostAddress, httpRoute.RouteUrl)
 		})
-		flog.Println("---------------------------------------")
+		fmt.Println("---------------------------------------")
 	}
 }
 
