@@ -122,6 +122,10 @@ func (receiver *HttpJwt) Valid() bool {
 
 // GetClaims 读取前端提交过来的Claims
 func (receiver *HttpJwt) GetClaims() jwt.MapClaims {
+	// nil说明没有执行过验证
+	if receiver.claims == nil {
+		receiver.Valid()
+	}
 	return receiver.claims
 }
 
