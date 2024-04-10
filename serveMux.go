@@ -2,6 +2,7 @@ package webapi
 
 import (
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/asyncLocal"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/trace"
@@ -78,6 +79,7 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 			trackContext.Error(httpContext.Exception)
 			_ = flog.Errorf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, httpContext.Exception.Error())
 		}
+		asyncLocal.GC()
 	})
 
 	// 检查规则
