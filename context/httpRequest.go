@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strings"
 )
@@ -48,15 +49,23 @@ func (r *HttpRequest) ParseForm() {
 
 	// multipart/form-data提交的数据在Body中
 	if r.BodyString != "" {
-		formValues := strings.Split(r.BodyString, "&")
-		for _, value := range formValues {
-			kv := strings.Split(value, "=")
-			if len(kv) > 1 {
-				key := strings.ToLower(kv[0])
-				r.Form[key] = kv[1]
-				r.Query[key] = kv[1]
+		parseQuery, _ := url.ParseQuery(r.BodyString)
+		for key, value := range parseQuery {
+			key = strings.ToLower(key)
+			if len(value) > 0 {
+				r.Form[key] = strings.Join(value, ",")
+				r.Query[key] = strings.Join(value, ",")
 			}
 		}
+		//formValues := strings.Split(r.BodyString, "&")
+		//for _, value := range formValues {
+		//	kv := strings.Split(value, "=")
+		//	if len(kv) > 1 {
+		//		key := strings.ToLower(kv[0])
+		//		r.Form[key] = kv[1]
+		//		r.Query[key] = kv[1]
+		//	}
+		//}
 	}
 }
 
