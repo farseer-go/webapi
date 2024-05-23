@@ -71,7 +71,7 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 		httpContext.Data.Set("Trace", trackContext)
 
 		// 设置到routine，可用于任意子函数获取
-		routineHttpContext.Set(httpContext)
+		SetHttpContext(httpContext)
 		// 执行第一个中间件
 		route.HttpMiddleware.Invoke(httpContext)
 		// 记录异常
@@ -322,4 +322,9 @@ func appendSorted(es []*context.HttpRoute, e *context.HttpRoute) []*context.Http
 // GetHttpContext 在minimalApi模式下也可以获取到上下文
 func GetHttpContext() *context.HttpContext {
 	return routineHttpContext.Get()
+}
+
+// SetHttpContext 设置当前上下文
+func SetHttpContext(httpCtx *context.HttpContext) {
+	routineHttpContext.Set(httpCtx)
 }
