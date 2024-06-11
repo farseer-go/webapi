@@ -1,6 +1,6 @@
 module github.com/farseer-go/webapi/session-redis
 
-go 1.19
+go 1.21
 
 toolchain go1.22.0
 
@@ -15,7 +15,7 @@ require (
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/farseer-go/collections v0.13.0 // indirect
+	github.com/farseer-go/collections v0.14.0 // indirect
 	github.com/farseer-go/mapper v0.13.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.4 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
