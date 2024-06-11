@@ -1,6 +1,6 @@
 module github.com/farseer-go/webapi/session-redis
 
-go 1.21
+go 1.19
 
 toolchain go1.22.0
 
