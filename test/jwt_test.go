@@ -1,6 +1,7 @@
 package test
 
 import (
+	"crypto/tls"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/webapi"
@@ -45,7 +46,13 @@ func TestJwt(t *testing.T) {
 	t.Run("test jwt validate error", func(t *testing.T) {
 		newRequest, _ := http.NewRequest("POST", "http://127.0.0.1:8090/jwt/validate", nil)
 		newRequest.Header.Set("Auto_test", "123123123")
-		client := &http.Client{}
+		client := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true, // 不验证 HTTPS 证书
+				},
+			},
+		}
 		rsp, _ := client.Do(newRequest)
 		rspBytes, _ := io.ReadAll(rsp.Body)
 		assert.Equal(t, configure.GetString("WebApi.Jwt.InvalidMessage"), string(rspBytes))
@@ -55,7 +62,13 @@ func TestJwt(t *testing.T) {
 	t.Run("test jwt validate success", func(t *testing.T) {
 		newRequest, _ := http.NewRequest("POST", "http://127.0.0.1:8090/jwt/validate", nil)
 		newRequest.Header.Set("Auto_test", buildToken)
-		client := &http.Client{}
+		client := &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true, // 不验证 HTTPS 证书
+				},
+			},
+		}
 		rsp, _ := client.Do(newRequest)
 		rspBytes, _ := io.ReadAll(rsp.Body)
 		assert.Equal(t, "hello", string(rspBytes))
