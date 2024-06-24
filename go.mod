@@ -13,6 +13,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/stretchr/testify v1.8.4
 )
+
 exclude github.com/timandy/routine v1.1.3
 
 require (
