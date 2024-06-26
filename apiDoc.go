@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/core"
+	"github.com/farseer-go/fs/fastReflect"
 	"github.com/farseer-go/fs/parse"
+	"github.com/farseer-go/fs/types"
 	"github.com/farseer-go/webapi/action"
 	"github.com/farseer-go/webapi/context"
 	"reflect"
@@ -55,15 +58,42 @@ func (r *applicationBuilder) UseApiDoc() {
 			lstBody.Add("</textarea>")
 
 			lstBody.Add("<textarea style=\"width: 50%; height: 120px;\">")
-			// 只有一个返回值
-			if httpRoute.ResponseBodyType.Count() == 1 {
-				responseBody := reflect.New(httpRoute.ResponseBodyType.First()).Interface()
-				// 基本类型直接转string
-				if httpRoute.IsGoBasicType {
-					lstBody.Add(parse.ToString(responseBody))
-				} else { // dto
-					indent, _ := json.MarshalIndent(responseBody, "", "  ")
+			if httpRoute.ResponseBodyType.Count() == 0 { // 没有返回值
+				// 使用ApiResponse，则返回ApiResponse格式
+				if r.useApiResponse {
+					rsp := core.Success[any]("成功", nil)
+					indent, _ := json.MarshalIndent(rsp, "", "  ")
 					lstBody.Add(string(indent))
+				} else {
+					lstBody.Add("")
+				}
+			} else if httpRoute.ResponseBodyType.Count() == 1 { // 只有一个返回值
+				rspRefType := httpRoute.ResponseBodyType.First()
+				responseBody := reflect.New(rspRefType).Interface()
+				// 如果是list，则添加3个元素，用于演示
+				pointerMeta := fastReflect.PointerOf(responseBody)
+				isList := pointerMeta.Type == fastReflect.List
+				if isList {
+					val := pointerMeta.GetItemMeta().ZeroValue
+					lstVal := types.ListNew(pointerMeta.ReflectType)
+					types.ListAdd(lstVal, val)
+					types.ListAdd(lstVal, val)
+					types.ListAdd(lstVal, val)
+					responseBody = lstVal.Interface()
+				}
+				// 使用ApiResponse，则返回ApiResponse格式
+				if r.useApiResponse {
+					rsp := core.Success[any]("成功", responseBody)
+					indent, _ := json.MarshalIndent(rsp, "", "  ")
+					lstBody.Add(string(indent))
+				} else {
+					// 基本类型直接转string
+					if httpRoute.IsGoBasicType {
+						lstBody.Add(parse.ToString(responseBody))
+					} else { // dto
+						indent, _ := json.MarshalIndent(responseBody, "", "  ")
+						lstBody.Add(string(indent))
+					}
 				}
 			} else {
 				// 多个返回值，则转成数组Json

@@ -28,6 +28,7 @@ type applicationBuilder struct {
 	tls            bool                                  // 是否使用https
 	MiddlewareList collections.List[context.IMiddleware] // 注册的中间件
 	printRoute     bool                                  // 打印所有路由信息到控制台
+	useApiResponse bool                                  // 是否使用了ApiResponse中间件
 	addr           string
 	hostAddress    string
 }
@@ -141,6 +142,7 @@ func (r *applicationBuilder) UseWebApi() {
 
 // UseApiResponse 支持ApiResponse结构
 func (r *applicationBuilder) UseApiResponse() {
+	r.useApiResponse = true
 	r.RegisterMiddleware(&middleware.ApiResponse{})
 }
 
@@ -229,8 +231,8 @@ func (r *applicationBuilder) PrintRoute() {
 
 // UseHealthCheck 【GET】开启健康检查（默认route = "/healthCheck"）
 func (r *applicationBuilder) UseHealthCheck(routes ...string) {
-	if len(routes)==0{
-		routes=[]string{"/healthCheck"}
+	if len(routes) == 0 {
+		routes = []string{"/healthCheck"}
 	}
 	for _, route := range routes {
 		r.RegisterGET(route, func() []string {
