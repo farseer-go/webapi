@@ -79,7 +79,7 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 			trackContext.Error(httpContext.Exception)
 			_ = flog.Errorf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, httpContext.Exception.Error())
 		}
-		asyncLocal.GC()
+		asyncLocal.Release()
 	})
 
 	// 检查规则
