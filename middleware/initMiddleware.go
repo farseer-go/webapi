@@ -31,11 +31,16 @@ func InitMiddleware(lstRouteTable map[string]*context.HttpRoute, lstMiddleware c
 func assembledPipeline(route *context.HttpRoute, lstMiddleware collections.List[context.IMiddleware]) collections.List[context.IMiddleware] {
 	// 添加系统中间件
 	lst := collections.NewList[context.IMiddleware](route.HttpMiddleware, &exceptionMiddleware{}, &routing{})
+
 	// 添加用户自定义中间件
 	for i := 0; i < lstMiddleware.Count(); i++ {
-		valIns := reflect.New(reflect.TypeOf(lstMiddleware.Index(i)).Elem()).Interface()
-		lst.Add(valIns.(context.IMiddleware))
+		middlewareType := reflect.TypeOf(lstMiddleware.Index(i)).Elem()
+		if route.Schema != "ws" && middlewareType.String() != "middleware.ApiResponse" {
+			valIns := reflect.New(middlewareType).Interface()
+			lst.Add(valIns.(context.IMiddleware))
+		}
 	}
+
 	// 添加Handle中间件
 	lst.Add(route.HandleMiddleware)
 

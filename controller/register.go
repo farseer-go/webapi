@@ -97,6 +97,7 @@ func registerAction(area string, actionMethod reflect.Method, actions map[string
 
 	// 添加到路由表
 	return &context.HttpRoute{
+		Schema:                  "http",
 		RouteUrl:                area + strings.ToLower(controllerName) + "/" + strings.ToLower(actionName),
 		Action:                  methodType,
 		Method:                  collections.NewList(strings.Split(strings.ToUpper(actions[actionName].Method), "|")...),

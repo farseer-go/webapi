@@ -2,12 +2,10 @@ package webapi
 
 import (
 	"github.com/farseer-go/collections"
-	"github.com/farseer-go/fs/asyncLocal"
-	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/flog"
-	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
+	"github.com/farseer-go/webapi/websocket"
 	"net"
 	"net/http"
 	"net/url"
@@ -57,30 +55,12 @@ func (mux *serveMux) HandleRoute(route *context.HttpRoute) {
 		UseEncodedPath: false,
 	})
 
-	route.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// 解析报文、组装httpContext
-		httpContext := context.NewHttpContext(route, w, r)
-		// 创建链路追踪上下文
-		trackContext := container.Resolve[trace.IManager]().EntryWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header.ToMap(), "", httpContext.URI.GetRealIp())
-		// 结束链路追踪
-		defer trackContext.End()
-		// 记录出入参
-		defer func() {
-			trackContext.SetBody(httpContext.Request.BodyString, httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes))
-		}()
-		httpContext.Data.Set("Trace", trackContext)
-
-		// 设置到routine，可用于任意子函数获取
-		SetHttpContext(httpContext)
-		// 执行第一个中间件
-		route.HttpMiddleware.Invoke(httpContext)
-		// 记录异常
-		if httpContext.Exception != nil {
-			trackContext.Error(httpContext.Exception)
-			_ = flog.Errorf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, httpContext.Exception.Error())
-		}
-		asyncLocal.Release()
-	})
+	// websocket
+	if route.Schema == "ws" {
+		route.Handler = websocket.SocketHandler(route)
+	} else { // http
+		route.Handler = HttpHandler(route)
+	}
 
 	// 检查规则
 	mux.checkHandle(route.RouteUrl, route.Handler)
@@ -321,10 +301,5 @@ func appendSorted(es []*context.HttpRoute, e *context.HttpRoute) []*context.Http
 
 // GetHttpContext 在minimalApi模式下也可以获取到上下文
 func GetHttpContext() *context.HttpContext {
-	return routineHttpContext.Get()
-}
-
-// SetHttpContext 设置当前上下文
-func SetHttpContext(httpCtx *context.HttpContext) {
-	routineHttpContext.Set(httpCtx)
+	return context.RoutineHttpContext.Get()
 }

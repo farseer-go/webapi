@@ -15,6 +15,7 @@ import (
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
+	"github.com/farseer-go/webapi/websocket"
 	"net/http"
 	"net/http/pprof"
 	"strings"
@@ -29,8 +30,8 @@ type applicationBuilder struct {
 	MiddlewareList collections.List[context.IMiddleware] // 注册的中间件
 	printRoute     bool                                  // 打印所有路由信息到控制台
 	useApiResponse bool                                  // 是否使用了ApiResponse中间件
-	addr           string
-	hostAddress    string
+	addr           string                                // 地址
+	hostAddress    string                                // 完整地址
 }
 
 func NewApplicationBuilder() *applicationBuilder {
@@ -65,10 +66,19 @@ func (r *applicationBuilder) RegisterDELETE(route string, actionFunc any, params
 	r.registerAction(Route{Url: route, Method: "DELETE", Action: actionFunc, Params: params})
 }
 
+// RegisterWS 注册WebSocket（支持占位符，例如：/{cateId}/{Id}）
+func (r *applicationBuilder) RegisterWS(route string, actionFunc any) {
+	r.registerAction(Route{Url: route, Method: "WS", Action: actionFunc})
+}
+
 // RegisterRoutes 批量注册路由
 func (r *applicationBuilder) RegisterRoutes(routes ...Route) {
 	for i := 0; i < len(routes); i++ {
-		r.registerAction(routes[i])
+		if strings.ToUpper(routes[i].Method) == "WS" {
+			r.registerWS(routes[i])
+		} else {
+			r.registerAction(routes[i])
+		}
 	}
 }
 
@@ -88,9 +98,22 @@ func (r *applicationBuilder) registerAction(route Route) {
 	route.Url = strings.Trim(route.Url, " ")
 	route.Url = strings.TrimLeft(route.Url, "/")
 	if route.Url == "" {
-		flog.Panicf("注册minimalApi失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
+		flog.Panicf("注册路由失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
 	}
 	r.mux.HandleRoute(minimal.Register(r.area, route.Method, route.Url, route.Action, route.Filters, route.Params...))
+}
+
+// registerWS 注册websocket
+func (r *applicationBuilder) registerWS(route Route) {
+	// 需要先依赖模块
+	modules.ThrowIfNotLoad(Module{})
+
+	route.Url = strings.Trim(route.Url, " ")
+	route.Url = strings.TrimLeft(route.Url, "/")
+	if route.Url == "" {
+		flog.Panicf("注册websocket路由失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
+	}
+	r.mux.HandleRoute(websocket.Register(r.area, route.Method, route.Url, route.Action, route.Filters))
 }
 
 // Area 设置区域
@@ -191,7 +214,6 @@ func (r *applicationBuilder) Run(params ...string) {
 	if apiDoc, exists := r.mux.m["/doc/api"]; exists {
 		flog.Infof("Api Document is：%s%s", r.hostAddress, apiDoc.RouteUrl)
 	}
-
 	if r.tls {
 		flog.Info(http.ListenAndServeTLS(r.addr, r.certFile, r.keyFile, r.mux))
 	} else {

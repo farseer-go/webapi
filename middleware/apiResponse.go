@@ -28,12 +28,13 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 
 		var returnVal any
 		// 只有一个返回值
-		if len(httpContext.Response.Body) == 1 {
+		bodyLength := len(httpContext.Response.Body)
+		if bodyLength == 1 {
 			returnVal = httpContext.Response.Body[0]
-		} else {
+		} else if bodyLength > 1 {
 			// 多个返回值，则转成数组Json
 			lst := collections.NewListAny()
-			for i := 0; i < len(httpContext.Response.Body); i++ {
+			for i := 0; i < bodyLength; i++ {
 				lst.Add(httpContext.Response.Body[i])
 			}
 			returnVal = lst

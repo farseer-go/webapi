@@ -2,13 +2,18 @@ package context
 
 import (
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/asyncLocal"
 	"github.com/farseer-go/webapi/check"
+	"golang.org/x/net/websocket"
 	"net/http"
 	"reflect"
 	"strings"
 )
 
+var RoutineHttpContext = asyncLocal.New[*HttpContext]()
+
 type HttpContext struct {
+	WebsocketConn    *websocket.Conn                                // websocket
 	Request          *HttpRequest                                   // Request
 	Response         *HttpResponse                                  // Response
 	Header           collections.ReadonlyDictionary[string, string] // 头部信息
@@ -86,11 +91,21 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 	return &httpContext
 }
 
+func (receiver *HttpContext) SetWebsocket(conn *websocket.Conn) {
+	receiver.WebsocketConn = conn
+}
+
 // ParseParams 转换成Handle函数需要的参数
 func (receiver *HttpContext) ParseParams() []reflect.Value {
 	// 没有入参时，忽略request.body
 	if receiver.Route.RequestParamType.Count() == 0 {
 		return []reflect.Value{}
+	}
+
+	if receiver.Route.Schema == "ws" {
+		contextWebSocket := reflect.New(receiver.Route.RequestParamType.First().Elem())
+		contextWebSocket.MethodByName("SetContext").Call([]reflect.Value{reflect.ValueOf(receiver)})
+		return []reflect.Value{contextWebSocket}
 	}
 
 	if receiver.Method == "GET" {
