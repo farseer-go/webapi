@@ -35,7 +35,7 @@ func assembledPipeline(route *context.HttpRoute, lstMiddleware collections.List[
 	// 添加用户自定义中间件
 	for i := 0; i < lstMiddleware.Count(); i++ {
 		middlewareType := reflect.TypeOf(lstMiddleware.Index(i)).Elem()
-		if route.Schema != "ws" && middlewareType.String() != "middleware.ApiResponse" {
+		if route.Schema != "ws" || middlewareType.String() != "middleware.ApiResponse" {
 			valIns := reflect.New(middlewareType).Interface()
 			lst.Add(valIns.(context.IMiddleware))
 		}
