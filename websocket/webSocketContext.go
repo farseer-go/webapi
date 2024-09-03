@@ -1,7 +1,7 @@
 package websocket
 
 import (
-	"encoding/json"
+	ctx "context"
 	"errors"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/fastReflect"
@@ -15,8 +15,12 @@ import (
 
 // Context websocket上下文
 type Context[T any] struct {
-	HttpContext *context.HttpContext
-	tType       reflect.Type
+	Ctx         ctx.Context          // 用于通知应用端是否断开连接
+	cancel      ctx.CancelFunc       // 用于通知Ctx，连接已断开
+	AutoExit    bool                 // 当断开连接时，自动退出
+	HttpContext *context.HttpContext // 上下文
+	tType       reflect.Type         // 得到泛型T的类型
+	isClose     bool                 // 是否断开连接
 }
 
 // ItemType 泛型类型
@@ -27,9 +31,11 @@ func (receiver *Context[T]) ItemType() T {
 
 // SetContext 收到请求时，设置上下文（webapi使用）
 func (receiver *Context[T]) SetContext(httpContext *context.HttpContext) {
+	receiver.Ctx, receiver.cancel = ctx.WithCancel(ctx.Background())
 	receiver.HttpContext = httpContext
 	var t T
 	receiver.tType = reflect.TypeOf(t)
+	receiver.AutoExit = true
 }
 
 // ReceiverMessage 接收消息
@@ -38,6 +44,7 @@ reopen:
 	var data string
 	err := websocket.Message.Receive(receiver.HttpContext.WebsocketConn, &data)
 	if err != nil {
+		receiver.errorIsClose(err)
 		flog.Warningf("路由：%s 接收数据时，出现异常：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 		goto reopen
 	}
@@ -52,11 +59,7 @@ reopen:
 	case reflect.Struct:
 		err := websocket.JSON.Receive(receiver.HttpContext.WebsocketConn, &t)
 		if err != nil {
-			var opError *net.OpError
-			if errors.As(err, &opError) || err.Error() == "EOF" {
-				exception.ThrowWebException(408, "客户端已关闭")
-			}
-
+			receiver.errorIsClose(err)
 			flog.Warningf("路由：%s 接收数据时，出现反序列失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 			goto reopen
 		}
@@ -64,6 +67,7 @@ reopen:
 		var data string
 		err := websocket.Message.Receive(receiver.HttpContext.WebsocketConn, &data)
 		if err != nil {
+			receiver.errorIsClose(err)
 			flog.Warningf("路由：%s 接收数据时，出现异常：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 			goto reopen
 		}
@@ -73,26 +77,48 @@ reopen:
 }
 
 // Send 发送消息，如果msg不是go的基础类型，则会自动序列化成json
-func (receiver *Context[T]) Send(msg any) {
-	switch fastReflect.PointerOf(msg).Type {
-	case fastReflect.GoBasicType:
-		_ = websocket.Message.Send(receiver.HttpContext.WebsocketConn, msg)
-	default:
-		marshalBytes, err := json.Marshal(msg)
-		if err != nil {
-			flog.Warningf("路由：%s 发送数据时，出现反序列失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
-		}
-		_, _ = receiver.HttpContext.WebsocketConn.Write(marshalBytes)
+func (receiver *Context[T]) Send(msg any) error {
+	var err error
+	// 基础类型不需要进行序列化
+	if fastReflect.PointerOf(msg).Type == fastReflect.GoBasicType {
+		err = websocket.Message.Send(receiver.HttpContext.WebsocketConn, msg)
+	} else {
+		// 其余类型，一律使用json
+		err = websocket.JSON.Send(receiver.HttpContext.WebsocketConn, msg)
 	}
+
+	if err != nil {
+		receiver.errorIsClose(err)
+		flog.Warningf("路由：%s 发送数据时失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
+	}
+	return err
 }
 
 // Close 关闭连接
 func (receiver *Context[T]) Close() {
 	_ = receiver.HttpContext.WebsocketConn.Close()
-	exception.ThrowWebException(408, "服务端关闭")
+	receiver.cancel()
+	receiver.isClose = true
 }
 
 // GetHeader 获取头部
 func (receiver *Context[T]) GetHeader(key string) string {
 	return receiver.HttpContext.Header.GetValue(key)
+}
+
+// IsClose 是否已断开连接
+func (receiver *Context[T]) IsClose() bool {
+	return receiver.isClose
+}
+
+// 根据错误信息，判断是否为断开连接导致的
+func (receiver *Context[T]) errorIsClose(err error) {
+	var opError *net.OpError
+	if errors.As(err, &opError) || err.Error() == "EOF" {
+		receiver.cancel()
+		receiver.isClose = true
+		if receiver.AutoExit {
+			exception.ThrowWebException(408, "客户端已关闭")
+		}
+	}
 }

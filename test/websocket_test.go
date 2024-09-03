@@ -29,14 +29,12 @@ func TestWebsocket(t *testing.T) {
 			val := context.GetHeader("Token")
 			assert.Equal(t, "farseer-go", val)
 
-			for {
-				req := context.Receiver()
-				context.Send("我收到消息啦：")
-				req.PageSize++
-				req.PageIndex++
-				context.Send(req)
-				//context.Close()
-			}
+			req := context.Receiver()
+			_ = context.Send("我收到消息啦：")
+
+			req.PageSize++
+			req.PageIndex++
+			_ = context.Send(req)
 		}})
 
 	go webapi.Run(":8096")
@@ -82,6 +80,10 @@ func TestWebsocket(t *testing.T) {
 		assert.Equal(t, 201, request2.PageSize)
 		assert.Equal(t, 101, request2.PageIndex)
 
-		client.Close()
+		time.Sleep(100 * time.Millisecond)
+		// 服务端关闭后，尝试继续接收消息
+		assert.Panics(t, func() {
+			client.Receiver()
+		})
 	})
 }
