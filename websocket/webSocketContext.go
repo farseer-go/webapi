@@ -79,3 +79,8 @@ func (receiver *Context[T]) Close() {
 	_ = receiver.httpContext.WebsocketConn.Close()
 	exception.ThrowWebException(408, "服务端关闭")
 }
+
+// GetHeader 获取头部
+func (receiver *Context[T]) GetHeader(key string) string {
+	return receiver.httpContext.Header.GetValue(key)
+}

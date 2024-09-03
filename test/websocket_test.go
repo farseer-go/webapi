@@ -24,6 +24,10 @@ func TestWebsocket(t *testing.T) {
 	// 场景二：客户端连接后，服务端根据条件多次返回消息
 	webapi.RegisterRoutes(webapi.Route{Url: "/ws/api", Method: "WS",
 		Action: func(context *websocket.Context[pageSizeRequest]) {
+			// 验证头部
+			val := context.GetHeader("Token")
+			assert.Equal(t, "farseer-go", val)
+
 			for {
 				req := context.Receiver()
 				context.Send("我收到消息啦：")
@@ -50,20 +54,27 @@ func TestWebsocket(t *testing.T) {
 	t.Run("/ws/api", func(t *testing.T) {
 		client, err := ws.NewClient("ws://127.0.0.1:8096/ws/api", 1024)
 		assert.Nil(t, err)
+
+		// 设置头部
+		client.SetHeader("token", "farseer-go")
+
+		// 连接
 		err = client.Connect()
 		assert.Nil(t, err)
 
-		request := pageSizeRequest{
+		// 发消息
+		err = client.Send(pageSizeRequest{
 			PageSize:  200,
 			PageIndex: 100,
-		}
-		err = client.Send(request)
+		})
 		assert.Nil(t, err)
 
+		// 接收服务端的消息
 		msg, err := client.Receiver()
 		assert.Nil(t, err)
 		assert.Equal(t, msg, "我收到消息啦：")
 
+		// 接收服务端的消息
 		var request2 pageSizeRequest
 		err = client.ReceiverJson(&request2)
 		assert.Nil(t, err)
