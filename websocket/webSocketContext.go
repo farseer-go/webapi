@@ -15,7 +15,7 @@ import (
 
 // Context websocket上下文
 type Context[T any] struct {
-	httpContext *context.HttpContext
+	HttpContext *context.HttpContext
 	tType       reflect.Type
 }
 
@@ -27,7 +27,7 @@ func (receiver *Context[T]) ItemType() T {
 
 // SetContext 收到请求时，设置上下文（webapi使用）
 func (receiver *Context[T]) SetContext(httpContext *context.HttpContext) {
-	receiver.httpContext = httpContext
+	receiver.HttpContext = httpContext
 	var t T
 	receiver.tType = reflect.TypeOf(t)
 }
@@ -38,21 +38,21 @@ reopen:
 	var t T
 	switch receiver.tType.Kind() {
 	case reflect.Struct:
-		err := websocket.JSON.Receive(receiver.httpContext.WebsocketConn, &t)
+		err := websocket.JSON.Receive(receiver.HttpContext.WebsocketConn, &t)
 		if err != nil {
 			var opError *net.OpError
 			if errors.As(err, &opError) || err.Error() == "EOF" {
 				exception.ThrowWebException(408, "客户端已关闭")
 			}
 
-			flog.Warningf("路由：%s 接收数据时，出现反序列失败：%s", receiver.httpContext.Route.RouteUrl, err.Error())
+			flog.Warningf("路由：%s 接收数据时，出现反序列失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 			goto reopen
 		}
 	default:
 		var data string
-		err := websocket.Message.Receive(receiver.httpContext.WebsocketConn, &data)
+		err := websocket.Message.Receive(receiver.HttpContext.WebsocketConn, &data)
 		if err != nil {
-			flog.Warningf("路由：%s 接收数据时，出现异常：%s", receiver.httpContext.Route.RouteUrl, err.Error())
+			flog.Warningf("路由：%s 接收数据时，出现异常：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 			goto reopen
 		}
 		return parse.Convert(data, t)
@@ -64,23 +64,23 @@ reopen:
 func (receiver *Context[T]) Send(msg any) {
 	switch fastReflect.PointerOf(msg).Type {
 	case fastReflect.GoBasicType:
-		_ = websocket.Message.Send(receiver.httpContext.WebsocketConn, msg)
+		_ = websocket.Message.Send(receiver.HttpContext.WebsocketConn, msg)
 	default:
 		marshalBytes, err := json.Marshal(msg)
 		if err != nil {
-			flog.Warningf("路由：%s 发送数据时，出现反序列失败：%s", receiver.httpContext.Route.RouteUrl, err.Error())
+			flog.Warningf("路由：%s 发送数据时，出现反序列失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 		}
-		_, _ = receiver.httpContext.WebsocketConn.Write(marshalBytes)
+		_, _ = receiver.HttpContext.WebsocketConn.Write(marshalBytes)
 	}
 }
 
 // Close 关闭连接
 func (receiver *Context[T]) Close() {
-	_ = receiver.httpContext.WebsocketConn.Close()
+	_ = receiver.HttpContext.WebsocketConn.Close()
 	exception.ThrowWebException(408, "服务端关闭")
 }
 
 // GetHeader 获取头部
 func (receiver *Context[T]) GetHeader(key string) string {
-	return receiver.httpContext.Header.GetValue(key)
+	return receiver.HttpContext.Header.GetValue(key)
 }

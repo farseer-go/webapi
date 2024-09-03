@@ -53,7 +53,7 @@ func TestWebsocket(t *testing.T) {
 	})
 
 	t.Run("/ws/api", func(t *testing.T) {
-		client, err := ws.NewClient("ws://127.0.0.1:8096/ws/api", 1024)
+		client, err := ws.NewClient("ws://127.0.0.1:8096/ws/api?a=b&c=d", 1024)
 		assert.Nil(t, err)
 
 		// 设置头部
