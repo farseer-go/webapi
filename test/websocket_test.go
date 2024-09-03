@@ -3,6 +3,7 @@ package test
 import (
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/core"
+	"github.com/farseer-go/utils/ws"
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/websocket"
 	"github.com/stretchr/testify/assert"
@@ -15,9 +16,9 @@ func TestWebsocket(t *testing.T) {
 	fs.Initialize[webapi.Module]("demo")
 	webapi.UseStaticFiles()
 	webapi.UseApiResponse()
-	//webapi.RegisterRoutes(webapi.Route{Url: "/mini/api", Method: "GET", Action: func() any {
-	//	return pageSizeRequest{PageSize: 3, PageIndex: 2}
-	//}})
+	webapi.RegisterRoutes(webapi.Route{Url: "/mini/api", Method: "GET", Action: func() any {
+		return pageSizeRequest{PageSize: 3, PageIndex: 2}
+	}})
 
 	// 场景一：客户端发一次消息，服务端返回一次消息
 	// 场景二：客户端连接后，服务端根据条件多次返回消息
@@ -34,7 +35,7 @@ func TestWebsocket(t *testing.T) {
 		}})
 
 	go webapi.Run(":8096")
-	time.Sleep(100 * time.Second)
+	time.Sleep(100 * time.Millisecond)
 
 	t.Run("mini/api", func(t *testing.T) {
 		rsp, _ := http.Get("http://127.0.0.1:8096/mini/api")
@@ -44,5 +45,31 @@ func TestWebsocket(t *testing.T) {
 		assert.Equal(t, 2, apiResponse.Data.PageIndex)
 		assert.Equal(t, 200, rsp.StatusCode)
 		assert.Equal(t, 200, apiResponse.StatusCode)
+	})
+
+	t.Run("/ws/api", func(t *testing.T) {
+		client, err := ws.NewClient("ws://127.0.0.1:8096/ws/api", 1024)
+		assert.Nil(t, err)
+		err = client.Connect()
+		assert.Nil(t, err)
+
+		request := pageSizeRequest{
+			PageSize:  200,
+			PageIndex: 100,
+		}
+		err = client.Send(request)
+		assert.Nil(t, err)
+
+		msg, err := client.Receiver()
+		assert.Nil(t, err)
+		assert.Equal(t, msg, "我收到消息啦：")
+
+		var request2 pageSizeRequest
+		err = client.ReceiverJson(&request2)
+		assert.Nil(t, err)
+		assert.Equal(t, 201, request2.PageSize)
+		assert.Equal(t, 101, request2.PageIndex)
+
+		client.Close()
 	})
 }
