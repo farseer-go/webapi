@@ -24,9 +24,9 @@ func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 	httpContext.Request.BodyBytes = buf.Bytes()
 
 	// 解析请求的参数
-	//httpContext.URI.ParseQuery()
 	httpContext.Request.ParseQuery()
 	httpContext.Request.ParseForm()
+	httpContext.URI.Query = httpContext.Request.Query
 
 	// 转换成Handle函数需要的参数
 	httpContext.Request.Params = httpContext.ParseParams()
