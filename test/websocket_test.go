@@ -3,6 +3,7 @@ package test
 import (
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/core"
+	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/utils/ws"
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/websocket"
@@ -22,8 +23,8 @@ func TestWebsocket(t *testing.T) {
 
 	// 场景一：客户端发一次消息，服务端返回一次消息
 	// 场景二：客户端连接后，服务端根据条件多次返回消息
-	webapi.RegisterRoutes(webapi.Route{Url: "/ws/api", Method: "WS",
-		Action: func(context *websocket.Context[pageSizeRequest]) {
+	webapi.RegisterRoutes(webapi.Route{Url: "/ws/api", Method: "WS", Params: []string{"context", ""},
+		Action: func(context *websocket.Context[pageSizeRequest], manager trace.IManager) {
 			// 验证头部
 			val := context.GetHeader("Token")
 			assert.Equal(t, "farseer-go", val)

@@ -14,18 +14,18 @@ import (
 // Register 注册单个Api
 func Register(area string, method string, route string, actionFunc any, filters []context.IFilter, paramNames ...string) *context.HttpRoute {
 	actionType := reflect.TypeOf(actionFunc)
-	params := types.GetInParam(actionType)
+	inParams := types.GetInParam(actionType)
 
 	// 如果设置了方法的入参（多参数），则需要全部设置
-	if len(paramNames) > 0 && len(paramNames) != len(params) {
+	if len(paramNames) > 0 && len(paramNames) != len(inParams) {
 		flog.Panicf("注册路由%s%s失败：%s函数入参与%s不匹配，建议重新运行fsctl -r命令", area, route, flog.Red(actionType.String()), flog.Blue(paramNames))
 	}
 
-	lstRequestParamType := collections.NewList(params...)
+	lstRequestParamType := collections.NewList(inParams...)
 	lstResponseParamType := collections.NewList(types.GetOutParam(actionType)...)
 
 	// 入参是否为DTO模式
-	isDtoModel := types.IsDtoModelIgnoreInterface(params)
+	isDtoModel := types.IsDtoModelIgnoreInterface(inParams)
 	// 是否实现了ICheck
 	var requestParamIsImplCheck bool
 	if isDtoModel {

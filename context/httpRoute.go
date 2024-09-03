@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/container"
-	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/parse"
 	"net/http"
 	"reflect"
@@ -52,8 +51,7 @@ func (receiver *HttpRoute) JsonToParams(request *HttpRequest) []reflect.Value {
 	}
 
 	// 多参数
-	mapVal := request.jsonToMap()
-	return receiver.FormToParams(mapVal)
+	return receiver.FormToParams(request.jsonToMap())
 }
 
 // FormToParams 将map转成入参值
@@ -61,11 +59,11 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 	// dto模式
 	if receiver.RequestParamIsModel {
 		// 第一个参数，将json反序列化到dto
-		dtoParam := receiver.RequestParamType.First()
+		firstParamType := receiver.RequestParamType.First() // 先取第一个参数
 		// 反序列后的dto对象值
-		dtoParamVal := reflect.New(dtoParam).Elem()
-		for i := 0; i < dtoParam.NumField(); i++ {
-			field := dtoParam.Field(i)
+		dtoParamVal := reflect.New(firstParamType).Elem()
+		for i := 0; i < firstParamType.NumField(); i++ {
+			field := firstParamType.Field(i)
 			if !field.IsExported() {
 				continue
 			}
@@ -94,16 +92,7 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 		var val any
 		// interface类型，则通过注入的方式
 		if fieldType.Kind() == reflect.Interface {
-			// 如果是接口类型，则这里的名称为IocName
-			paramName := ""
-			if i < receiver.ParamNames.Count() {
-				paramName = receiver.ParamNames.Index(i)
-			}
-			var err error
-			val, err = container.ResolveType(fieldType, paramName)
-			if err != nil {
-				exception.ThrowWebException(500, err.Error())
-			}
+			val = receiver.diParam(i)
 		} else {
 			val = reflect.New(fieldType).Elem().Interface()
 			// 指定了参数名称
@@ -126,17 +115,22 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 // 第2个参数起，为interface类型，需要做注入操作
 func (receiver *HttpRoute) parseInterfaceParam(returnVal []reflect.Value) []reflect.Value {
 	for i := 1; i < receiver.RequestParamType.Count(); i++ {
-		// 如果是接口类型，则这里的名称为IocName
-		paramName := ""
-		if i < receiver.ParamNames.Count() {
-			paramName = receiver.ParamNames.Index(i)
-		}
-		iocType := receiver.RequestParamType.Index(i)
-		if !container.IsRegisterType(iocType, paramName) {
-			panic(fmt.Sprintf("类型：%s 未注册到IOC", iocType.String()))
-		}
-		val, _ := container.ResolveType(iocType, paramName)
-		returnVal = append(returnVal, reflect.ValueOf(val))
+		val := reflect.ValueOf(receiver.diParam(i))
+		returnVal = append(returnVal, val)
 	}
 	return returnVal
+}
+
+func (receiver *HttpRoute) diParam(paramIndex int) any {
+	// 如果是接口类型，则这里的名称为IocName
+	paramName := ""
+	if paramIndex < receiver.ParamNames.Count() {
+		paramName = receiver.ParamNames.Index(paramIndex)
+	}
+	iocType := receiver.RequestParamType.Index(paramIndex)
+	if !container.IsRegisterType(iocType, paramName) {
+		panic(fmt.Sprintf("类型：%s 未注册到IOC", iocType.String()))
+	}
+	val, _ := container.ResolveType(iocType, paramName)
+	return val
 }

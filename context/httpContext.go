@@ -105,7 +105,8 @@ func (receiver *HttpContext) ParseParams() []reflect.Value {
 	if receiver.Route.Schema == "ws" {
 		contextWebSocket := reflect.New(receiver.Route.RequestParamType.First().Elem())
 		contextWebSocket.MethodByName("SetContext").Call([]reflect.Value{reflect.ValueOf(receiver)})
-		return []reflect.Value{contextWebSocket}
+		// 第2个参数起，为interface类型，需要做注入操作
+		return receiver.Route.parseInterfaceParam([]reflect.Value{contextWebSocket})
 	}
 
 	if receiver.Method == "GET" {

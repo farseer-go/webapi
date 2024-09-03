@@ -113,7 +113,7 @@ func (r *applicationBuilder) registerWS(route Route) {
 	if route.Url == "" {
 		flog.Panicf("注册websocket路由失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
 	}
-	r.mux.HandleRoute(websocket.Register(r.area, route.Method, route.Url, route.Action, route.Filters))
+	r.mux.HandleRoute(websocket.Register(r.area, route.Method, route.Url, route.Action, route.Filters, route.Params...))
 }
 
 // Area 设置区域
