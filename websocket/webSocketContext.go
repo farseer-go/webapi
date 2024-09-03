@@ -32,6 +32,18 @@ func (receiver *Context[T]) SetContext(httpContext *context.HttpContext) {
 	receiver.tType = reflect.TypeOf(t)
 }
 
+// ReceiverMessage 接收消息
+func (receiver *Context[T]) ReceiverMessage() string {
+reopen:
+	var data string
+	err := websocket.Message.Receive(receiver.HttpContext.WebsocketConn, &data)
+	if err != nil {
+		flog.Warningf("路由：%s 接收数据时，出现异常：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
+		goto reopen
+	}
+	return data
+}
+
 // Receiver 接收消息
 func (receiver *Context[T]) Receiver() T {
 reopen:
