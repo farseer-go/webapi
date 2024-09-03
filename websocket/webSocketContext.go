@@ -41,7 +41,7 @@ reopen:
 		err := websocket.JSON.Receive(receiver.httpContext.WebsocketConn, &t)
 		if err != nil {
 			var opError *net.OpError
-			if errors.As(err, &opError) {
+			if errors.As(err, &opError) || err.Error() == "EOF" {
 				exception.ThrowWebException(408, "客户端已关闭")
 			}
 
