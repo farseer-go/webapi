@@ -65,6 +65,7 @@ func (receiver *Context[T]) ReceiverMessageFunc(d time.Duration, f func(message 
 			cancel()
 		}
 		c, cancel = ctx.WithCancel(ctx.Background())
+		f(message)
 
 		// 异步执行函数f
 		go func() {
@@ -95,6 +96,7 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message T)) {
 			cancel()
 		}
 		c, cancel = ctx.WithCancel(ctx.Background())
+		f(message)
 
 		// 异步执行函数f
 		go func() {
