@@ -79,6 +79,10 @@ func InitJwt() {
 
 // GetToken 获取前端提交过来的Token
 func (receiver *HttpJwt) GetToken() string {
+	// 走ws协议
+	if receiver.r.Header.Get("Upgrade") == "websocket" {
+		return receiver.r.Form.Get(headerName)
+	}
 	return receiver.r.Header.Get(headerName)
 }
 

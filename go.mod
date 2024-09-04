@@ -12,6 +12,7 @@ require (
 	github.com/go-playground/validator/v10 v10.21.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/net v0.26.0
 )
 
 exclude github.com/timandy/routine v1.1.3
@@ -23,7 +24,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/timandy/routine v1.1.2 // indirect
 	golang.org/x/crypto v0.24.0 // indirect
-	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
