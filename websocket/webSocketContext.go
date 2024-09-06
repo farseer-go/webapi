@@ -52,7 +52,7 @@ reopen:
 	return data
 }
 
-// ReceiverMessageFunc 接收消息。当收到消息后，会执行cancel()，并重新颁发新的ctx、cancel
+// ReceiverMessageFunc 接收消息。当收到消息后，会执行f()
 func (receiver *Context[T]) ReceiverMessageFunc(d time.Duration, f func(message string)) {
 	var c ctx.Context
 	var cancel ctx.CancelFunc
@@ -83,8 +83,8 @@ func (receiver *Context[T]) ReceiverMessageFunc(d time.Duration, f func(message 
 	}
 }
 
-// ReceiverFunc 接收消息。当收到消息后，会执行cancel()，并重新颁发新的ctx、cancel
-func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message T)) {
+// ReceiverFunc 接收消息。当收到消息后，会执行f()
+func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message *T)) {
 	var c ctx.Context
 	var cancel ctx.CancelFunc
 
@@ -96,7 +96,7 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message T)) {
 			cancel()
 		}
 		c, cancel = ctx.WithCancel(ctx.Background())
-		f(message)
+		f(&message)
 
 		// 异步执行函数f
 		go func() {
@@ -107,7 +107,7 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message T)) {
 				case <-receiver.Ctx.Done():
 					return
 				case <-time.Tick(d):
-					f(message)
+					f(&message)
 				}
 			}
 		}()
@@ -182,20 +182,6 @@ func (receiver *Context[T]) errorIsClose(err error) {
 		receiver.isClose = true
 		if receiver.AutoExit {
 			exception.ThrowWebException(408, "客户端已关闭")
-		}
-	}
-}
-
-// ForeachSend 根据duration时间，间隔执行f（发消息），直到c 或者 receiver.Ctx 出现Done信号
-func (receiver *Context[T]) ForeachSend(f func(), c ctx.Context, duration time.Duration) {
-	for {
-		select {
-		case <-receiver.Ctx.Done():
-			return
-		case <-c.Done():
-			return
-		case <-time.Tick(duration):
-			f()
 		}
 	}
 }
