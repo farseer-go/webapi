@@ -185,3 +185,8 @@ func (receiver *Context[T]) errorIsClose(err error) {
 		}
 	}
 }
+
+// GetParam 获取来自URL的参数
+func (receiver *Context[T]) GetParam(key string) any {
+	return receiver.HttpContext.Request.Form[key]
+}
