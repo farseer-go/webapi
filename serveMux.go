@@ -177,7 +177,7 @@ func (mux *serveMux) handler(host, path string, r *http.Request) (route *context
 	}
 	if route == nil {
 		route = &context.HttpRoute{Handler: http.NotFoundHandler()}
-		flog.Infof("404：%s %s", host, path)
+		flog.Debugf("%s %s%s 404", r.Method, r.Host, path)
 	}
 	return
 }
