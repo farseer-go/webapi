@@ -5,6 +5,7 @@ import (
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/webapi/context"
+	"github.com/timandy/routine"
 	"golang.org/x/net/websocket"
 	"reflect"
 	"time"
@@ -27,8 +28,8 @@ func (receiver *Context[T]) SetContext(httpContext *context.HttpContext) {
 	var t T
 	receiver.tType = reflect.TypeOf(t)
 	receiver.BaseContext = &BaseContext{
-		HttpContext : httpContext,
-		AutoExit : true,
+		HttpContext: httpContext,
+		AutoExit:    true,
 	}
 	receiver.Ctx, receiver.cancel = ctx.WithCancel(ctx.Background())
 }
@@ -49,7 +50,7 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message *T)) {
 		f(&message)
 
 		// 异步执行函数f
-		go func() {
+		routine.Go(func() {
 			for {
 				select {
 				case <-c.Done():
@@ -60,7 +61,7 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message *T)) {
 					f(&message)
 				}
 			}
-		}()
+		})
 	}
 }
 
