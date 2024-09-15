@@ -39,8 +39,9 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 			}
 			returnVal = lst
 		}
-		apiResponse = core.Success[any](httpContext.Response.GetStatusMessage(), returnVal)
-		apiResponse.StatusCode = httpContext.Response.GetStatusCode()
+		statusCode, statusMessage := httpContext.Response.GetStatus()
+		apiResponse = core.Success[any](statusMessage, returnVal)
+		apiResponse.Status = statusCode == 200
 	})
 
 	catch.CatchWebException(func(exp exception.WebException) {

@@ -74,14 +74,9 @@ func (receiver *HttpResponse) Reject(httpCode int, content string) {
 	receiver.BodyBytes = []byte(content)
 }
 
-// GetStatusMessage 获取statusMessage
-func (receiver *HttpResponse) GetStatusMessage() string {
-	return receiver.statusMessage
-}
-
-// GetStatusCode 获取statusCode
-func (receiver *HttpResponse) GetStatusCode() int {
-	return receiver.statusCode
+// GetStatus 获取statusCode、statusMessage
+func (receiver *HttpResponse) GetStatus() (int, string) {
+	return receiver.statusCode, receiver.statusMessage
 }
 
 // SetValues 设置Body值
