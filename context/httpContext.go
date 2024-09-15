@@ -71,7 +71,13 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 		},
 	}
 
-	if r.TLS != nil {
+	if httpRoute.Schema == "ws" {
+		if r.TLS != nil {
+			httpContext.URI.Url = "wss://" + r.Host + r.RequestURI
+		} else {
+			httpContext.URI.Url = "ws://" + r.Host + r.RequestURI
+		}
+	} else if r.TLS != nil {
 		httpContext.URI.Url = "https://" + r.Host + r.RequestURI
 	}
 
