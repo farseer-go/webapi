@@ -91,7 +91,7 @@ func (receiver *BaseContext) Send(msg any) error {
 	var message string
 	// 基础类型不需要进行序列化
 	if fastReflect.PointerOf(msg).Type == fastReflect.GoBasicType {
-		message = parse.ToString(message)
+		message = parse.ToString(msg)
 	} else {
 		// 其余类型，一律使用json
 		marshal, _ := json.Marshal(msg)
