@@ -17,9 +17,9 @@ func SocketHandler(route *context.HttpRoute) websocket.Handler {
 		httpContext.SetWebsocket(conn)
 
 		// 创建链路追踪上下文
-		trackContext := container.Resolve[trace.IManager]().EntryWebApi(httpContext.URI.Host, httpContext.URI.Url, "WEBSOCKET", httpContext.ContentType, httpContext.Header.ToMap(), httpContext.URI.GetRealIp())
+		trackContext := container.Resolve[trace.IManager]().EntryWebSocket(httpContext.URI.Host, httpContext.URI.Url, httpContext.ContentType, httpContext.Header.ToMap(), httpContext.URI.GetRealIp())
 		trackContext.SetBody(httpContext.Request.BodyString, httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes))
-		trackContext.End()
+		trackContext.End(nil)
 		//httpContext.Data.Set("Trace", trackContext)
 
 		// 设置到routine，可用于任意子函数获取

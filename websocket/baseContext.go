@@ -3,10 +3,14 @@ package websocket
 import (
 	ctx "context"
 	"errors"
+	"fmt"
+	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/fastReflect"
 	"github.com/farseer-go/fs/flog"
+	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
+	"github.com/timandy/routine"
 	"golang.org/x/net/websocket"
 	"net"
 	"time"
@@ -46,21 +50,36 @@ func (receiver *BaseContext) ReceiverMessageFunc(d time.Duration, f func(message
 			cancel()
 		}
 		c, cancel = ctx.WithCancel(ctx.Background())
-		f(message)
 
 		// 异步执行函数f
-		go func() {
+		routine.Go(func() {
 			for {
+				func() {
+					var err error
+					// 创建链路追踪上下文
+					trackContext := container.Resolve[trace.IManager]().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.ContentType, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
+					defer func() {
+						trackContext.End(err)
+					}()
+
+					trackContext.SetBody(message, 0, "")
+					exception.Try(func() {
+						f(message)
+					}).CatchException(func(exp any) {
+						err = fmt.Errorf(fmt.Sprint(exp))
+					})
+				}()
+
+				// 等待下一次执行
 				select {
 				case <-c.Done():
 					return
 				case <-receiver.Ctx.Done():
 					return
 				case <-time.Tick(d):
-					f(message)
 				}
 			}
-		}()
+		})
 	}
 }
 
