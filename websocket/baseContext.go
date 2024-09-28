@@ -39,6 +39,25 @@ reopen:
 	return data
 }
 
+// ForReceiverFunc 持续接收消息然后执行f()，然后再接收
+func (receiver *BaseContext) ForReceiverFunc(f func(message string)) {
+	// 异步执行函数f
+	for {
+		// 等待消息
+		message := receiver.ReceiverMessage()
+		var err error
+		// 创建链路追踪上下文
+		trackContext := container.Resolve[trace.IManager]().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
+		trackContext.SetBody(message, 0, "")
+		exception.Try(func() {
+			f(message)
+		}).CatchException(func(exp any) {
+			err = fmt.Errorf(fmt.Sprint(exp))
+		})
+		trackContext.End(err)
+	}
+}
+
 // ReceiverMessageFunc 接收消息。当收到消息后，会执行f()
 func (receiver *BaseContext) ReceiverMessageFunc(d time.Duration, f func(message string)) {
 	var c ctx.Context
