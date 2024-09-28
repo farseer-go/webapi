@@ -41,7 +41,7 @@ reopen:
 
 // ForReceiverFunc 持续接收消息然后执行f()，然后再接收
 func (receiver *BaseContext) ForReceiverFunc(f func(message string)) {
-	// 异步执行函数f
+	// 执行函数f
 	for {
 		// 等待消息
 		message := receiver.ReceiverMessage()
