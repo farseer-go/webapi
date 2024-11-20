@@ -2,6 +2,11 @@ package webapi
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/pprof"
+	"strconv"
+	"strings"
+
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/container"
@@ -10,15 +15,11 @@ import (
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/modules"
-	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/farseer-go/webapi/minimal"
 	"github.com/farseer-go/webapi/websocket"
-	"net/http"
-	"net/http/pprof"
-	"strings"
 )
 
 type applicationBuilder struct {
@@ -240,7 +241,7 @@ func (r *applicationBuilder) print() {
 			if method == "" {
 				method = "GET"
 			}
-			fmt.Printf("%s：%s %s%s\n", flog.Blue(parse.ToString(index+1)), flog.Red(method), r.hostAddress, httpRoute.RouteUrl)
+			fmt.Printf("%s：%s %s%s\n", flog.Blue(strconv.Itoa(index+1)), flog.Red(method), r.hostAddress, httpRoute.RouteUrl)
 		})
 		fmt.Println("---------------------------------------")
 	}
