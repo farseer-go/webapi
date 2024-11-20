@@ -2,9 +2,13 @@ package websocket
 
 import (
 	ctx "context"
-	"encoding/json"
+
 	"errors"
 	"fmt"
+	"net"
+	"time"
+
+	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/fastReflect"
@@ -14,8 +18,6 @@ import (
 	"github.com/farseer-go/webapi/context"
 	"github.com/timandy/routine"
 	"golang.org/x/net/websocket"
-	"net"
-	"time"
 )
 
 type BaseContext struct {
@@ -113,7 +115,7 @@ func (receiver *BaseContext) Send(msg any) error {
 		message = parse.ToString(msg)
 	} else {
 		// 其余类型，一律使用json
-		marshal, _ := json.Marshal(msg)
+		marshal, _ := sonic.Marshal(msg)
 		message = string(marshal)
 	}
 	err = websocket.Message.Send(receiver.HttpContext.WebsocketConn, message)

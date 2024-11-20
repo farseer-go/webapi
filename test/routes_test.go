@@ -2,16 +2,17 @@ package test
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"github.com/farseer-go/fs"
-	"github.com/farseer-go/fs/configure"
-	"github.com/farseer-go/webapi"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/bytedance/sonic"
+	"github.com/farseer-go/fs"
+	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/webapi"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRoutes(t *testing.T) {
@@ -26,7 +27,7 @@ func TestRoutes(t *testing.T) {
 
 	t.Run("mini/test1:8095-POST", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := json.Marshal(sizeRequest)
+		marshal, _ := sonic.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8095/mini/test1", "application/json", bytes.NewReader(marshal))
 		body, _ := io.ReadAll(rsp.Body)
 		_ = rsp.Body.Close()

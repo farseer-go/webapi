@@ -2,8 +2,12 @@ package websocket
 
 import (
 	ctx "context"
-	"encoding/json"
+
 	"fmt"
+	"reflect"
+	"time"
+
+	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/flog"
@@ -12,8 +16,6 @@ import (
 	"github.com/farseer-go/webapi/context"
 	"github.com/timandy/routine"
 	"golang.org/x/net/websocket"
-	"reflect"
-	"time"
 )
 
 // Context websocket上下文
@@ -141,7 +143,7 @@ reopen:
 
 	// 序列化
 	var t T
-	if err := json.Unmarshal([]byte(message), &t); err != nil {
+	if err := sonic.Unmarshal([]byte(message), &t); err != nil {
 		receiver.errorIsClose(err)
 		flog.Warningf("路由：%s 接收数据时，出现反序列失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 		goto reopen

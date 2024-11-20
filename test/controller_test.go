@@ -2,8 +2,15 @@ package test
 
 import (
 	"bytes"
-	"encoding/json"
+
 	"fmt"
+	"net/http"
+	"net/url"
+	"strconv"
+	"testing"
+	"time"
+
+	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/core"
@@ -11,11 +18,6 @@ import (
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"net/url"
-	"strconv"
-	"testing"
-	"time"
 )
 
 type header struct {
@@ -84,7 +86,7 @@ func TestController(t *testing.T) {
 
 	t.Run("api/1.0/test/hello1", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := json.Marshal(sizeRequest)
+		marshal, _ := sonic.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8079/api/1.0/testheader/hello1", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
@@ -108,7 +110,7 @@ func TestController(t *testing.T) {
 
 	t.Run("api/1.0/test/hello2-application/json", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := json.Marshal(sizeRequest)
+		marshal, _ := sonic.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8079/api/1.0/testheader/hello2", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()

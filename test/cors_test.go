@@ -2,15 +2,16 @@ package test
 
 import (
 	"bytes"
-	"encoding/json"
-	"github.com/farseer-go/fs"
-	"github.com/farseer-go/fs/configure"
-	"github.com/farseer-go/webapi"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/bytedance/sonic"
+	"github.com/farseer-go/fs"
+	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/webapi"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCors(t *testing.T) {
@@ -26,7 +27,7 @@ func TestCors(t *testing.T) {
 
 	t.Run("/cors/test:8080", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := json.Marshal(sizeRequest)
+		marshal, _ := sonic.Marshal(sizeRequest)
 		req, _ := http.NewRequest("DELETE", "http://127.0.0.1:8080/cors/test", bytes.NewReader(marshal))
 		req.Header.Set("Content-Type", "application/json")
 		rsp, _ := http.DefaultClient.Do(req)
@@ -38,7 +39,7 @@ func TestCors(t *testing.T) {
 
 	t.Run("/cors/test:8080-OPTIONS", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := json.Marshal(sizeRequest)
+		marshal, _ := sonic.Marshal(sizeRequest)
 		req, _ := http.NewRequest("OPTIONS", "http://127.0.0.1:8080/cors/test", bytes.NewReader(marshal))
 		req.Header.Set("Content-Type", "application/json")
 		req.Header.Set("Origin", "localhost")

@@ -2,16 +2,18 @@ package test
 
 import (
 	"bytes"
-	"encoding/json"
+
 	"fmt"
+	"net/http"
+	"testing"
+	"time"
+
+	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/webapi"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
-	"time"
 )
 
 func TestResponse(t *testing.T) {
@@ -32,7 +34,7 @@ func TestResponse(t *testing.T) {
 
 	t.Run("multiResponse", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := json.Marshal(sizeRequest)
+		marshal, _ := sonic.Marshal(sizeRequest)
 		req, _ := http.NewRequest("DELETE", "http://127.0.0.1:8086/multiResponse", bytes.NewReader(marshal))
 		req.Header.Set("Content-Type", "application/json")
 		rsp, _ := http.DefaultClient.Do(req)
@@ -44,7 +46,7 @@ func TestResponse(t *testing.T) {
 
 	t.Run("basicTypeResponse", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := json.Marshal(sizeRequest)
+		marshal, _ := sonic.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8086/basicTypeResponse", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()

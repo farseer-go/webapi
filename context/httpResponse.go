@@ -1,9 +1,10 @@
 package context
 
 import (
-	"encoding/json"
 	"net/http"
 	"reflect"
+
+	"github.com/bytedance/sonic"
 )
 
 type HttpResponse struct {
@@ -37,7 +38,7 @@ func (receiver *HttpResponse) WriteString(content string) {
 
 // WriteJson 将响应内容转成json后写入http流
 func (receiver *HttpResponse) WriteJson(content any) {
-	receiver.BodyBytes, _ = json.Marshal(content)
+	receiver.BodyBytes, _ = sonic.Marshal(content)
 	receiver.W.Header().Set("Content-Type", "application/json")
 }
 

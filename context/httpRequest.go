@@ -2,7 +2,6 @@ package context
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
@@ -23,8 +22,8 @@ type HttpRequest struct {
 // jsonToMap 将json转成map类型
 func (r *HttpRequest) jsonToMap() map[string]any {
 	mapVal := make(map[string]any)
-	//_ = json.Unmarshal(r.BodyBytes, &mapVal)
-	d := json.NewDecoder(bytes.NewReader(r.BodyBytes))
+	//_ = sonic.Unmarshal(r.BodyBytes, &mapVal)
+	d := sonic.NewDecoder(bytes.NewReader(r.BodyBytes))
 	d.UseNumber()
 	_ = d.Decode(&mapVal)
 

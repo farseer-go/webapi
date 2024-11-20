@@ -2,14 +2,15 @@ package test
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"github.com/farseer-go/fs"
-	"github.com/farseer-go/fs/configure"
-	"github.com/farseer-go/webapi"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/bytedance/sonic"
+	"github.com/farseer-go/fs"
+	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/webapi"
 )
 
 // BenchmarkRun-12    	    4434	    304151 ns/op	   22731 B/op	     202 allocs/op（优化前）
@@ -28,7 +29,7 @@ func BenchmarkRun(b *testing.B) {
 	time.Sleep(10 * time.Millisecond)
 	b.ReportAllocs()
 	sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-	marshal, _ := json.Marshal(sizeRequest)
+	marshal, _ := sonic.Marshal(sizeRequest)
 
 	for i := 0; i < b.N; i++ {
 		rsp, _ := http.Post("http://127.0.0.1:8094/dto", "application/json", bytes.NewReader(marshal))
