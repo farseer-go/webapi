@@ -2,14 +2,15 @@ package test
 
 import (
 	"crypto/tls"
-	"github.com/farseer-go/fs"
-	"github.com/farseer-go/fs/configure"
-	"github.com/farseer-go/webapi"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/farseer-go/fs"
+	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/webapi"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestJwt(t *testing.T) {
@@ -22,6 +23,7 @@ func TestJwt(t *testing.T) {
 	configure.SetDefault("WebApi.Jwt.InvalidMessage", "您没有权限访问")
 
 	fs.Initialize[webapi.Module]("demo")
+
 	// 颁发Token给到前端
 	webapi.RegisterRoutes(webapi.Route{Url: "/jwt/build", Action: func() {
 		claims := make(map[string]any)

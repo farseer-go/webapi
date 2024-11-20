@@ -1,20 +1,18 @@
 package test
 
 import (
-	"github.com/farseer-go/fs"
-	"github.com/farseer-go/fs/configure"
-	"github.com/farseer-go/webapi"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/farseer-go/fs"
+	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/webapi"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestArea(t *testing.T) {
-	fs.Initialize[webapi.Module]("demo")
-	configure.SetDefault("Log.Component.webapi", true)
-
 	fs.Initialize[webapi.Module]("demo")
 	configure.SetDefault("Log.Component.webapi", true)
 	webapi.Area("api/1.0", func() {

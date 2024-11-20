@@ -1,13 +1,24 @@
 package context
 
 import (
-	"bytes"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
+
+	"github.com/bytedance/sonic"
 )
+
+var snc sonic.API
+
+func init() {
+	snc = sonic.Config{
+		CompactMarshaler: true,
+		SortMapKeys:      true,
+		UseNumber:        true,
+	}.Froze()
+}
 
 type HttpRequest struct {
 	Body       io.ReadCloser
@@ -22,10 +33,11 @@ type HttpRequest struct {
 // jsonToMap 将json转成map类型
 func (r *HttpRequest) jsonToMap() map[string]any {
 	mapVal := make(map[string]any)
-	//_ = sonic.Unmarshal(r.BodyBytes, &mapVal)
-	d := sonic.NewDecoder(bytes.NewReader(r.BodyBytes))
-	d.UseNumber()
-	_ = d.Decode(&mapVal)
+	//_ = json.Unmarshal(r.BodyBytes, &mapVal)
+	// d := sonic.NewDecoder(bytes.NewReader(r.BodyBytes))
+	// d.UseNumber()
+	// _ = d.Decode(&mapVal)
+	snc.Unmarshal(r.BodyBytes, &mapVal)
 
 	// 将Key转小写
 	for k, v := range mapVal {
