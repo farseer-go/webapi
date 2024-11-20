@@ -97,7 +97,7 @@ func (receiver *HttpJwt) Build(claims map[string]any) (string, error) {
 	sign, err := token.SignedString(jwtKey) // 带秘钥的签名
 
 	// 成功生成后，写入到head
-	if err == nil {
+	if err == nil && receiver.w != nil {
 		receiver.w.Header().Set(headerName, sign)
 	}
 	return sign, err
