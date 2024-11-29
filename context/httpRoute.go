@@ -6,10 +6,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/bytedance/sonic"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/parse"
+	"github.com/farseer-go/fs/snc"
 )
 
 // HttpRoute 路由表
@@ -44,7 +44,7 @@ func (receiver *HttpRoute) JsonToParams(request *HttpRequest) []reflect.Value {
 		// 第一个参数，将json反序列化到dto
 		firstParamType := receiver.RequestParamType.First() // 先取第一个参数
 		val := reflect.New(firstParamType).Interface()
-		_ = sonic.Unmarshal(request.BodyBytes, val)
+		_ = snc.Unmarshal(request.BodyBytes, val)
 		returnVal := []reflect.Value{reflect.ValueOf(val).Elem()}
 
 		// 第2个参数起，为interface类型，需要做注入操作

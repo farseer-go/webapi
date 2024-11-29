@@ -8,12 +8,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/fastReflect"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/parse"
+	"github.com/farseer-go/fs/snc"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"github.com/timandy/routine"
@@ -115,7 +115,7 @@ func (receiver *BaseContext) Send(msg any) error {
 		message = parse.ToString(msg)
 	} else {
 		// 其余类型，一律使用json
-		marshal, _ := sonic.Marshal(msg)
+		marshal, _ := snc.Marshal(msg)
 		message = string(marshal)
 	}
 	err = websocket.Message.Send(receiver.HttpContext.WebsocketConn, message)

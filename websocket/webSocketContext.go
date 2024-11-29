@@ -7,11 +7,11 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/parse"
+	"github.com/farseer-go/fs/snc"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"github.com/timandy/routine"
@@ -143,7 +143,7 @@ reopen:
 
 	// 序列化
 	var t T
-	if err := sonic.Unmarshal([]byte(message), &t); err != nil {
+	if err := snc.Unmarshal([]byte(message), &t); err != nil {
 		receiver.errorIsClose(err)
 		flog.Warningf("路由：%s 接收数据时，出现反序列失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 		goto reopen

@@ -5,11 +5,11 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/bytedance/sonic"
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/fastReflect"
 	"github.com/farseer-go/fs/parse"
+	"github.com/farseer-go/fs/snc"
 	"github.com/farseer-go/fs/types"
 	"github.com/farseer-go/webapi/action"
 	"github.com/farseer-go/webapi/context"
@@ -40,7 +40,7 @@ func (r *applicationBuilder) UseApiDoc() {
 			// dto模式转成json
 			if httpRoute.RequestParamIsModel {
 				val := reflect.New(httpRoute.RequestParamType.First()).Interface()
-				indent, _ := sonic.MarshalIndent(val, "", "  ")
+				indent, _ := snc.MarshalIndent(val, "", "  ")
 				lstBody.Add(string(indent))
 			} else {
 				var mapVal = make(map[string]any)
@@ -53,7 +53,7 @@ func (r *applicationBuilder) UseApiDoc() {
 						mapVal[paramName] = reflect.New(fieldType).Elem().Interface()
 					}
 				}
-				indent, _ := sonic.MarshalIndent(mapVal, "", "  ")
+				indent, _ := snc.MarshalIndent(mapVal, "", "  ")
 				lstBody.Add(string(indent))
 			}
 			lstBody.Add("</textarea>")
@@ -63,7 +63,7 @@ func (r *applicationBuilder) UseApiDoc() {
 				// 使用ApiResponse，则返回ApiResponse格式
 				if r.useApiResponse {
 					rsp := core.Success[any]("成功", nil)
-					indent, _ := sonic.MarshalIndent(rsp, "", "  ")
+					indent, _ := snc.MarshalIndent(rsp, "", "  ")
 					lstBody.Add(string(indent))
 				} else {
 					lstBody.Add("")
@@ -85,14 +85,14 @@ func (r *applicationBuilder) UseApiDoc() {
 				// 使用ApiResponse，则返回ApiResponse格式
 				if r.useApiResponse {
 					rsp := core.Success[any]("成功", responseBody)
-					indent, _ := sonic.MarshalIndent(rsp, "", "  ")
+					indent, _ := snc.MarshalIndent(rsp, "", "  ")
 					lstBody.Add(string(indent))
 				} else {
 					// 基本类型直接转string
 					if httpRoute.IsGoBasicType {
 						lstBody.Add(parse.ToString(responseBody))
 					} else { // dto
-						indent, _ := sonic.MarshalIndent(responseBody, "", "  ")
+						indent, _ := snc.MarshalIndent(responseBody, "", "  ")
 						lstBody.Add(string(indent))
 					}
 				}
@@ -102,7 +102,7 @@ func (r *applicationBuilder) UseApiDoc() {
 				httpRoute.ResponseBodyType.Foreach(func(item *reflect.Type) {
 					lst.Add(reflect.New(*item).Interface())
 				})
-				indent, _ := sonic.MarshalIndent(lst, "", "  ")
+				indent, _ := snc.MarshalIndent(lst, "", "  ")
 				lstBody.Add(string(indent))
 			}
 			lstBody.Add("</textarea>")

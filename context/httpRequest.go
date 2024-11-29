@@ -7,18 +7,8 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/bytedance/sonic"
+	"github.com/farseer-go/fs/snc"
 )
-
-var snc sonic.API
-
-func init() {
-	snc = sonic.Config{
-		CompactMarshaler: true,
-		SortMapKeys:      true,
-		UseNumber:        true,
-	}.Froze()
-}
 
 type HttpRequest struct {
 	Body       io.ReadCloser
@@ -34,7 +24,7 @@ type HttpRequest struct {
 func (r *HttpRequest) jsonToMap() map[string]any {
 	mapVal := make(map[string]any)
 	//_ = json.Unmarshal(r.BodyBytes, &mapVal)
-	// d := sonic.NewDecoder(bytes.NewReader(r.BodyBytes))
+	// d := json.NewDecoder(bytes.NewReader(r.BodyBytes))
 	// d.UseNumber()
 	// _ = d.Decode(&mapVal)
 	snc.Unmarshal(r.BodyBytes, &mapVal)

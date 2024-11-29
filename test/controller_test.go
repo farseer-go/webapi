@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/core"
+	"github.com/farseer-go/fs/snc"
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/controller"
 	"github.com/farseer-go/webapi/middleware"
@@ -86,7 +86,7 @@ func TestController(t *testing.T) {
 
 	t.Run("api/1.0/test/hello1", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := sonic.Marshal(sizeRequest)
+		marshal, _ := snc.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8079/api/1.0/testheader/hello1", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[string](rsp.Body)
 		_ = rsp.Body.Close()
@@ -110,7 +110,7 @@ func TestController(t *testing.T) {
 
 	t.Run("api/1.0/test/hello2-application/json", func(t *testing.T) {
 		sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-		marshal, _ := sonic.Marshal(sizeRequest)
+		marshal, _ := snc.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8079/api/1.0/testheader/hello2", "application/json", bytes.NewReader(marshal))
 		apiResponse := core.NewApiResponseByReader[pageSizeRequest](rsp.Body)
 		_ = rsp.Body.Close()

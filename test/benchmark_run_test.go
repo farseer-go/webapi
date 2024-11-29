@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/fs/snc"
 	"github.com/farseer-go/webapi"
 )
 
@@ -29,7 +29,7 @@ func BenchmarkRun(b *testing.B) {
 	time.Sleep(10 * time.Millisecond)
 	b.ReportAllocs()
 	sizeRequest := pageSizeRequest{PageSize: 10, PageIndex: 2}
-	marshal, _ := sonic.Marshal(sizeRequest)
+	marshal, _ := snc.Marshal(sizeRequest)
 
 	for i := 0; i < b.N; i++ {
 		rsp, _ := http.Post("http://127.0.0.1:8094/dto", "application/json", bytes.NewReader(marshal))

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bytedance/sonic"
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/configure"
+	"github.com/farseer-go/fs/snc"
 	"github.com/farseer-go/webapi"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +32,7 @@ func TestValidate(t *testing.T) {
 
 	t.Run("/Validate error", func(t *testing.T) {
 		sizeRequest := ValidateRequest{Name: "", Age: 200}
-		marshal, _ := sonic.Marshal(sizeRequest)
+		marshal, _ := snc.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8092/Validate", "application/json", bytes.NewReader(marshal))
 		body, _ := io.ReadAll(rsp.Body)
 		_ = rsp.Body.Close()
@@ -42,7 +42,7 @@ func TestValidate(t *testing.T) {
 
 	t.Run("/Validate success", func(t *testing.T) {
 		sizeRequest := ValidateRequest{Name: "steden", Age: 37}
-		marshal, _ := sonic.Marshal(sizeRequest)
+		marshal, _ := snc.Marshal(sizeRequest)
 		rsp, _ := http.Post("http://127.0.0.1:8092/Validate", "application/json", bytes.NewReader(marshal))
 		body, _ := io.ReadAll(rsp.Body)
 		_ = rsp.Body.Close()

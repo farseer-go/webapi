@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"reflect"
 
-	"github.com/bytedance/sonic"
+	"github.com/farseer-go/fs/snc"
 )
 
 type HttpResponse struct {
@@ -38,7 +38,7 @@ func (receiver *HttpResponse) WriteString(content string) {
 
 // WriteJson 将响应内容转成json后写入http流
 func (receiver *HttpResponse) WriteJson(content any) {
-	receiver.BodyBytes, _ = sonic.Marshal(content)
+	receiver.BodyBytes, _ = snc.Marshal(content)
 	receiver.W.Header().Set("Content-Type", "application/json")
 }
 
