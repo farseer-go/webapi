@@ -1,12 +1,13 @@
 package webapi
 
 import (
+	"net/http"
+
 	"github.com/farseer-go/fs/asyncLocal"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
-	"net/http"
 )
 
 func HttpHandler(route *context.HttpRoute) http.HandlerFunc {
@@ -18,7 +19,7 @@ func HttpHandler(route *context.HttpRoute) http.HandlerFunc {
 		// 记录出入参
 		defer func() {
 			trackContext.SetBody(httpContext.Request.BodyString, httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes))
-			trackContext.End(httpContext.Exception)
+			container.Resolve[trace.IManager]().Push(trackContext, httpContext.Exception)
 		}()
 		httpContext.Data.Set("Trace", trackContext)
 

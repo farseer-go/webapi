@@ -56,7 +56,7 @@ func (receiver *BaseContext) ForReceiverFunc(f func(message string)) {
 		}).CatchException(func(exp any) {
 			err = fmt.Errorf(fmt.Sprint(exp))
 		})
-		trackContext.End(err)
+		container.Resolve[trace.IManager]().Push(trackContext, err)
 	}
 }
 
@@ -82,7 +82,7 @@ func (receiver *BaseContext) ReceiverMessageFunc(d time.Duration, f func(message
 					// 创建链路追踪上下文
 					trackContext := container.Resolve[trace.IManager]().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
 					defer func() {
-						trackContext.End(err)
+						container.Resolve[trace.IManager]().Push(trackContext, err)
 					}()
 
 					trackContext.SetBody(message, 0, "")

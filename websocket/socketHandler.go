@@ -19,7 +19,7 @@ func SocketHandler(route *context.HttpRoute) websocket.Handler {
 		// 创建链路追踪上下文
 		trackContext := container.Resolve[trace.IManager]().EntryWebSocket(httpContext.URI.Host, httpContext.URI.Url, httpContext.Header.ToMap(), httpContext.URI.GetRealIp())
 		trackContext.SetBody(httpContext.Request.BodyString, httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes))
-		trackContext.End(nil)
+		container.Resolve[trace.IManager]().Push(trackContext, nil)
 		//httpContext.Data.Set("Trace", trackContext)
 
 		// 设置到routine，可用于任意子函数获取

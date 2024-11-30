@@ -2,13 +2,14 @@ package middleware
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
-	"net/http"
-	"time"
 )
 
 type ApiResponse struct {
@@ -61,9 +62,9 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 		apiResponse = core.Error[any](fmt.Sprint(exp), http.StatusInternalServerError)
 	})
 
-	traceContext := httpContext.Data.Get("Trace").(trace.ITraceContext)
-	apiResponse.TraceId = traceContext.GetTraceId()
-	apiResponse.ElapsedMilliseconds = (time.Now().UnixMicro() - traceContext.GetStartTs()) / 1000
+	traceContext := httpContext.Data.Get("Trace").(*trace.TraceContext)
+	apiResponse.TraceId = traceContext.TraceId
+	apiResponse.ElapsedMilliseconds = (time.Now().UnixMicro() - traceContext.StartTs) / 1000
 	httpContext.Route.IsGoBasicType = false
 	httpContext.Response.Body = []any{apiResponse}
 }
