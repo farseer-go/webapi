@@ -5,7 +5,6 @@ go 1.21
 toolchain go1.23.3
 
 require (
-	github.com/bytedance/sonic v1.12.4
 	github.com/farseer-go/collections v0.15.0
 	github.com/farseer-go/fs v0.15.0
 	github.com/farseer-go/utils v0.15.0
@@ -19,7 +18,6 @@ require (
 )
 
 require (
-	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
