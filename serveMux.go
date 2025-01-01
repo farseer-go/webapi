@@ -1,11 +1,6 @@
 package webapi
 
 import (
-	"github.com/farseer-go/collections"
-	"github.com/farseer-go/fs/flog"
-	"github.com/farseer-go/webapi/context"
-	"github.com/farseer-go/webapi/middleware"
-	"github.com/farseer-go/webapi/websocket"
 	"net"
 	"net/http"
 	"net/url"
@@ -13,6 +8,12 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/flog"
+	"github.com/farseer-go/webapi/context"
+	"github.com/farseer-go/webapi/middleware"
+	"github.com/farseer-go/webapi/websocket"
 )
 
 type serveMux struct {
@@ -302,4 +303,13 @@ func appendSorted(es []*context.HttpRoute, e *context.HttpRoute) []*context.Http
 // GetHttpContext 在minimalApi模式下也可以获取到上下文
 func GetHttpContext() *context.HttpContext {
 	return context.RoutineHttpContext.Get()
+}
+
+// GetRealIp 获取真实的ip地址
+func GetRealIp() string {
+	httpCtx := GetHttpContext()
+	if httpCtx == nil {
+		return "127.0.0.1"
+	}
+	return httpCtx.URI.GetRealIp()
 }
