@@ -13,6 +13,7 @@ type Route struct {
 	Message string            // api返回的StatusMessage
 	Filters []context.IFilter // 过滤器（对单个路由的执行单元）
 	Params  []string          // Handle的入参
+	// Summary string            // api的描述
 }
 
 // UseJwt 使用Jwt
