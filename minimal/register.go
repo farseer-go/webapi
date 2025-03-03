@@ -1,14 +1,16 @@
 package minimal
 
 import (
+	"reflect"
+	"strings"
+
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/color"
 	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/types"
 	"github.com/farseer-go/webapi/check"
 	"github.com/farseer-go/webapi/context"
 	"github.com/farseer-go/webapi/middleware"
-	"reflect"
-	"strings"
 )
 
 // Register 注册单个Api
@@ -18,7 +20,7 @@ func Register(area string, method string, route string, actionFunc any, filters 
 
 	// 如果设置了方法的入参（多参数），则需要全部设置
 	if len(paramNames) > 0 && len(paramNames) != len(inParams) {
-		flog.Panicf("注册路由%s%s失败：%s函数入参与%s不匹配，建议重新运行fsctl -r命令", area, route, flog.Red(actionType.String()), flog.Blue(paramNames))
+		flog.Panicf("注册路由%s%s失败：%s函数入参与%s不匹配，建议重新运行fsctl -r命令", area, route, color.Red(actionType.String()), color.Blue(paramNames))
 	}
 
 	lstRequestParamType := collections.NewList(inParams...)

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/farseer-go/collections"
+	"github.com/farseer-go/fs/color"
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/core"
@@ -99,7 +100,7 @@ func (r *applicationBuilder) registerAction(route Route) {
 	route.Url = strings.Trim(route.Url, " ")
 	route.Url = strings.TrimLeft(route.Url, "/")
 	if route.Url == "" {
-		flog.Panicf("注册路由失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
+		flog.Panicf("注册路由失败：%s必须设置值", color.Colors[eumLogLevel.Error]("routing"))
 	}
 	r.mux.HandleRoute(minimal.Register(r.area, route.Method, route.Url, route.Action, route.Filters, route.Params...))
 }
@@ -112,7 +113,7 @@ func (r *applicationBuilder) registerWS(route Route) {
 	route.Url = strings.Trim(route.Url, " ")
 	route.Url = strings.TrimLeft(route.Url, "/")
 	if route.Url == "" {
-		flog.Panicf("注册websocket路由失败：%s必须设置值", flog.Colors[eumLogLevel.Error]("routing"))
+		flog.Panicf("注册websocket路由失败：%s必须设置值", color.Colors[eumLogLevel.Error]("routing"))
 	}
 	r.mux.HandleRoute(websocket.Register(r.area, route.Method, route.Url, route.Action, route.Filters, route.Params...))
 }
@@ -241,7 +242,7 @@ func (r *applicationBuilder) print() {
 			if method == "" {
 				method = "GET"
 			}
-			fmt.Printf("%s：%s %s%s\n", flog.Blue(strconv.Itoa(index+1)), flog.Red(method), r.hostAddress, httpRoute.RouteUrl)
+			fmt.Printf("%s：%s %s%s\n", color.Blue(strconv.Itoa(index+1)), color.Red(method), r.hostAddress, httpRoute.RouteUrl)
 		})
 		fmt.Println("---------------------------------------")
 	}
