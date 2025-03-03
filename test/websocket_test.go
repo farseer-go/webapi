@@ -1,6 +1,10 @@
 package test
 
 import (
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/farseer-go/fs"
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/trace"
@@ -8,9 +12,6 @@ import (
 	"github.com/farseer-go/webapi"
 	"github.com/farseer-go/webapi/websocket"
 	"github.com/stretchr/testify/assert"
-	"net/http"
-	"testing"
-	"time"
 )
 
 func TestWebsocket(t *testing.T) {
@@ -68,7 +69,7 @@ func TestWebsocket(t *testing.T) {
 	})
 
 	t.Run("/ws/api1", func(t *testing.T) {
-		client, err := ws.NewClient("ws://127.0.0.1:8096/ws/api1?a=b&c=d", 1024)
+		client, err := ws.NewClient("ws://127.0.0.1:8096/ws/api1?a=b&c=d", 1024, true)
 		assert.Nil(t, err)
 
 		// 设置头部
@@ -105,7 +106,7 @@ func TestWebsocket(t *testing.T) {
 	})
 
 	t.Run("/ws/api2", func(t *testing.T) {
-		client, err := ws.NewClient("ws://127.0.0.1:8096/ws/api2", 1024)
+		client, err := ws.NewClient("ws://127.0.0.1:8096/ws/api2", 1024, true)
 		assert.Nil(t, err)
 
 		// 连接
