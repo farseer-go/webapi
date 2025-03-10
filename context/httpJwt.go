@@ -84,7 +84,13 @@ func (receiver *HttpJwt) GetToken() string {
 	if receiver.r.Header.Get("Upgrade") == "websocket" {
 		return receiver.r.Form.Get(headerName)
 	}
-	return receiver.r.Header.Get(headerName)
+	// 优先通过header读取
+	if token := receiver.r.Header.Get(headerName); token != "" {
+		return token
+	}
+
+	// 走URL读取
+	return receiver.r.Form.Get(headerName)
 }
 
 // Build 生成jwt token，并写入head
