@@ -76,7 +76,7 @@ func (r *applicationBuilder) UseApiDoc() {
 				isList := pointerMeta.Type == fastReflect.List
 				if isList {
 					val := pointerMeta.GetItemMeta().ZeroValue
-					lstVal := types.ListNew(pointerMeta.ReflectType)
+					lstVal := types.ListNew(pointerMeta.ReflectType, 3)
 					types.ListAdd(lstVal, val)
 					types.ListAdd(lstVal, val)
 					types.ListAdd(lstVal, val)
