@@ -53,8 +53,13 @@ func (receiver *BaseContext) ForReceiverFunc(f func(message string)) {
 		trackContext.SetBody(message, 0, "")
 		exception.Try(func() {
 			f(message)
+		}).CatchWebException(func(exp exception.WebException) {
+			// 408为客户端断开了连接，此异常可以忽略
+			if exp.StatusCode != 408 {
+				err = errors.New(fmt.Sprint(exp))
+			}
 		}).CatchException(func(exp any) {
-			err = fmt.Errorf(fmt.Sprint(exp))
+			err = errors.New(fmt.Sprint(exp))
 		})
 		container.Resolve[trace.IManager]().Push(trackContext, err)
 	}
@@ -88,18 +93,23 @@ func (receiver *BaseContext) ReceiverMessageFunc(d time.Duration, f func(message
 					trackContext.SetBody(message, 0, "")
 					exception.Try(func() {
 						f(message)
+					}).CatchWebException(func(exp exception.WebException) {
+						// 408为客户端断开了连接，此异常可以忽略
+						if exp.StatusCode != 408 {
+							err = errors.New(fmt.Sprint(exp))
+						}
 					}).CatchException(func(exp any) {
-						err = fmt.Errorf(fmt.Sprint(exp))
+						err = errors.New(fmt.Sprint(exp))
 					})
 				}()
-
 				// 等待下一次执行
 				select {
 				case <-c.Done():
 					return
 				case <-receiver.Ctx.Done():
 					return
-				case <-time.Tick(d):
+				case <-time.NewTicker(d).C:
+					continue
 				}
 			}
 		})

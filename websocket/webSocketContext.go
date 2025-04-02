@@ -2,6 +2,7 @@ package websocket
 
 import (
 	ctx "context"
+	"errors"
 
 	"fmt"
 	"reflect"
@@ -69,8 +70,13 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message *T)) {
 					trackContext.SetBody(messageStr, 0, "")
 					exception.Try(func() {
 						f(&messageData)
+					}).CatchWebException(func(exp exception.WebException) {
+						// 408为客户端断开了连接，此异常可以忽略
+						if exp.StatusCode != 408 {
+							err = errors.New(fmt.Sprint(exp))
+						}
 					}).CatchException(func(exp any) {
-						err = fmt.Errorf(fmt.Sprint(exp))
+						err = errors.New(fmt.Sprint(exp))
 					})
 				}()
 
@@ -80,7 +86,7 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message *T)) {
 					return
 				case <-receiver.Ctx.Done():
 					return
-				case <-time.Tick(d):
+				case <-time.NewTicker(d).C:
 				}
 			}
 		})
@@ -99,8 +105,13 @@ func (receiver *Context[T]) ForReceiverFunc(f func(message *T)) {
 		trackContext.SetBody(messageStr, 0, "")
 		exception.Try(func() {
 			f(&messageData)
+		}).CatchWebException(func(exp exception.WebException) {
+			// 408为客户端断开了连接，此异常可以忽略
+			if exp.StatusCode != 408 {
+				err = errors.New(fmt.Sprint(exp))
+			}
 		}).CatchException(func(exp any) {
-			err = fmt.Errorf(fmt.Sprint(exp))
+			err = errors.New(fmt.Sprint(exp))
 		})
 		container.Resolve[trace.IManager]().Push(trackContext, err)
 	}
