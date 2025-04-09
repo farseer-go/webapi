@@ -52,12 +52,6 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 	})
 
 	catch.CatchException(func(exp any) {
-		switch e := exp.(type) {
-		case error:
-			httpContext.Exception = e
-		default:
-			httpContext.Exception = fmt.Errorf("%s", e)
-		}
 		// 响应码
 		apiResponse = core.Error[any](fmt.Sprint(exp), http.StatusInternalServerError)
 	})

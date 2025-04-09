@@ -19,7 +19,7 @@ func HttpHandler(route *context.HttpRoute) http.HandlerFunc {
 		// 记录出入参
 		defer func() {
 			trackContext.SetBody(httpContext.Request.BodyString, httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes))
-			container.Resolve[trace.IManager]().Push(trackContext, httpContext.Exception)
+			container.Resolve[trace.IManager]().Push(trackContext, nil)
 		}()
 		httpContext.Data.Set("Trace", trackContext)
 
@@ -28,8 +28,8 @@ func HttpHandler(route *context.HttpRoute) http.HandlerFunc {
 		// 执行第一个中间件
 		route.HttpMiddleware.Invoke(httpContext)
 		// 记录异常
-		if httpContext.Exception != nil {
-			_ = flog.Errorf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, httpContext.Exception.Error())
+		if trackContext.Exception != nil {
+			_ = flog.Errorf("[%s]%s 发生错误：%s", httpContext.Method, httpContext.URI.Url, trackContext.Exception.ExceptionMessage)
 		}
 		asyncLocal.Release()
 	}

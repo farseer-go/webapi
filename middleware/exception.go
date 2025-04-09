@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"fmt"
+	"net/http"
+
 	"github.com/farseer-go/fs/core"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/webapi/context"
 	"golang.org/x/net/websocket"
-	"net/http"
 )
 
 // exception 异常中间件（默认加载）
@@ -28,12 +28,6 @@ func (receiver *exceptionMiddleware) Invoke(httpContext *context.HttpContext) {
 		httpContext.Response.Write([]byte(exp.Message))
 		httpContext.Response.SetHttpCode(exp.StatusCode)
 	}).CatchException(func(exp any) {
-		switch e := exp.(type) {
-		case error:
-			httpContext.Exception = e
-		default:
-			httpContext.Exception = fmt.Errorf("%s", e)
-		}
 		// ws协议先主动发一条消息，然后立即关闭
 		if httpContext.WebsocketConn != nil {
 			_ = websocket.JSON.Send(httpContext.WebsocketConn, core.ApiResponseStringError(httpContext.Exception.Error(), http.StatusInternalServerError))
