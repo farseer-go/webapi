@@ -47,8 +47,11 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 	})
 
 	catch.CatchWebException(func(exp exception.WebException) {
-		// 响应码
 		apiResponse = core.Error[any](exp.Message, exp.StatusCode)
+	})
+
+	catch.CatchRefuseException(func(exp exception.RefuseException) {
+		apiResponse = core.Error[any](exp.Message, http.StatusInternalServerError)
 	})
 
 	catch.CatchException(func(exp any) {
