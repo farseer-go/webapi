@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.8
 
 require (
-	github.com/farseer-go/collections v0.16.0
+	github.com/farseer-go/collections v0.16.3
 	github.com/farseer-go/fs v0.16.4
 	github.com/farseer-go/utils v0.16.0
 	github.com/go-playground/locales v0.14.1
