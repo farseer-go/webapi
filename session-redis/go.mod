@@ -1,22 +1,22 @@
 module github.com/farseer-go/webapi/session-redis
 
-go 1.22
+go 1.23.0
 
-toolchain go1.23.3
+toolchain go1.23.8
 
 require (
-	github.com/farseer-go/cache v0.16.0
-	github.com/farseer-go/cacheMemory v0.16.0
-	github.com/farseer-go/fs v0.16.0
-	github.com/farseer-go/redis v0.16.0
-	github.com/farseer-go/webapi v0.16.0
+	github.com/farseer-go/cache v0.16.6
+	github.com/farseer-go/cacheMemory v0.16.6
+	github.com/farseer-go/fs v0.16.7
+	github.com/farseer-go/redis v0.16.6
+	github.com/farseer-go/webapi v0.16.6
 )
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/farseer-go/collections v0.16.0 // indirect
-	github.com/farseer-go/mapper v0.16.0 // indirect
+	github.com/farseer-go/collections v0.16.6 // indirect
+	github.com/farseer-go/mapper v0.16.6 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -28,9 +28,9 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/timandy/routine v1.1.5 // indirect
-	golang.org/x/crypto v0.36.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
+	golang.org/x/crypto v0.37.0 // indirect
+	golang.org/x/net v0.39.0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/text v0.24.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
