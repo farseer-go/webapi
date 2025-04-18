@@ -5,9 +5,9 @@ go 1.23.0
 toolchain go1.23.8
 
 require (
-	github.com/farseer-go/collections v0.16.8
-	github.com/farseer-go/fs v0.16.8
-	github.com/farseer-go/utils v0.16.8
+	github.com/farseer-go/collections v0.16.9
+	github.com/farseer-go/fs v0.16.9
+	github.com/farseer-go/utils v0.16.9
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.26.0
@@ -19,7 +19,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
