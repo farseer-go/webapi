@@ -210,7 +210,7 @@ func (r *applicationBuilder) Run(params ...string) {
 	r.print()
 
 	if strings.HasPrefix(r.addr, ":") {
-		flog.Infof("Web service is started：%s/", r.hostAddress)
+		flog.Infof("Web service（%s）is started：%s/", color.Red(core.Version), r.hostAddress)
 	}
 
 	if apiDoc, exists := r.mux.m["/doc/api"]; exists {
