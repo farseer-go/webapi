@@ -2,9 +2,7 @@ package websocket
 
 import (
 	ctx "context"
-	"errors"
 
-	"fmt"
 	"reflect"
 	"time"
 
@@ -60,24 +58,24 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message *T)) {
 		routine.Go(func() {
 			for {
 				func() {
-					var err error
 					// 创建链路追踪上下文
 					trackContext := container.Resolve[trace.IManager]().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
 					defer func() {
-						container.Resolve[trace.IManager]().Push(trackContext, err)
+						container.Resolve[trace.IManager]().Push(trackContext, nil)
 					}()
 
 					trackContext.SetBody(messageStr, 0, "")
 					exception.Try(func() {
 						f(&messageData)
-					}).CatchWebException(func(exp exception.WebException) {
-						// 408为客户端断开了连接，此异常可以忽略
-						if exp.StatusCode != 408 {
-							err = errors.New(fmt.Sprint(exp))
-						}
-					}).CatchException(func(exp any) {
-						err = errors.New(fmt.Sprint(exp))
 					})
+					// .CatchWebException(func(exp exception.WebException) {
+					// 	// 408为客户端断开了连接，此异常可以忽略
+					// 	if exp.StatusCode != 408 {
+					// 		err = errors.New(fmt.Sprint(exp))
+					// 	}
+					// }).CatchException(func(exp any) {
+					// 	err = errors.New(fmt.Sprint(exp))
+					// })
 				}()
 
 				// 等待下一次执行
@@ -99,21 +97,21 @@ func (receiver *Context[T]) ForReceiverFunc(f func(message *T)) {
 	for {
 		// 等待消息
 		messageStr, messageData := receiver.receiver()
-		var err error
 		// 创建链路追踪上下文
 		trackContext := container.Resolve[trace.IManager]().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
 		trackContext.SetBody(messageStr, 0, "")
 		exception.Try(func() {
 			f(&messageData)
-		}).CatchWebException(func(exp exception.WebException) {
-			// 408为客户端断开了连接，此异常可以忽略
-			if exp.StatusCode != 408 {
-				err = errors.New(fmt.Sprint(exp))
-			}
-		}).CatchException(func(exp any) {
-			err = errors.New(fmt.Sprint(exp))
 		})
-		container.Resolve[trace.IManager]().Push(trackContext, err)
+		// .CatchWebException(func(exp exception.WebException) {
+		// 	// 408为客户端断开了连接，此异常可以忽略
+		// 	if exp.StatusCode != 408 {
+		// 		err = errors.New(fmt.Sprint(exp))
+		// 	}
+		// }).CatchException(func(exp any) {
+		// 	err = errors.New(fmt.Sprint(exp))
+		// })
+		container.Resolve[trace.IManager]().Push(trackContext, nil)
 	}
 }
 
