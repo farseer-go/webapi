@@ -3,6 +3,8 @@ package context
 import (
 	"net/http"
 	"strings"
+
+	"github.com/farseer-go/fs/parse"
 )
 
 type HttpURL struct {
@@ -36,4 +38,20 @@ func (receiver *HttpURL) GetRealIp() string {
 		ip = receiver.RemoteAddr
 	}
 	return strings.Split(ip, ":")[0]
+}
+
+// GetRealIp 获取真实IP、Port
+func (receiver *HttpURL) GetRealIpPort() (string, int) {
+	ip := receiver.X_Real_Ip
+	if ip == "" {
+		ip = strings.Split(receiver.X_Forwarded_For, ",")[0]
+	}
+	if ip == "" {
+		ip = receiver.RemoteAddr
+	}
+	ipPorts := strings.Split(ip, ":")
+	if len(ipPorts) == 1 {
+		return ipPorts[0], 0
+	}
+	return ipPorts[0], parse.ToInt(ipPorts[1])
 }

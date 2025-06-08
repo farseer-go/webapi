@@ -40,7 +40,7 @@ func (receiver *Context[T]) SetContext(httpContext *context.HttpContext) {
 	receiver.Ctx, receiver.cancel = ctx.WithCancel(ctx.Background())
 }
 
-// ReceiverFunc 接收消息。当收到消息后，会执行f()
+// ReceiverFunc 当收到下一条消息时，会停止上一条消息的f()执行，然后再执行下一条消息的f()。如果没有收到消息，则会一直定时间隔执行f()
 func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message *T)) {
 	var c ctx.Context
 	var cancel ctx.CancelFunc
