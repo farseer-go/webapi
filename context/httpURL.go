@@ -40,18 +40,15 @@ func (receiver *HttpURL) GetRealIp() string {
 	return strings.Split(ip, ":")[0]
 }
 
-// GetRealIp 获取真实IP、Port
+// GetRealIpPort 获取真实IP、Port
 func (receiver *HttpURL) GetRealIpPort() (string, int) {
-	ip := receiver.X_Real_Ip
-	if ip == "" {
-		ip = strings.Split(receiver.X_Forwarded_For, ",")[0]
+	ips := []string{receiver.X_Real_Ip, strings.Split(receiver.X_Forwarded_For, ",")[0], receiver.RemoteAddr}
+	for _, ip := range ips {
+		if ipPorts := strings.Split(ip, ":"); len(ipPorts) == 2 {
+			return ipPorts[0], parse.ToInt(ipPorts[1])
+		}
 	}
-	if ip == "" {
-		ip = receiver.RemoteAddr
-	}
-	ipPorts := strings.Split(ip, ":")
-	if len(ipPorts) == 1 {
-		return ipPorts[0], 0
-	}
-	return ipPorts[0], parse.ToInt(ipPorts[1])
+
+	// 如果没有找到IP和端口，则返回RemoteAddr的IP部分和0端口
+	return strings.Split(receiver.RemoteAddr, ":")[0], 0
 }
