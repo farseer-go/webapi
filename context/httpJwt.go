@@ -3,6 +3,7 @@ package context
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/farseer-go/fs/configure"
 	"github.com/farseer-go/fs/exception"
@@ -84,9 +85,17 @@ func (receiver *HttpJwt) GetToken() string {
 	if receiver.r.Header.Get("Upgrade") == "websocket" {
 		return receiver.r.Form.Get(headerName)
 	}
+
 	// 优先通过header读取
 	if token := receiver.r.Header.Get(headerName); token != "" {
-		return token
+		// 检查是否以 Bearer 开头（忽略大小写）
+		if strings.HasPrefix(strings.ToLower(token), "bearer ") {
+			// 分割后取 token 部分
+			return strings.TrimSpace(token[7:])
+		}
+
+		// 否则直接使用整个 header 作为 token
+		return strings.TrimSpace(token)
 	}
 
 	// 走URL读取
