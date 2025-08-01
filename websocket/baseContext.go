@@ -7,6 +7,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/farseer-go/fs/asyncLocal"
 	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/fastReflect"
@@ -37,6 +38,9 @@ reopen:
 		flog.Warningf("路由：%s 接收数据时，出现异常：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 		goto reopen
 	}
+
+	// InitContext 初始化同一协程上下文，避免在同一协程中多次初始化
+	asyncLocal.InitContext()
 	return data
 }
 

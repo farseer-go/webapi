@@ -11,6 +11,8 @@ import (
 
 func HttpHandler(route *context.HttpRoute) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// InitContext 初始化同一协程上下文，避免在同一协程中多次初始化
+		asyncLocal.InitContext()
 		// 解析报文、组装httpContext
 		httpContext := context.NewHttpContext(route, w, r)
 		// 创建链路追踪上下文
