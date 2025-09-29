@@ -86,3 +86,15 @@ func (receiver *HttpResponse) SetValues(callValues ...reflect.Value) {
 		receiver.Body = append(receiver.Body, value.Interface())
 	}
 }
+
+// Redirect302 302重定向
+func (receiver *HttpResponse) Redirect302(location string) {
+	receiver.httpCode = 302
+	receiver.W.Header().Set("Location", location)
+}
+
+// Redirect301 301重定向
+func (receiver *HttpResponse) Redirect301(location string) {
+	receiver.httpCode = 301
+	receiver.W.Header().Set("Location", location)
+}
