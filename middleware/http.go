@@ -1,9 +1,12 @@
 package middleware
 
 import (
+	"net/http"
+	"strings"
+
+	"github.com/farseer-go/collections"
 	"github.com/farseer-go/webapi/action"
 	"github.com/farseer-go/webapi/context"
-	"net/http"
 )
 
 // Http HTTP报文响应中间件（默认加载）
@@ -32,6 +35,13 @@ func (receiver *Http) Invoke(httpContext *context.HttpContext) {
 
 	// 输出返回值
 	httpContext.Response.W.WriteHeader(httpContext.Response.GetHttpCode())
+
+	// 响应header
+	rspHeader := collections.NewDictionary[string, string]()
+	for k, v := range httpContext.Response.W.Header() {
+		rspHeader.Add(k, strings.Join(v, ";"))
+	}
+	httpContext.ResponseHeader = rspHeader.ToReadonlyDictionary()
 
 	// 写入Response流
 	if len(httpContext.Response.BodyBytes) > 0 {

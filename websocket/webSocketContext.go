@@ -64,7 +64,7 @@ func (receiver *Context[T]) ReceiverFunc(d time.Duration, f func(message *T)) {
 						container.Resolve[trace.IManager]().Push(trackContext, nil)
 					}()
 
-					trackContext.SetBody(messageStr, 0, "")
+					trackContext.SetBody(messageStr, 0, "", nil)
 					exception.Try(func() {
 						f(&messageData)
 					})
@@ -99,7 +99,7 @@ func (receiver *Context[T]) ForReceiverFunc(f func(message *T)) {
 		messageStr, messageData := receiver.receiver()
 		// 创建链路追踪上下文
 		trackContext := container.Resolve[trace.IManager]().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
-		trackContext.SetBody(messageStr, 0, "")
+		trackContext.SetBody(messageStr, 0, "", nil)
 		exception.Try(func() {
 			f(&messageData)
 		})

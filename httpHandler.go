@@ -19,7 +19,7 @@ func HttpHandler(route *context.HttpRoute) http.HandlerFunc {
 		trackContext := container.Resolve[trace.IManager]().EntryWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header.ToMap(), httpContext.URI.GetRealIp())
 		// 记录出入参
 		defer func() {
-			trackContext.SetBody(httpContext.Request.BodyString, httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes))
+			trackContext.SetBody(httpContext.Request.BodyString, httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes), httpContext.ResponseHeader.ToMap())
 			container.Resolve[trace.IManager]().Push(trackContext, nil)
 		}()
 		httpContext.Data.Set("Trace", trackContext)

@@ -1,13 +1,14 @@
 package context
 
 import (
+	"net/http"
+	"reflect"
+	"strings"
+
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/asyncLocal"
 	"github.com/farseer-go/webapi/check"
 	"golang.org/x/net/websocket"
-	"net/http"
-	"reflect"
-	"strings"
 )
 
 var RoutineHttpContext = asyncLocal.New[*HttpContext]()
@@ -17,6 +18,7 @@ type HttpContext struct {
 	Request          *HttpRequest                                   // Request
 	Response         *HttpResponse                                  // Response
 	Header           collections.ReadonlyDictionary[string, string] // 头部信息
+	ResponseHeader   collections.ReadonlyDictionary[string, string] // 头部信息
 	Cookie           *HttpCookies                                   // Cookies信息
 	Session          IHttpSession                                   // Session信息
 	Route            *HttpRoute                                     // 路由信息
