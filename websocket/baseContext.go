@@ -139,7 +139,7 @@ func (receiver *BaseContext) Send(msg any) error {
 	}
 
 	// 如果使用了链路追踪，则记录异常
-	if traceContext := trace.CurTraceContext.Get(); traceContext != nil {
+	if traceContext, exists := container.Resolve[trace.IManager]().GetTraceContext(); exists {
 		traceContext.SetResponseBody(message)
 		traceContext.Error(err)
 	}
