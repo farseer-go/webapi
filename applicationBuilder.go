@@ -6,6 +6,7 @@ import (
 	"net/http/pprof"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/color"
@@ -216,10 +217,20 @@ func (r *applicationBuilder) Run(params ...string) {
 	if apiDoc, exists := r.mux.m["/doc/api"]; exists {
 		flog.Infof("Api Document is：%s%s", r.hostAddress, apiDoc.RouteUrl)
 	}
+
+	// 构造自定义 Server 以控制超时
+	server := &http.Server{
+		Addr:              r.addr,
+		Handler:           r.mux,
+		ReadHeaderTimeout: 5 * time.Second,  // 关键：防止空连接不发 Header 占用协程
+		IdleTimeout:       60 * time.Second, // 关键：强制释放长期不活跃的 Keep-Alive 连接
+		// ReadTimeout:       15 * time.Second, // 关键：限制读取请求体的时间（为了兼容websocket，暂不启用）
+		// WriteTimeout:      30 * time.Second, // 限制写入响应的时间（为了兼容websocket，暂不启用）
+	}
 	if r.tls {
-		flog.Info(http.ListenAndServeTLS(r.addr, r.certFile, r.keyFile, r.mux))
+		flog.Info(server.ListenAndServeTLS(r.certFile, r.keyFile))
 	} else {
-		flog.Info(http.ListenAndServe(r.addr, r.mux))
+		flog.Info(server.ListenAndServe())
 	}
 }
 
