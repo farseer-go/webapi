@@ -224,8 +224,8 @@ func (r *applicationBuilder) Run(params ...string) {
 		Handler:           r.mux,
 		ReadHeaderTimeout: 5 * time.Second,  // 关键：防止空连接不发 Header 占用协程
 		IdleTimeout:       60 * time.Second, // 关键：强制释放长期不活跃的 Keep-Alive 连接
-		// ReadTimeout:       15 * time.Second, // 关键：限制读取请求体的时间（为了兼容websocket，暂不启用）
-		// WriteTimeout:      30 * time.Second, // 限制写入响应的时间（为了兼容websocket，暂不启用）
+		ReadTimeout:       60 * time.Minute, // 关键：限制读取请求体的时间（为了兼容websocket，设置为1个小时）
+		WriteTimeout:      60 * time.Minute, // 限制写入响应的时间（为了兼容websocket，设置为1个小时）
 	}
 	if r.tls {
 		flog.Info(server.ListenAndServeTLS(r.certFile, r.keyFile))
