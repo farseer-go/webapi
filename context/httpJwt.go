@@ -107,7 +107,7 @@ func (receiver *HttpJwt) Build(claims map[string]any) (string, error) {
 	// 生成token对象
 	token := jwt.NewWithClaims(jwtKeyMethod, jwt.MapClaims(claims))
 
-	exception.ThrowWebExceptionBool(len(jwtKey) == 0, 403, "未设置jwt的秘钥，请到./farseer.yaml的WebApi.Jwt.Key节点中配置")
+	exception.ThrowWebExceptionBool(len(jwtKey) == 0, 403, "未设置jwt的秘钥，请到./config.yaml的WebApi.Jwt.Key节点中配置")
 
 	sign, err := token.SignedString(jwtKey) // 带秘钥的签名
 
