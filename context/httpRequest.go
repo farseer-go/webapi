@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/farseer-go/fs/snc"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 type HttpRequest struct {
@@ -23,13 +24,32 @@ type HttpRequest struct {
 // jsonToMap 将json转成map类型
 func (r *HttpRequest) jsonToMap() map[string]any {
 	mapVal := make(map[string]any)
-	//_ = json.Unmarshal(r.BodyBytes, &mapVal)
-	// d := json.NewDecoder(bytes.NewReader(r.BodyBytes))
-	// d.UseNumber()
-	// _ = d.Decode(&mapVal)
 	snc.Unmarshal(r.BodyBytes, &mapVal)
 
 	// 将Key转小写
+	for k, v := range mapVal {
+		kLower := strings.ToLower(k)
+		if k != kLower {
+			delete(mapVal, k)
+			mapVal[kLower] = v
+		}
+	}
+	return mapVal
+}
+
+// msgpackToMap 将 msgpack 二进制转成 map 类型
+func (r *HttpRequest) msgpackToMap() map[string]any {
+	mapVal := make(map[string]any)
+
+	// 直接将二进制 Body 反序列化到 map 中
+	err := msgpack.Unmarshal(r.BodyBytes, &mapVal)
+	if err != nil {
+		// 如果解包失败，返回空 map 防止后续空指针
+		return make(map[string]any)
+	}
+
+	// 保持和你 jsonToMap 一致的逻辑：将 Key 转小写
+	// 这是为了兼容你后续 FormToParams 的匹配逻辑
 	for k, v := range mapVal {
 		kLower := strings.ToLower(k)
 		if k != kLower {

@@ -121,10 +121,11 @@ func (receiver *HttpContext) ParseParams() []reflect.Value {
 		return receiver.Route.FormToParams(receiver.Request.Query)
 	}
 
-	// application/json
 	switch receiver.ContentType {
 	case "application/json":
 		return receiver.Route.JsonToParams(receiver.Request)
+	case "application/x-msgpack":
+		return receiver.Route.MsgpackToParams(receiver.Request)
 	default: //case "application/x-www-form-urlencoded", "multipart/form-data":
 		return receiver.Route.FormToParams(receiver.Request.Query) // Query比Form有更齐全的值，所以不用Form
 	}

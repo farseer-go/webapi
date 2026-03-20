@@ -8,8 +8,10 @@ import (
 
 	"github.com/farseer-go/collections"
 	"github.com/farseer-go/fs/container"
+	"github.com/farseer-go/fs/flog"
 	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/fs/snc"
+	"github.com/vmihailenco/msgpack/v5"
 )
 
 // HttpRoute 路由表
@@ -53,6 +55,32 @@ func (receiver *HttpRoute) JsonToParams(request *HttpRequest) []reflect.Value {
 
 	// 多参数
 	return receiver.FormToParams(request.jsonToMap())
+}
+
+// MsgpackToParams 处理 application/x-msgpack 入参
+func (receiver *HttpRoute) MsgpackToParams(request *HttpRequest) []reflect.Value {
+	// DTO 模式处理
+	if receiver.RequestParamIsModel {
+		// 1. 获取第一个参数的类型并创建实例
+		firstParamType := receiver.RequestParamType.First()
+		val := reflect.New(firstParamType).Interface()
+
+		// 2. 将 msgpack 二进制数据直接反序列化到 DTO 对象中
+		err := msgpack.Unmarshal(request.BodyBytes, val)
+		if err != nil {
+			// 实际业务中建议增加错误处理，例如记录日志
+			flog.Errorf("Msgpack Unmarshal 失败: %v", err)
+		}
+
+		// 3. 将对象转换为 reflect.Value
+		returnVal := []reflect.Value{reflect.ValueOf(val).Elem()}
+
+		// 4. 处理后续注入逻辑
+		return receiver.parseInterfaceParam(returnVal)
+	}
+
+	// 多参数模式处理：将 msgpack 转为 map 后再处理
+	return receiver.FormToParams(request.msgpackToMap())
 }
 
 // FormToParams 将map转成入参值
