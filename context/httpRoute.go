@@ -69,7 +69,7 @@ func (receiver *HttpRoute) MsgpackToParams(request *HttpRequest) []reflect.Value
 		err := msgpack.Unmarshal(request.BodyBytes, val)
 		if err != nil {
 			// 实际业务中建议增加错误处理，例如记录日志
-			flog.Errorf("Msgpack Unmarshal 失败: %v", err)
+			flog.Warningf("webapi Msgpack Unmarshal 失败: %v", err)
 		}
 
 		// 3. 将对象转换为 reflect.Value
