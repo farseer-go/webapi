@@ -12,13 +12,12 @@ import (
 )
 
 type HttpRequest struct {
-	Body       io.ReadCloser
-	BodyString string
-	BodyBytes  []byte
-	Form       map[string]any
-	Query      map[string]any
-	Params     []reflect.Value // 转换成Handle函数需要的参数
-	R          *http.Request
+	Body      io.ReadCloser
+	BodyBytes []byte // 接收到的字节
+	Form      map[string]any
+	Query     map[string]any
+	Params    []reflect.Value // 转换成Handle函数需要的参数
+	R         *http.Request
 }
 
 // jsonToMap 将json转成map类型
@@ -69,8 +68,8 @@ func (r *HttpRequest) ParseForm() {
 	}
 
 	// multipart/form-data提交的数据在Body中
-	if r.BodyString != "" {
-		parseQuery, _ := url.ParseQuery(r.BodyString)
+	if len(r.BodyBytes) > 0 {
+		parseQuery, _ := url.ParseQuery(string(r.BodyBytes))
 		for key, value := range parseQuery {
 			key = strings.ToLower(key)
 			if len(value) > 0 {

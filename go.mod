@@ -3,12 +3,14 @@ module github.com/farseer-go/webapi
 go 1.24.0
 
 require (
+	github.com/andybalholm/brotli v1.2.0
 	github.com/farseer-go/collections v0.17.3
 	github.com/farseer-go/fs v0.17.3
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
+	github.com/klauspost/compress v1.18.5
 	github.com/timandy/routine v1.1.6
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	golang.org/x/net v0.49.0
