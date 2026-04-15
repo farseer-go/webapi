@@ -124,6 +124,7 @@ func (receiver *BaseContext) Send(msg any) error {
 	var err error
 	var message string
 	// 基础类型不需要进行序列化
+	flog.Infof("a1")
 	if fastReflect.PointerOf(msg).Type == fastReflect.GoBasicType {
 		message = parse.ToString(msg)
 	} else {
@@ -131,18 +132,19 @@ func (receiver *BaseContext) Send(msg any) error {
 		marshal, _ := snc.Marshal(msg)
 		message = string(marshal)
 	}
+	flog.Infof("a2")
 	err = websocket.Message.Send(receiver.HttpContext.WebsocketConn, message)
-
 	if err != nil {
 		receiver.errorIsClose(err)
 		flog.Warningf("路由：%s 发送数据时失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 	}
-
+	flog.Infof("a3")
 	// 如果使用了链路追踪，则记录异常
 	if traceContext, exists := container.Resolve[trace.IManager]().GetTraceContext(); exists {
 		traceContext.SetResponseBody(message)
 		traceContext.Error(err)
 	}
+	flog.Infof("a4")
 	return err
 }
 
