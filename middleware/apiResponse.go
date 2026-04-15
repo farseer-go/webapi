@@ -41,7 +41,7 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 			returnVal = lst
 		}
 		statusCode, statusMessage := httpContext.Response.GetStatus()
-		apiResponse = core.Success[any](statusMessage, returnVal)
+		apiResponse = core.Success(statusMessage, returnVal)
 		apiResponse.StatusCode = statusCode
 		apiResponse.Status = statusCode == 200
 	})
