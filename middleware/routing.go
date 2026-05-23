@@ -35,7 +35,9 @@ func (receiver *routing) Invoke(httpContext *context.HttpContext) {
 
 	// 解析请求的参数
 	httpContext.Request.ParseQuery()
-	httpContext.Request.ParseForm()
+	if httpContext.ContentType != "application/x-msgpack" {
+		httpContext.Request.ParseForm()
+	}
 	httpContext.URI.Query = httpContext.Request.Query
 
 	// 转换成Handle函数需要的参数
