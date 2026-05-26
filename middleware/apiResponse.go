@@ -51,7 +51,7 @@ func (receiver *ApiResponse) Invoke(httpContext *context.HttpContext) {
 	})
 
 	catch.CatchRefuseException(func(exp exception.RefuseException) {
-		apiResponse = core.Error[any](exp.Message, http.StatusInternalServerError)
+		apiResponse = core.Error[any](exp.Message, http.StatusForbidden)
 	})
 
 	catch.CatchException(func(exp any) {
