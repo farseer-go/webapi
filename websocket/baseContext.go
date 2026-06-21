@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/farseer-go/fs/asyncLocal"
-	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/exception"
 	"github.com/farseer-go/fs/fastReflect"
 	"github.com/farseer-go/fs/flog"
@@ -51,7 +50,7 @@ func (receiver *BaseContext) ForReceiverFunc(f func(message string)) {
 		// 等待消息
 		message := receiver.ReceiverMessage()
 		// 创建链路追踪上下文
-		trackContext := container.Resolve[trace.IManager]().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
+		trackContext := trace.Manager().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
 		trackContext.SetBody(message, 0, "", nil)
 		exception.Try(func() {
 			f(message)
@@ -64,7 +63,7 @@ func (receiver *BaseContext) ForReceiverFunc(f func(message string)) {
 		// }).CatchException(func(exp any) {
 		// 	err = errors.New(fmt.Sprint(exp))
 		// })
-		container.Resolve[trace.IManager]().Push(trackContext, nil)
+		trace.Manager().Push(trackContext, nil)
 	}
 }
 
@@ -87,9 +86,9 @@ func (receiver *BaseContext) ReceiverMessageFunc(d time.Duration, f func(message
 			for {
 				func() {
 					// 创建链路追踪上下文
-					trackContext := container.Resolve[trace.IManager]().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
+					trackContext := trace.Manager().EntryWebSocket(receiver.HttpContext.URI.Host, receiver.HttpContext.URI.Url, receiver.HttpContext.Header.ToMap(), receiver.HttpContext.URI.GetRealIp())
 					defer func() {
-						container.Resolve[trace.IManager]().Push(trackContext, nil)
+						trace.Manager().Push(trackContext, nil)
 					}()
 
 					trackContext.SetBody(message, 0, "", nil)
@@ -137,7 +136,7 @@ func (receiver *BaseContext) Send(msg any) error {
 		flog.Warningf("路由：%s 发送数据时失败：%s", receiver.HttpContext.Route.RouteUrl, err.Error())
 	}
 	// 如果使用了链路追踪，则记录异常
-	if traceContext, exists := container.Resolve[trace.IManager]().GetTraceContext(); exists {
+	if traceContext, exists := trace.Manager().GetTraceContext(); exists {
 		traceContext.SetResponseBody(message)
 		traceContext.Error(err)
 	}

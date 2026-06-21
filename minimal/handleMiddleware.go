@@ -1,10 +1,10 @@
 package minimal
 
 import (
-	"github.com/farseer-go/fs/container"
+	"reflect"
+
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
-	"reflect"
 )
 
 type HandleMiddleware struct {
@@ -19,7 +19,7 @@ func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
 	// 实现了check.ICheck（必须放在过滤器之后执行）
 	httpContext.RequestParamCheck()
 
-	traceDetail := container.Resolve[trace.IManager]().TraceHand("执行路由")
+	traceDetail := trace.Manager().TraceHand("执行路由")
 	// 调用action
 	callValues := reflect.ValueOf(httpContext.Route.Action).Call(httpContext.Request.Params)
 	httpContext.Response.SetValues(callValues...)

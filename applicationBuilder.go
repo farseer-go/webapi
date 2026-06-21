@@ -201,6 +201,14 @@ func (r *applicationBuilder) Run(params ...string) {
 
 	// 初始化中间件
 	r.mux.initMiddleware(r.MiddlewareList)
+
+	// 预解析每个路由的单例注入依赖（此时所有模块、所有DI均已就绪）
+	// 将单例实例缓存到路由上，避免每个请求重复走容器查找与反射装箱
+	for _, route := range r.mux.m {
+		if route.Action != nil {
+			route.PrecomputeDI()
+		}
+	}
 	if r.tls {
 		r.hostAddress = fmt.Sprintf("https://127.0.0.1%s", r.addr)
 	} else {

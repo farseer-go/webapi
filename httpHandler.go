@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/farseer-go/fs/asyncLocal"
-	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 )
@@ -16,7 +15,7 @@ func HttpHandler(route *context.HttpRoute) http.HandlerFunc {
 		// 解析报文、组装httpContext
 		httpContext := context.NewHttpContext(route, w, r)
 		// 创建链路追踪上下文
-		trackContext := container.Resolve[trace.IManager]().EntryWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header.ToMap(), httpContext.URI.GetRealIp())
+		trackContext := trace.Manager().EntryWebApi(httpContext.URI.Host, httpContext.URI.Url, httpContext.Method, httpContext.ContentType, httpContext.Header.ToMap(), httpContext.URI.GetRealIp())
 		// 记录出入参
 		defer func() {
 			requestBody := ""
@@ -24,7 +23,7 @@ func HttpHandler(route *context.HttpRoute) http.HandlerFunc {
 				requestBody = string(httpContext.Request.BodyBytes)
 			}
 			trackContext.SetBody(requestBody, httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes), httpContext.ResponseHeader.ToMap())
-			container.Resolve[trace.IManager]().Push(trackContext, nil)
+			trace.Manager().Push(trackContext, nil)
 		}()
 		httpContext.Data.Set("Trace", trackContext)
 

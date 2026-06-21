@@ -31,6 +31,12 @@ type HttpContext struct {
 	Jwt              *HttpJwt                                       // jwt验证
 	Close            bool
 	TransferEncoding []string
+	headerMap        map[string]string // 请求头的明文map缓存，构造时生成一次，供链路追踪等复用，避免重复ToMap分配
+}
+
+// HeaderMap 返回请求头的明文map（构造时已生成，直接复用，避免每请求重复ToMap分配）
+func (receiver *HttpContext) HeaderMap() map[string]string {
+	return receiver.headerMap
 }
 
 // NewHttpContext 初始化上下文
@@ -84,12 +90,13 @@ func NewHttpContext(httpRoute *HttpRoute, w http.ResponseWriter, r *http.Request
 		httpContext.URI.Url = "https://" + r.Host + r.RequestURI
 	}
 
-	// header
-	header := collections.NewDictionary[string, string]()
+	// header：先组装成明文map（缓存复用），再转成只读字典，避免后续ToMap重复分配
+	headerMap := make(map[string]string, len(r.Header))
 	for k, v := range r.Header {
-		header.Add(k, strings.Join(v, ";"))
+		headerMap[k] = strings.Join(v, ";")
 	}
-	httpContext.Header = header.ToReadonlyDictionary()
+	httpContext.headerMap = headerMap
+	httpContext.Header = collections.NewReadonlyDictionaryFromMap(headerMap)
 
 	// ContentType
 	for _, contentType := range strings.Split(httpContext.Header.GetValue("Content-Type"), ";") {

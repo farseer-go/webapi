@@ -37,6 +37,43 @@ type HttpRoute struct {
 	Handler                 http.Handler                   // api处理函数
 	Filters                 []IFilter                      // 过滤器（对单个路由的执行单元）
 	Schema                  string                         // http or ws
+
+	// 依赖注入缓存（在路由全部注册、容器就绪后由 PrecomputeDI 预解析）
+	diResolved   bool            // 是否已完成预解析
+	diParamCache []reflect.Value // 各入参的预解析单例实例（nil表示该位非缓存项，需按请求解析）
+	diParamIsDI  []bool          // 各入参是否为需要注入的interface类型
+}
+
+// PrecomputeDI 预解析路由的注入依赖。
+// 在所有模块加载、所有路由注册完成后调用一次（非热路径）。
+// 对于注册为单例的依赖，提前解析好 reflect.Value 并缓存，
+// 请求时直接复用，避免每个请求重复走容器查找、加锁与反射装箱。
+func (receiver *HttpRoute) PrecomputeDI() {
+	paramCount := receiver.RequestParamType.Count()
+	receiver.diParamCache = make([]reflect.Value, paramCount)
+	receiver.diParamIsDI = make([]bool, paramCount)
+
+	// 从第2个参数起（或非DTO模式下从首个interface参数起）才是注入参数
+	for i := 0; i < paramCount; i++ {
+		paramType := receiver.RequestParamType.Index(i)
+		if paramType.Kind() != reflect.Interface {
+			continue
+		}
+		receiver.diParamIsDI[i] = true
+
+		// 解析别名（与 diParam 保持一致）
+		paramName := ""
+		if i < receiver.ParamNames.Count() {
+			paramName = receiver.ParamNames.Index(i)
+		}
+		// 仅单例可安全缓存；临时生命周期保持每请求解析
+		if container.IsSingleType(paramType, paramName) {
+			if val, err := container.ResolveType(paramType, paramName); err == nil {
+				receiver.diParamCache[i] = reflect.ValueOf(val)
+			}
+		}
+	}
+	receiver.diResolved = true
 }
 
 // JsonToParams json入参转成param
@@ -69,7 +106,7 @@ func (receiver *HttpRoute) MsgpackToParams(request *HttpRequest) []reflect.Value
 		err := msgpack.Unmarshal(request.BodyBytes, val)
 		if err != nil {
 			// 实际业务中建议增加错误处理，例如记录日志
-			flog.Warningf("webapi Msgpack Unmarshal 失败: %v", err)
+			flog.Errorf("Msgpack Unmarshal 失败: %v", err)
 		}
 
 		// 3. 将对象转换为 reflect.Value
@@ -119,9 +156,10 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 	for i := 0; i < receiver.RequestParamType.Count(); i++ {
 		fieldType := receiver.RequestParamType.Index(i)
 		var val any
-		// interface类型，则通过注入的方式
+		// interface类型，则通过注入的方式（优先命中预解析单例缓存）
 		if fieldType.Kind() == reflect.Interface {
-			val = receiver.diParam(i)
+			lstParams[i] = receiver.resolveDIParam(i)
+			continue
 		} else {
 			val = reflect.New(fieldType).Elem().Interface()
 			// 指定了参数名称
@@ -144,10 +182,20 @@ func (receiver *HttpRoute) FormToParams(mapVal map[string]any) []reflect.Value {
 // 第2个参数起，为interface类型，需要做注入操作
 func (receiver *HttpRoute) parseInterfaceParam(returnVal []reflect.Value) []reflect.Value {
 	for i := 1; i < receiver.RequestParamType.Count(); i++ {
-		val := reflect.ValueOf(receiver.diParam(i))
-		returnVal = append(returnVal, val)
+		returnVal = append(returnVal, receiver.resolveDIParam(i))
 	}
 	return returnVal
+}
+
+// resolveDIParam 获取第i个注入参数的值：命中预解析的单例缓存则直接复用，
+// 否则（临时生命周期或未预解析）回退到按请求实时解析。
+func (receiver *HttpRoute) resolveDIParam(paramIndex int) reflect.Value {
+	if receiver.diResolved && paramIndex < len(receiver.diParamCache) {
+		if cached := receiver.diParamCache[paramIndex]; cached.IsValid() {
+			return cached
+		}
+	}
+	return reflect.ValueOf(receiver.diParam(paramIndex))
 }
 
 func (receiver *HttpRoute) diParam(paramIndex int) any {
@@ -157,9 +205,10 @@ func (receiver *HttpRoute) diParam(paramIndex int) any {
 		paramName = receiver.ParamNames.Index(paramIndex)
 	}
 	iocType := receiver.RequestParamType.Index(paramIndex)
-	if !container.IsRegisterType(iocType, paramName) {
+	// 单次解析：未注册时 ResolveType 返回 error，避免额外再做一次 IsRegisterType 的查找与加锁
+	val, err := container.ResolveType(iocType, paramName)
+	if err != nil {
 		panic(fmt.Sprintf("类型：%s 未注册到IOC", iocType.String()))
 	}
-	val, _ := container.ResolveType(iocType, paramName)
 	return val
 }

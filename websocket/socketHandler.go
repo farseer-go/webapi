@@ -2,7 +2,6 @@ package websocket
 
 import (
 	"github.com/farseer-go/fs/asyncLocal"
-	"github.com/farseer-go/fs/container"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
 	"golang.org/x/net/websocket"
@@ -19,9 +18,9 @@ func SocketHandler(route *context.HttpRoute) websocket.Handler {
 		asyncLocal.InitContext()
 
 		// 创建链路追踪上下文
-		trackContext := container.Resolve[trace.IManager]().EntryWebSocket(httpContext.URI.Host, httpContext.URI.Url, httpContext.Header.ToMap(), httpContext.URI.GetRealIp())
+		trackContext := trace.Manager().EntryWebSocket(httpContext.URI.Host, httpContext.URI.Url, httpContext.Header.ToMap(), httpContext.URI.GetRealIp())
 		trackContext.SetBody(string(httpContext.Request.BodyBytes), httpContext.Response.GetHttpCode(), string(httpContext.Response.BodyBytes), nil)
-		container.Resolve[trace.IManager]().Push(trackContext, nil)
+		trace.Manager().Push(trackContext, nil)
 		//httpContext.Data.Set("Trace", trackContext)
 
 		// 设置到routine，可用于任意子函数获取

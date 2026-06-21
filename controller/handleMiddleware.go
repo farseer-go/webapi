@@ -1,18 +1,18 @@
 package controller
 
 import (
-	"github.com/farseer-go/fs/container"
+	"reflect"
+
 	"github.com/farseer-go/fs/parse"
 	"github.com/farseer-go/fs/trace"
 	"github.com/farseer-go/webapi/context"
-	"reflect"
 )
 
 type HandleMiddleware struct {
 }
 
 func (receiver HandleMiddleware) Invoke(httpContext *context.HttpContext) {
-	traceDetail := container.Resolve[trace.IManager]().TraceHand("执行路由")
+	traceDetail := trace.Manager().TraceHand("执行路由")
 	defer traceDetail.End(nil)
 
 	// 实例化控制器
